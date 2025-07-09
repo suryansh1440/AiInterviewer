@@ -8,7 +8,9 @@ const App = () => {
   return (
     <div>
       <Navbar/>
-      <Outlet/>
+      <div className='min-h-[90vh]'>
+        <Outlet/>
+      </div>
       <Footer/>
     </div>
   )
