@@ -6,14 +6,14 @@ const Navbar = () => {
   const isSignedIn = true;
 
   return (
-    <nav className="navbar w-full bg-white shadow-md px-8 py-3 flex items-center justify-between">
+    <nav className="navbar w-full shadow-md px-8 py-3 flex items-center justify-between sticky top-0 z-30 backdrop-blur bg-white/70">
       <div className="logo text-2xl font-bold text-gray-800 flex items-center select-none">
         AI Interview<span className="dot text-blue-500 ml-1">.</span>
       </div>
       <ul className="nav-links flex items-center gap-6 text-gray-700 font-medium">
         <li><Link to="/" className="hover:text-blue-500 transition-colors duration-200">Home</Link></li>
         <li><Link to="/about" className="hover:text-blue-500 transition-colors duration-200">About</Link></li>
-        <li><Link to="#" className="hover:text-blue-500 transition-colors duration-200">Interview</Link></li>
+        {isSignedIn && (<li><Link to="#" className="hover:text-blue-500 transition-colors duration-200">Interview</Link></li>)}
         <li><Link to="#" className="hover:text-blue-500 transition-colors duration-200">Pricing</Link></li>
         <li><Link to="#" className="hover:text-blue-500 transition-colors duration-200">Contact</Link></li>
         <li><Link to="#" className="hover:text-blue-500 transition-colors duration-200">Settings</Link></li>
