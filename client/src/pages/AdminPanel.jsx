@@ -1,4 +1,4 @@
-import Profile from "../../src/components/Profile";
+import UserProfile from "../components/UserProfile";
 import InfoCard from "../../src/components/InfoCard";
 import { Users, Radio, Cable, Trash, ChevronDown } from "lucide-react";
 import User from "../../src/components/User";
@@ -7,7 +7,7 @@ import { users } from "../../src/data";
 export default function AdminPanel() {
   return (
     <section className="grid grid-cols-[repeat(4,minmax(16rem,1fr))] grid-rows-[min-content_10vw_90vh] bg-[#f8f8f8] gap-12">
-      <Profile />
+      <UserProfile />
       <InfoCard
         bgColor="bg-[#3e6dda33]"
         Icon={<Users strokeWidth={1} size={30} stroke="#3e6dda" />}

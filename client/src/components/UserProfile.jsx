@@ -1,6 +1,6 @@
 import { BellDot, Mail, UserRound } from "lucide-react";
 
-export default function Profile() {
+export default function UserProfile() {
   return (
     <div className="col-span-4 row-span-1 flex justify-between items-center bg-white">
       <h1 className="m-[0.6rem] p-[0.6rem_0.9rem]  font-bold">Users</h1>
