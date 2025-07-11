@@ -6,7 +6,7 @@ import { Outlet } from 'react-router-dom'
 
 const App = () => {
   return (
-    <div>
+    <div data-theme="light">
       <Navbar/>
       <div className='min-h-[90vh]'>
         <Outlet/>
