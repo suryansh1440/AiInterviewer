@@ -18,6 +18,8 @@ const Navbar = () => {
         <li><Link to="/pricing" className="hover:text-blue-500 transition-colors duration-200">Pricing</Link></li>
         <li><Link to="#" className="hover:text-blue-500 transition-colors duration-200">Contact</Link></li>
         <li><Link to="#" className="hover:text-blue-500 transition-colors duration-200">Settings</Link></li>
+        <li><Link to="/attempt" className="hover:text-blue-500 transition-colors duration-200">Attempt</Link></li>
+        <li><Link to="/contact" className="hover:text-blue-500 transition-colors duration-200">Contact</Link></li>
         {isSignedIn ? (
           <li className="relative account-dropdown">
             <button
