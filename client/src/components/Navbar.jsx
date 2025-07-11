@@ -14,7 +14,7 @@ const Navbar = () => {
       <ul className="nav-links flex items-center gap-6 text-gray-700 font-medium">
         <li><Link to="/" className="hover:text-blue-500 transition-colors duration-200">Home</Link></li>
         <li><Link to="/about" className="hover:text-blue-500 transition-colors duration-200">About</Link></li>
-        {isSignedIn && (<li><Link to="#" className="hover:text-blue-500 transition-colors duration-200">Interview</Link></li>)}
+        {isSignedIn && (<li><Link to="/start" className="hover:text-blue-500 transition-colors duration-200">Interview</Link></li>)}
         <li><Link to="/pricing" className="hover:text-blue-500 transition-colors duration-200">Pricing</Link></li>
         <li><Link to="#" className="hover:text-blue-500 transition-colors duration-200">Contact</Link></li>
         <li><Link to="#" className="hover:text-blue-500 transition-colors duration-200">Settings</Link></li>

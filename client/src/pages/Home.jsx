@@ -61,7 +61,7 @@ const Home = () => {
             Get instant, actionable feedback to boost your confidence and skills.
           </p>
           <Link
-            to="#"
+            to="/start"
             className="cta-btn mt-2 px-8 py-3 rounded-lg bg-blue-600 text-white text-lg font-semibold shadow-lg hover:bg-blue-700 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-300"
           >
             Start Free Interview
@@ -105,7 +105,7 @@ const Home = () => {
           Subscribe anytime to unlock unlimited practice sessions.
         </p>
         <Link
-          to=""
+          to="/pricing"
           className="subscribe-btn inline-block px-8 py-3 rounded-lg bg-white text-blue-600 font-semibold text-lg shadow hover:bg-blue-50 transition-colors duration-200"
         >
           View Pricing
