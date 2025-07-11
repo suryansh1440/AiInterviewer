@@ -3,6 +3,7 @@ import App from "../App";
 import Home from "../pages/Home";
 import Pricing from "../pages/Pricing";
 import Start from "../pages/Start";
+import Setting from "../pages/Setting";
 
 const router = createBrowserRouter([
     {
@@ -24,6 +25,10 @@ const router = createBrowserRouter([
             {
                 path:"/start",
                 element:<Start/>
+            },
+            {
+                path:"/setting",
+                element:<Setting/>
             }
            
         ]
