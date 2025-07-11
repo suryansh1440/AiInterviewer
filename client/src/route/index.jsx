@@ -4,6 +4,8 @@ import Home from "../pages/Home";
 import Pricing from "../pages/Pricing";
 import Start from "../pages/Start";
 import Setting from "../pages/Setting";
+import Contact from "../pages/Contact"
+import Attempt from "../pages/Attempt";
 
 const router = createBrowserRouter([
     {
@@ -31,6 +33,7 @@ const router = createBrowserRouter([
                 path:"/setting",
                element:<Setting/>
             },
+            {
                 path: '/attempt',
                 element: <Attempt />,
             },
