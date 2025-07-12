@@ -1,5 +1,6 @@
 import React from 'react';
 import { Mic, Zap, Computer, Building, DollarSign, Settings, Heart, Scale, BarChart3, TrendingUp } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 const categories = [
   { id: 'tech', label: 'Tech & Programming', icon: Computer },
@@ -83,9 +84,11 @@ const Start = () => {
           </div>
 
           {/* Start Button */}
+          <Link to="/interview/id=1234">
           <button className="w-full bg-gradient-to-r from-accent to-primary text-primary-content py-4 px-8 rounded-xl font-semibold text-lg hover:from-accent-focus hover:to-primary-focus transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-1">
             Start Interview
           </button>
+          </Link>
         </div>
       </section>
     </div>

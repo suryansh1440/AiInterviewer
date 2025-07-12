@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Link } from "react-router-dom";
 
 const Navbar = () => {
-  
+  const [accountOpen, setAccountOpen] = useState(false);
   const isSignedIn = true;
 
   return (
@@ -11,7 +11,6 @@ const Navbar = () => {
         AI Interview<span className="dot text-blue-500 ml-1">.</span>
       </div>
       <ul className="nav-links flex items-center gap-6 text-gray-700 font-medium">
-
         <li><Link to="/" className="hover:text-blue-500 transition-colors duration-200">Home</Link></li>
         <li><Link to="/about" className="hover:text-blue-500 transition-colors duration-200">About</Link></li>
         {isSignedIn && (<li><Link to="/start" className="hover:text-blue-500 transition-colors duration-200">Interview</Link></li>)}
@@ -25,6 +24,7 @@ const Navbar = () => {
               id="accountBtn"
               className="flex items-center gap-2 px-4 py-2 rounded-md hover:bg-gray-100 transition-colors duration-200 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-200"
               onClick={() => setAccountOpen((open) => !open)}
+            >
               <img src='https://randomuser.me/api/portraits/men/75.jpg' alt="Surya" className="w-7 h-7 rounded-full border-2 border-blue-200 shadow-sm object-cover" />
               <span className="font-semibold">Suryansh</span>
             </button>
