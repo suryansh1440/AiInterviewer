@@ -11,56 +11,13 @@ const Navbar = () => {
         AI Interview<span className="dot text-blue-500 ml-1">.</span>
       </div>
       <ul className="nav-links flex items-center gap-6 text-gray-700 font-medium">
-        <li>
-          <Link
-            to="/"
-            className="hover:text-blue-500 transition-colors duration-200"
-          >
-            Home
-          </Link>
-        </li>
-        <li>
-          <Link
-            to="/about"
-            className="hover:text-blue-500 transition-colors duration-200"
-          >
-            About
-          </Link>
-        </li>
-        {isSignedIn && (
-          <li>
-            <Link
-              to="/start"
-              className="hover:text-blue-500 transition-colors duration-200"
-            >
-              Interview
-            </Link>
-          </li>
-        )}
-        <li>
-          <Link
-            to="/pricing"
-            className="hover:text-blue-500 transition-colors duration-200"
-          >
-            Pricing
-          </Link>
-        </li>
-        <li>
-          <Link
-            to="#"
-            className="hover:text-blue-500 transition-colors duration-200"
-          >
-            Contact
-          </Link>
-        </li>
-        <li>
-          <Link
-            to="#"
-            className="hover:text-blue-500 transition-colors duration-200"
-          >
-            Settings
-          </Link>
-        </li>
+
+        <li><Link to="/" className="hover:text-blue-500 transition-colors duration-200">Home</Link></li>
+        <li><Link to="/about" className="hover:text-blue-500 transition-colors duration-200">About</Link></li>
+        {isSignedIn && (<li><Link to="/start" className="hover:text-blue-500 transition-colors duration-200">Interview</Link></li>)}
+        <li><Link to="/pricing" className="hover:text-blue-500 transition-colors duration-200">Pricing</Link></li>
+        <li><Link to="/contact" className="hover:text-blue-500 transition-colors duration-200">Contact</Link></li>
+        <li><Link to="/setting" className="hover:text-blue-500 transition-colors duration-200">Settings</Link></li>
         {isSignedIn ? (
           <li className="relative account-dropdown">
             <button
@@ -92,30 +49,11 @@ const Navbar = () => {
             </button>
             {accountOpen && (
               <div className="dropdown-menu absolute right-0 mt-2 w-44 bg-white rounded-lg shadow-xl py-2 z-20 animate-fade-in border border-gray-100">
-                <Link
-                  to="#"
-                  className="block px-5 py-2 hover:bg-blue-50 transition-colors duration-200"
-                >
-                  Profile
-                </Link>
-                <Link
-                  to="#"
-                  className="block px-5 py-2 hover:bg-blue-50 transition-colors duration-200"
-                >
-                  History
-                </Link>
-                <Link
-                  to="#"
-                  className="block px-5 py-2 text-red-500 hover:bg-red-50 transition-colors duration-200"
-                >
-                  Logout
-                </Link>
-                <Link
-                  to="/admin-panel"
-                  className="block px-5 py-2 hover:bg-blue-50 transition-colors duration-200"
-                >
-                  Admin Panel
-                </Link>
+
+                
+                <Link to="#" className="block px-5 py-2 hover:bg-blue-50 transition-colors duration-200">Profile</Link>
+                <Link to="/attempt" className="block px-5 py-2 hover:bg-blue-50 transition-colors duration-200">Attempts</Link>
+                <Link to="#" className="block px-5 py-2 text-red-500 hover:bg-red-50 transition-colors duration-200">Logout</Link>
               </div>
             )}
           </li>

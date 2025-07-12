@@ -3,34 +3,51 @@ import App from "../App";
 import Home from "../pages/Home";
 import Pricing from "../pages/Pricing";
 import Start from "../pages/Start";
+
 import AdminPanel from "../pages/AdminPanel";
+
+import Setting from "../pages/Setting";
+import Contact from "../pages/Contact"
+import Attempt from "../pages/Attempt";
+
 const router = createBrowserRouter([
   {
     path: "/",
     element: <App />,
-    children: [
-      {
-        path: "/",
-        element: <Home />,
-      },
-      {
-        path: "/about",
-        element: <div>about</div>,
-      },
-      {
-        path: "/pricing",
-        element: <Pricing />,
-      },
-      {
-        path: "/start",
-        element: <Start />,
-      },
-      {
-        path: "/admin-panel",
-        element: <AdminPanel />,
-      },
-    ],
-  },
-]);
+        children: [
+            {
+                path: "/",
+                element: <Home/>
+            },
+            {
+                path:"/about",
+                element:<div>about</div>
+            },
+            {
+                path:"/pricing",
+                element:<Pricing/>
+            },
+            {
+                path:"/start",
+                element:<Start/>
+            },
+            {
 
-export default router;
+                path:"/setting",
+               element:<Setting/>
+            },
+            {
+                path: '/attempt',
+                element: <Attempt />,
+            },
+            {
+                path: '/contact',
+                element: <Contact />
+
+            }
+           
+        ]
+    }
+])
+
+export default router 
