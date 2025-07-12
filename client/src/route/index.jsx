@@ -3,15 +3,18 @@ import App from "../App";
 import Home from "../pages/Home";
 import Pricing from "../pages/Pricing";
 import Start from "../pages/Start";
+
+import AdminPanel from "../pages/AdminPanel";
+
 import Setting from "../pages/Setting";
 import Contact from "../pages/Contact"
 import Attempt from "../pages/Attempt";
 import Dashboard from "../layout/Dashboard";
 
 const router = createBrowserRouter([
-    {
-        path: "/",
-        element: <App />,
+  {
+    path: "/",
+    element: <App />,
         children: [
             {
                 path: "/",

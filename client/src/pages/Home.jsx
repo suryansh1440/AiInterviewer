@@ -1,49 +1,49 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
+import React from "react";
+import { Link } from "react-router-dom";
 
 const features = [
   {
-    icon: '🤖',
-    title: 'AI-Powered Questions',
-    desc: 'Get dynamic, domain-specific questions tailored to your experience level.',
+    icon: "🤖",
+    title: "AI-Powered Questions",
+    desc: "Get dynamic, domain-specific questions tailored to your experience level.",
   },
   {
-    icon: '🗣️',
-    title: 'Voice Interaction',
-    desc: 'Practice answering out loud and receive feedback on your communication skills.',
+    icon: "🗣️",
+    title: "Voice Interaction",
+    desc: "Practice answering out loud and receive feedback on your communication skills.",
   },
   {
-    icon: '📊',
-    title: 'Instant Feedback',
-    desc: 'Receive detailed, actionable feedback and scoring after every answer.',
+    icon: "📊",
+    title: "Instant Feedback",
+    desc: "Receive detailed, actionable feedback and scoring after every answer.",
   },
   {
-    icon: '🌐',
-    title: 'Multiple Domains',
-    desc: 'Choose from tech, management, finance, and more for a personalized experience.',
+    icon: "🌐",
+    title: "Multiple Domains",
+    desc: "Choose from tech, management, finance, and more for a personalized experience.",
   },
   {
-    icon: '🔒',
-    title: 'Privacy First',
-    desc: 'Your data and responses are always secure and confidential.',
+    icon: "🔒",
+    title: "Privacy First",
+    desc: "Your data and responses are always secure and confidential.",
   },
 ];
 
 const testimonials = [
   {
-    name: 'Priya S.',
-    text: 'The AI feedback is spot on! Helped me land my dream job.',
-    avatar: 'https://randomuser.me/api/portraits/women/44.jpg',
+    name: "Priya S.",
+    text: "The AI feedback is spot on! Helped me land my dream job.",
+    avatar: "https://randomuser.me/api/portraits/women/44.jpg",
   },
   {
-    name: 'Rahul M.',
-    text: 'Mock interviews feel real and the instant tips are super helpful.',
-    avatar: 'https://randomuser.me/api/portraits/men/32.jpg',
+    name: "Rahul M.",
+    text: "Mock interviews feel real and the instant tips are super helpful.",
+    avatar: "https://randomuser.me/api/portraits/men/32.jpg",
   },
   {
-    name: 'Aisha K.',
-    text: 'Love the voice interaction feature. My confidence has skyrocketed!',
-    avatar: 'https://randomuser.me/api/portraits/women/68.jpg',
+    name: "Aisha K.",
+    text: "Love the voice interaction feature. My confidence has skyrocketed!",
+    avatar: "https://randomuser.me/api/portraits/women/68.jpg",
   },
 ];
 
@@ -53,6 +53,7 @@ const Home = () => {
       {/* Hero Section */}
       <section className="hero flex flex-col-reverse md:flex-row items-center justify-between max-w-7xl mx-auto px-6 py-16 gap-10">
         <div className="hero-text flex-1 flex flex-col items-start gap-6">
+
           <h1 className="text-4xl md:text-5xl font-extrabold text-base-content leading-tight">
             Crack Your Next Interview <span className="text-primary">with AI</span>
           </h1>
@@ -67,8 +68,16 @@ const Home = () => {
             Start Free Interview
           </Link>
           <div className="flex gap-4 mt-4">
-            <img src="https://img.shields.io/badge/Privacy%20Protected-100%25-blue" alt="Privacy Badge" className="h-7" />
-            <img src="https://img.shields.io/badge/AI%20Powered-Yes-blueviolet" alt="AI Badge" className="h-7" />
+            <img
+              src="https://img.shields.io/badge/Privacy%20Protected-100%25-blue"
+              alt="Privacy Badge"
+              className="h-7"
+            />
+            <img
+              src="https://img.shields.io/badge/AI%20Powered-Yes-blueviolet"
+              alt="AI Badge"
+              className="h-7"
+            />
           </div>
         </div>
         <div className="hero-img flex-1 flex justify-center">
@@ -81,12 +90,14 @@ const Home = () => {
       </section>
 
       {/* Features Section */}
+
       <section className="features bg-base-100 py-16 px-4" id="features">
         <h2 className="text-3xl md:text-4xl font-bold text-center text-base-content mb-10">Platform Features</h2>
         <div className="features-list grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-8 max-w-6xl mx-auto">
           {features.map((f, i) => (
             <div
               key={f.title}
+
               className="feature flex flex-col items-center bg-base-200 rounded-xl p-6 shadow-md hover:scale-105 hover:shadow-xl transition-transform duration-200 group"
             >
               <span className="feature-icon text-4xl mb-3 group-hover:scale-125 transition-transform text-primary">{f.icon}</span>
@@ -101,7 +112,8 @@ const Home = () => {
       <section className="pricing-teaser bg-gradient-to-r from-primary to-secondary text-primary-content py-16 px-4 text-center">
         <h2 className="text-3xl md:text-4xl font-bold mb-4">Start Free</h2>
         <p className="text-lg md:text-xl mb-6">
-          Your first 2 interviews are on us.<br />
+          Your first 2 interviews are on us.
+          <br />
           Subscribe anytime to unlock unlimited practice sessions.
         </p>
         <Link
@@ -113,6 +125,7 @@ const Home = () => {
       </section>
 
       {/* Testimonials */}
+
       <section className="testimonials py-16 px-4 bg-base-100">
         <h2 className="text-2xl md:text-3xl font-bold text-center text-base-content mb-10">What Our Users Say</h2>
         <div className="flex flex-col md:flex-row gap-8 justify-center items-center max-w-5xl mx-auto">
