@@ -10,6 +10,7 @@ import Attempt from "../pages/Attempt";
 import Dashboard from "../layout/Dashboard";
 import InterviewPage from "../pages/InterviewPage";
 
+
 const router = createBrowserRouter([
   {
     path: "/",
@@ -57,7 +58,7 @@ const router = createBrowserRouter([
           },
           {
             path: "adminPannal",
-            element: <div>Admin Pannal</div>,
+            element:<AdminPanel/>
           },
         ],
       },
