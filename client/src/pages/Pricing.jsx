@@ -90,9 +90,9 @@ const faqs = [
 const Pricing = () => {
   const [openFaq, setOpenFaq] = useState(null);
   return (
-    <div className="bg-gradient-to-br from-blue-50 via-white to-blue-100 min-h-screen">
+    <div className="bg-base-200 min-h-screen">
       {/* Hero */}
-      <section className="pricing-hero text-center py-16 px-4 bg-gradient-to-r from-blue-700 to-blue-500 text-white shadow-lg">
+      <section className="pricing-hero text-center py-16 px-4 bg-gradient-to-r from-primary to-secondary text-primary-content shadow-lg">
         <h1 className="text-4xl md:text-5xl font-extrabold mb-4 drop-shadow-lg">Simple, Transparent Pricing</h1>
         <p className="text-lg md:text-xl max-w-2xl mx-auto opacity-90">Start for free. Upgrade anytime for unlimited, AI-powered interview practice and feedback.</p>
       </section>
@@ -102,22 +102,22 @@ const Pricing = () => {
         {pricingTiers.map((tier, idx) => (
           <div
             key={tier.title}
-            className={`tier relative flex-1 flex flex-col items-center bg-white/60 backdrop-blur-lg rounded-3xl shadow-xl p-8 border border-blue-100 transition-transform duration-300 hover:scale-105 ${tier.highlight ? 'z-10 shadow-2xl border-blue-300' : ''}`}
+            className={`tier relative flex-1 flex flex-col items-center bg-base-100/60 backdrop-blur-lg rounded-3xl shadow-xl p-8 border border-base-200 transition-transform duration-300 hover:scale-105 ${tier.highlight ? 'z-10 shadow-2xl border-primary' : ''}`}
           >
             {tier.badge && (
-              <div className="popular-badge absolute -top-5 left-1/2 -translate-x-1/2 bg-gradient-to-r from-blue-600 to-blue-400 text-white text-xs font-bold px-4 py-1 rounded-full shadow-lg uppercase tracking-wider">{tier.badge}</div>
+              <div className="popular-badge absolute -top-5 left-1/2 -translate-x-1/2 bg-gradient-to-r from-primary to-secondary text-primary-content text-xs font-bold px-4 py-1 rounded-full shadow-lg uppercase tracking-wider">{tier.badge}</div>
             )}
-            <div className="tier-title text-2xl font-bold mb-2 text-blue-700">{tier.title}</div>
-            <div className="tier-price text-4xl font-extrabold mb-1 text-gray-900">{tier.price}<span className="text-base font-medium text-gray-500">{tier.priceNote}</span></div>
-            <div className="tier-desc text-gray-600 mb-4 text-center">{tier.desc}</div>
+            <div className="tier-title text-2xl font-bold mb-2 text-primary">{tier.title}</div>
+            <div className="tier-price text-4xl font-extrabold mb-1 text-base-content">{tier.price}<span className="text-base font-medium text-base-content/70">{tier.priceNote}</span></div>
+            <div className="tier-desc text-base-content/70 mb-4 text-center">{tier.desc}</div>
             <ul className="mb-6 space-y-2 w-full">
               {tier.features.map((f, i) => (
-                <li key={i} className="flex items-center gap-2 text-gray-700"><span className="text-blue-500">✔</span> {f}</li>
+                <li key={i} className="flex items-center gap-2 text-base-content"><span className="text-primary">✔</span> {f}</li>
               ))}
             </ul>
             <Link
               to={tier.ctaLink}
-              className={`cta-btn w-full text-center px-6 py-3 rounded-lg font-semibold shadow transition-colors duration-200 ${tier.highlight ? 'bg-blue-600 text-white hover:bg-blue-700' : 'bg-white text-blue-600 border border-blue-600 hover:bg-blue-50'}`}
+              className={`cta-btn w-full text-center px-6 py-3 rounded-lg font-semibold shadow transition-colors duration-200 ${tier.highlight ? 'bg-primary text-primary-content hover:bg-primary-focus' : 'bg-base-100 text-primary border border-primary hover:bg-base-200'}`}
             >
               {tier.cta}
             </Link>
@@ -127,19 +127,19 @@ const Pricing = () => {
 
       {/* Comparison Table */}
       <section className="comparison-table max-w-4xl mx-auto my-16 px-2">
-        <div className="overflow-x-auto rounded-2xl shadow-lg bg-white/80">
-          <table className="min-w-full text-center text-gray-800">
+        <div className="overflow-x-auto rounded-2xl shadow-lg bg-base-100/80">
+          <table className="min-w-full text-center text-base-content">
             <thead>
-              <tr className="bg-blue-100">
+              <tr className="bg-base-200">
                 <th className="py-3 px-4 text-lg font-bold">Features</th>
                 <th className="py-3 px-4 text-lg font-bold">Free</th>
+                <th className="py-3 px-4 text-lg font-bold">Starter</th>
                 <th className="py-3 px-4 text-lg font-bold">Pro</th>
-                <th className="py-3 px-4 text-lg font-bold">Team</th>
               </tr>
             </thead>
             <tbody>
               {comparisonRows.map((row, i) => (
-                <tr key={i} className="border-t border-blue-100 hover:bg-blue-50 transition-colors">
+                <tr key={i} className="border-t border-base-200 hover:bg-base-200 transition-colors">
                   <td className="py-3 px-4 font-semibold text-left md:text-center">{row[0]}</td>
                   <td className="py-3 px-4">{row[1]}</td>
                   <td className="py-3 px-4">{row[2]}</td>
@@ -155,12 +155,12 @@ const Pricing = () => {
 
       {/* FAQ Section */}
       <section className="faq-section max-w-3xl mx-auto py-16 px-4">
-        <h2 className="text-2xl md:text-3xl font-bold text-center text-gray-900 mb-10">Frequently Asked Questions</h2>
+        <h2 className="text-2xl md:text-3xl font-bold text-center text-base-content mb-10">Frequently Asked Questions</h2>
         <div className="space-y-4">
           {faqs.map((faq, idx) => (
-            <div key={idx} className="faq rounded-xl bg-white/70 shadow p-5">
+            <div key={idx} className="faq rounded-xl bg-base-100/70 shadow p-5">
               <button
-                className="faq-question w-full text-left flex justify-between items-center text-lg font-semibold text-blue-700 focus:outline-none"
+                className="faq-question w-full text-left flex justify-between items-center text-lg font-semibold text-primary focus:outline-none"
                 onClick={() => setOpenFaq(openFaq === idx ? null : idx)}
                 aria-expanded={openFaq === idx}
               >
@@ -168,7 +168,7 @@ const Pricing = () => {
                 <span className={`ml-2 transition-transform ${openFaq === idx ? 'rotate-180' : ''}`}>▼</span>
               </button>
               <div
-                className={`faq-answer overflow-hidden transition-all duration-500 text-gray-700 ${openFaq === idx ? 'max-h-40 mt-3 opacity-100' : 'max-h-0 opacity-0'}`}
+                className={`faq-answer overflow-hidden transition-all duration-500 text-base-content ${openFaq === idx ? 'max-h-40 mt-3 opacity-100' : 'max-h-0 opacity-0'}`}
                 style={{}}
               >
                 {openFaq === idx && <div>{faq.a}</div>}
@@ -180,10 +180,10 @@ const Pricing = () => {
 
       {/* Call to Action */}
       <section className="text-center py-12 px-4">
-        <div className="inline-block bg-gradient-to-r from-blue-600 to-blue-400 text-white px-10 py-6 rounded-2xl shadow-xl">
+        <div className="inline-block bg-gradient-to-r from-primary to-secondary text-primary-content px-10 py-6 rounded-2xl shadow-xl">
           <h3 className="text-2xl font-bold mb-2">Ready to get started?</h3>
           <p className="mb-4">Sign up now and get your first 2 interviews free. No credit card required.</p>
-          <Link to="#" className="cta-btn px-8 py-3 rounded-lg bg-white text-blue-600 font-semibold text-lg shadow hover:bg-blue-50 transition-colors duration-200">Start Free</Link>
+          <Link to="#" className="cta-btn px-8 py-3 rounded-lg bg-base-100 text-primary font-semibold text-lg shadow hover:bg-base-200 transition-colors duration-200">Start Free</Link>
         </div>
       </section>
     </div>

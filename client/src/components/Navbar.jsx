@@ -32,8 +32,8 @@ const Navbar = () => {
             {accountOpen && (
               <div className="dropdown-menu absolute right-0 mt-2 w-44 bg-white rounded-lg shadow-xl py-2 z-20 animate-fade-in border border-gray-100">
                 
-                <Link to="#" className="block px-5 py-2 hover:bg-blue-50 transition-colors duration-200">Profile</Link>
-                <Link to="/attempt" className="block px-5 py-2 hover:bg-blue-50 transition-colors duration-200">Attempts</Link>
+                <Link to="/dashboard/profile" className="block px-5 py-2 hover:bg-blue-50 transition-colors duration-200">Profile</Link>
+                <Link to="/dashboard/attempt" className="block px-5 py-2 hover:bg-blue-50 transition-colors duration-200">Attempts</Link>
                 <Link to="#" className="block px-5 py-2 text-red-500 hover:bg-red-50 transition-colors duration-200">Logout</Link>
               </div>
             )}

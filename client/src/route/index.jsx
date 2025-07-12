@@ -6,6 +6,7 @@ import Start from "../pages/Start";
 import Setting from "../pages/Setting";
 import Contact from "../pages/Contact"
 import Attempt from "../pages/Attempt";
+import Dashboard from "../layout/Dashboard";
 
 const router = createBrowserRouter([
     {
@@ -34,13 +35,23 @@ const router = createBrowserRouter([
                element:<Setting/>
             },
             {
-                path: '/attempt',
-                element: <Attempt />,
-            },
-            {
                 path: '/contact',
                 element: <Contact />
 
+            },
+            {
+                path: '/dashboard',
+                element: <Dashboard/>,
+                children: [
+                    {
+                        path: 'profile',
+                        element: <div>Profie</div>
+                    },
+                    {
+                        path : 'attempt',
+                        element: <Attempt/>
+                    }
+                ]
             }
            
         ]
