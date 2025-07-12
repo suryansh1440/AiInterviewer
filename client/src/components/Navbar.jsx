@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 
 const Navbar = () => {
-  const [accountOpen, setAccountOpen] = useState(false);
+  
   const isSignedIn = true;
   
 
@@ -20,23 +20,16 @@ const Navbar = () => {
         <li><Link to="/setting" className="hover:text-blue-500 transition-colors duration-200">Settings</Link></li>
         {isSignedIn ? (
           <li className="relative account-dropdown">
+            <Link to="/dashboard/profile">
             <button
               id="accountBtn"
               className="flex items-center gap-2 px-4 py-2 rounded-md hover:bg-gray-100 transition-colors duration-200 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-200"
               onClick={() => setAccountOpen((open) => !open)}
-            >
+              >
               <img src='https://randomuser.me/api/portraits/men/75.jpg' alt="Surya" className="w-7 h-7 rounded-full border-2 border-blue-200 shadow-sm object-cover" />
               <span className="font-semibold">Suryansh</span>
-              <svg className={`w-4 h-4 ml-1 transition-transform ${accountOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" /></svg>
             </button>
-            {accountOpen && (
-              <div className="dropdown-menu absolute right-0 mt-2 w-44 bg-white rounded-lg shadow-xl py-2 z-20 animate-fade-in border border-gray-100">
-                
-                <Link to="/dashboard/profile" className="block px-5 py-2 hover:bg-blue-50 transition-colors duration-200">Profile</Link>
-                <Link to="/dashboard/attempt" className="block px-5 py-2 hover:bg-blue-50 transition-colors duration-200">Attempts</Link>
-                <Link to="#" className="block px-5 py-2 text-red-500 hover:bg-red-50 transition-colors duration-200">Logout</Link>
-              </div>
-            )}
+              </Link>
           </li>
         ) : (
           <>

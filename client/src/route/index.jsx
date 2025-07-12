@@ -50,9 +50,13 @@ const router = createBrowserRouter([
                     {
                         path : 'attempt',
                         element: <Attempt/>
+                    },
+                    {
+                        path: 'adminPannal',
+                        element: <div>Admin Pannal</div>
                     }
                 ]
-            }
+            },
            
         ]
     }

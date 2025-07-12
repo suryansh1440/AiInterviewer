@@ -9,7 +9,7 @@ const navLinks = [
     label: 'Profile',
   },
   {
-    to: '/dashboard',
+    to: '/dashboard/adminpannal',
     icon: <LayoutDashboard className="w-5 h-5 mr-3" />,
     label: 'Admin Panel',
   },
