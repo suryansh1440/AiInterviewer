@@ -1,4 +1,5 @@
 import React from "react";
+
 import { Link } from "react-router-dom";
 
 const features = [
@@ -53,13 +54,15 @@ const Home = () => {
       {/* Hero Section */}
       <section className="hero flex flex-col-reverse md:flex-row items-center justify-between max-w-7xl mx-auto px-6 py-16 gap-10">
         <div className="hero-text flex-1 flex flex-col items-start gap-6">
-
           <h1 className="text-4xl md:text-5xl font-extrabold text-base-content leading-tight">
-            Crack Your Next Interview <span className="text-primary">with AI</span>
+            Crack Your Next Interview{" "}
+            <span className="text-primary">with AI</span>
           </h1>
           <p className="subtitle text-lg md:text-xl text-base-content/70">
-            Experience realistic, AI-powered mock interviews.<br />
-            Get instant, actionable feedback to boost your confidence and skills.
+            Experience realistic, AI-powered mock interviews.
+            <br />
+            Get instant, actionable feedback to boost your confidence and
+            skills.
           </p>
           <Link
             to="/start"
@@ -67,6 +70,7 @@ const Home = () => {
           >
             Start Free Interview
           </Link>
+
           <div className="flex gap-4 mt-4">
             <img
               src="https://img.shields.io/badge/Privacy%20Protected-100%25-blue"
@@ -92,17 +96,24 @@ const Home = () => {
       {/* Features Section */}
 
       <section className="features bg-base-100 py-16 px-4" id="features">
-        <h2 className="text-3xl md:text-4xl font-bold text-center text-base-content mb-10">Platform Features</h2>
+        <h2 className="text-3xl md:text-4xl font-bold text-center text-base-content mb-10">
+          Platform Features
+        </h2>
         <div className="features-list grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-8 max-w-6xl mx-auto">
           {features.map((f, i) => (
             <div
               key={f.title}
-
               className="feature flex flex-col items-center bg-base-200 rounded-xl p-6 shadow-md hover:scale-105 hover:shadow-xl transition-transform duration-200 group"
             >
-              <span className="feature-icon text-4xl mb-3 group-hover:scale-125 transition-transform text-primary">{f.icon}</span>
-              <h3 className="text-xl font-semibold text-base-content mb-2 text-center">{f.title}</h3>
-              <p className="text-base-content/70 text-center text-sm">{f.desc}</p>
+              <span className="feature-icon text-4xl mb-3 group-hover:scale-125 transition-transform text-primary">
+                {f.icon}
+              </span>
+              <h3 className="text-xl font-semibold text-base-content mb-2 text-center">
+                {f.title}
+              </h3>
+              <p className="text-base-content/70 text-center text-sm">
+                {f.desc}
+              </p>
             </div>
           ))}
         </div>
@@ -127,11 +138,20 @@ const Home = () => {
       {/* Testimonials */}
 
       <section className="testimonials py-16 px-4 bg-base-100">
-        <h2 className="text-2xl md:text-3xl font-bold text-center text-base-content mb-10">What Our Users Say</h2>
+        <h2 className="text-2xl md:text-3xl font-bold text-center text-base-content mb-10">
+          What Our Users Say
+        </h2>
         <div className="flex flex-col md:flex-row gap-8 justify-center items-center max-w-5xl mx-auto">
           {testimonials.map((t, i) => (
-            <div key={i} className="bg-base-200 rounded-xl shadow p-6 flex flex-col items-center w-full md:w-80 hover:shadow-lg transition-shadow">
-              <img src={t.avatar} alt={t.name} className="w-16 h-16 rounded-full mb-3 border-4 border-base-100 shadow" />
+            <div
+              key={i}
+              className="bg-base-200 rounded-xl shadow p-6 flex flex-col items-center w-full md:w-80 hover:shadow-lg transition-shadow"
+            >
+              <img
+                src={t.avatar}
+                alt={t.name}
+                className="w-16 h-16 rounded-full mb-3 border-4 border-base-100 shadow"
+              />
               <p className="text-base-content text-center mb-2">"{t.text}"</p>
               <span className="font-semibold text-primary">{t.name}</span>
             </div>

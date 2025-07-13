@@ -6,7 +6,7 @@ export default function LoginForm({ handleRotation }) {
       <h2 className="col-span-2 row-start-2 row-end-3 justify-self-center text-3xl mb-4 self-start !text-black">
         Welcome to{" "}
         <span className={clsx(styles.highlight, "text-white relative px-2")}>
-          interviewAi
+          AI Interview
         </span>
       </h2>
       <div className="login-body col-span-2 row-start-3 row-end-4 grid gap-4">
