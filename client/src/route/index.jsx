@@ -9,7 +9,8 @@ import Contact from "../pages/Contact";
 import Attempt from "../pages/Attempt";
 import Dashboard from "../layout/Dashboard";
 import InterviewPage from "../pages/InterviewPage";
-
+import About from "../pages/about";
+import Profile from "../pages/profile";
 
 const router = createBrowserRouter([
   {
@@ -22,7 +23,7 @@ const router = createBrowserRouter([
       },
       {
         path: "/about",
-        element: <div>about</div>,
+        element: <About />,
       },
       {
         path: "/pricing",
@@ -50,7 +51,7 @@ const router = createBrowserRouter([
         children: [
           {
             path: "profile",
-            element: <div>Profie</div>,
+            element: <Profile />,
           },
           {
             path: "attempt",
