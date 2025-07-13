@@ -1,8 +1,8 @@
 import UserProfile from "../components/UserProfile";
-import InfoCard from "../../src/components/InfoCard";
+import InfoCard from "../components/InfoCard";
 import { Users, Radio, Cable, Trash, ChevronDown } from "lucide-react";
-import User from "../../src/components/User";
-import { users } from "../../src/data";
+import User from "../components/User";
+import { users } from "../data";
 
 export default function AdminPanel() {
   return (
@@ -17,7 +17,7 @@ export default function AdminPanel() {
 
       <InfoCard
         bgColor="bg-[#e2760233]"
-        Icon={<Radio strokeWidth={1} size={30} stroke="#e27602" bac />}
+        Icon={<Radio strokeWidth={1} size={30} stroke="#e27602" />}
         number={35}
         detail="Live Interviews"
       />

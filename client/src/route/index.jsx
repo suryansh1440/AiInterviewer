@@ -57,7 +57,7 @@ const router = createBrowserRouter([
             element: <Attempt />,
           },
           {
-            path: "adminPannal",
+            path: "adminPanel",
             element:<AdminPanel/>
           },
         ],
