@@ -1,0 +1,13 @@
+.container {
+  backface-visibility: hidden;
+  grid-row: 1/2;
+  grid-column: 1/2;
+  display: grid;
+  grid-template-rows: 1rem auto max-content auto;
+  grid-template-columns: 1fr auto;
+  padding: 1.5rem;
+  gap: 1rem;
+  min-height: 70vh;
+  min-width: 30rem;
+  transform: rotateY(180deg);
+}
