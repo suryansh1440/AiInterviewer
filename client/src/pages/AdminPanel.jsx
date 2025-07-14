@@ -1,4 +1,3 @@
-import UserProfile from "../components/UserProfile";
 import InfoCard from "../components/InfoCard";
 import { Users, Radio, Cable, Trash, ChevronDown } from "lucide-react";
 import User from "../components/User";
@@ -6,38 +5,37 @@ import { users } from "../data";
 
 export default function AdminPanel() {
   return (
-    <section className="grid grid-cols-[repeat(4,minmax(16rem,1fr))] grid-rows-[min-content_10vw_90vh] bg-[#f8f8f8] gap-12">
-      <UserProfile />
+    <section className="grid grid-cols-[repeat(4,minmax(16rem,1fr))] grid-rows-[min-content_10vw_90vh] bg-base-200 gap-12">
       <InfoCard
-        bgColor="bg-[#3e6dda33]"
-        Icon={<Users strokeWidth={1} size={30} stroke="#3e6dda" />}
+        bgColor="bg-primary/10"
+        Icon={<Users strokeWidth={1} size={30} className="text-primary" />}
         number={123}
         detail="Total Users"
       />
 
       <InfoCard
-        bgColor="bg-[#e2760233]"
-        Icon={<Radio strokeWidth={1} size={30} stroke="#e27602" />}
+        bgColor="bg-secondary/10"
+        Icon={<Radio strokeWidth={1} size={30} className="text-secondary" />}
         number={35}
         detail="Live Interviews"
       />
 
       <InfoCard
-        bgColor="bg-[rgba(54,175,104,0.2)]"
-        Icon={<Cable strokeWidth={1} size={30} stroke="#36af68" />}
+        bgColor="bg-accent/10"
+        Icon={<Cable strokeWidth={1} size={30} className="text-accent" />}
         number={12}
         detail="Logins Today"
       />
 
       <InfoCard
-        bgColor="bg-[rgba(213,51,86,0.2)]"
-        Icon={<Trash strokeWidth={1} size={30} stroke="#d53356" />}
+        bgColor="bg-error/10"
+        Icon={<Trash strokeWidth={1} size={30} className="text-error" />}
         number={2}
         detail="Deleted Users"
       />
 
-      <div className="col-span-full row-start-3 grid grid-cols-8 grid-rows-[repeat(auto-fill,max-content)] bg-white overflow-auto p-[0.6rem]">
-        <div className="col-span-full grid grid-cols-subgrid justify-items-center items-center text-black/40 text-lg font-bold uppercase border-b border-gray-300 py-[0.3rem]">
+      <div className="col-span-full row-start-3 grid grid-cols-8 grid-rows-[repeat(auto-fill,max-content)] bg-base-100 overflow-auto p-[0.6rem]">
+        <div className="col-span-full grid grid-cols-subgrid justify-items-center items-center text-base-content/50 text-lg font-bold uppercase border-b border-base-300 py-[0.3rem]">
           {[
             "Email",
             "Profile",
@@ -54,7 +52,7 @@ export default function AdminPanel() {
             >
               {header}
               <button className="border-none bg-transparent">
-                <ChevronDown stroke="black" strokeWidth={1} size={20} />
+                <ChevronDown stroke="var(--fallback-bc,theme(colors.base-content))" strokeWidth={1} size={20} />
               </button>
             </div>
           ))}

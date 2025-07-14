@@ -1,8 +1,10 @@
 import { useState } from "react";
 import { THEMES } from "../theme";
+import { useThemeStore } from "../store/useThemeStore";
 
 const Setting = () => {
-    const [theme,setTheme] = useState("light")
+    
+    const {setTheme} = useThemeStore();
   return (
     <div className="min-h-screen container mx-auto px-4 pt-20 max-w-5xl">
       <div className="space-y-8">
