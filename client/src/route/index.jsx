@@ -2,6 +2,8 @@ import { createBrowserRouter } from "react-router-dom";
 import React, { Suspense, lazy } from "react";
 import { Loader } from "lucide-react";
 import App from "../App";
+import AdminPremission from "../layout/AdminPremission";
+import AuthUserPermission from "../layout/AuthUserPremission";
 
 // Lazy load pages and layouts
 const Home = lazy(() => import("../pages/Home"));
@@ -61,7 +63,7 @@ const router = createBrowserRouter([
       },
       {
         path: "/dashboard",
-        element: suspense(Dashboard),
+        element: <AuthUserPermission>{suspense(Dashboard)}</AuthUserPermission>,
         children: [
           {
             path: "profile",
@@ -73,7 +75,7 @@ const router = createBrowserRouter([
           },
           {
             path: "adminPanel",
-            element: suspense(AdminPanel),
+            element: (<AdminPremission>{suspense(AdminPanel)}</AdminPremission>),
           },
         ],
       },
