@@ -7,28 +7,24 @@ export default function AdminPanel() {
   return (
     <section className="grid grid-cols-[repeat(4,minmax(16rem,1fr))] grid-rows-[min-content_10vw_90vh] bg-base-200 gap-12">
       <InfoCard
-        bgColor="bg-primary/10"
         Icon={<Users strokeWidth={1} size={30} className="text-primary" />}
         number={123}
         detail="Total Users"
       />
 
       <InfoCard
-        bgColor="bg-secondary/10"
         Icon={<Radio strokeWidth={1} size={30} className="text-secondary" />}
         number={35}
         detail="Live Interviews"
       />
 
       <InfoCard
-        bgColor="bg-accent/10"
         Icon={<Cable strokeWidth={1} size={30} className="text-accent" />}
         number={12}
         detail="Logins Today"
       />
 
       <InfoCard
-        bgColor="bg-error/10"
         Icon={<Trash strokeWidth={1} size={30} className="text-error" />}
         number={2}
         detail="Deleted Users"

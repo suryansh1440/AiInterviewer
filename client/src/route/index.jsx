@@ -13,7 +13,7 @@ const Contact = lazy(() => import("../pages/Contact"));
 const Attempt = lazy(() => import("../pages/Attempt"));
 const Dashboard = lazy(() => import("../layout/Dashboard"));
 const InterviewPage = lazy(() => import("../pages/InterviewPage"));
-const About = lazy(() => import("../pages/about"));
+const About = lazy(() => import("../pages/About"));
 const Profile = lazy(() => import("../pages/profile"));
 
 const suspense = (Component) => (

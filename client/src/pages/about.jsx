@@ -69,7 +69,7 @@ const About = () => {
           <div className="text-center mt-14">
             <h2 className="text-3xl font-bold text-base-content mb-2">Ready to Start?</h2>
             <p className="text-base-content/70 mb-6">Join thousands of successful candidates who have improved their interview skills with AI Interview</p>
-            <Link to="/interview/1" className="bg-primary text-primary-content px-10 py-3 rounded-lg font-semibold text-lg shadow-lg hover:bg-primary-focus transition inline-block">Get Started</Link>
+            <Link to="/start" className="bg-primary text-primary-content px-10 py-3 rounded-lg font-semibold text-lg shadow-lg hover:bg-primary-focus transition inline-block">Get Started</Link>
           </div>
         </div>
       </div>
