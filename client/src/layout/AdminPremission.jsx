@@ -14,8 +14,8 @@ const AdminPremission = ({ children }) => {
                 Sorry, you do not have the required admin privileges to access this page.<br/>
                 If you believe this is a mistake, please contact your administrator.
             </p>
-            <Link to="/dashboard/profile" className="btn btn-primary btn-lg mt-2">
-                Go to Dashboard
+            <Link to="/" className="btn btn-primary btn-lg mt-2">
+                Go to Home
             </Link>
         </div>
     );

@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Link} from "react-router-dom";
 import {useAuthStore} from "../store/useAuthStore"
+import { Award, XCircle } from "lucide-react";
 const Navbar = () => {
   const {user} = useAuthStore();
 

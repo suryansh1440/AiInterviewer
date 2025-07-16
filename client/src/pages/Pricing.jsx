@@ -142,7 +142,7 @@ const Pricing = () => {
               ))}
             </ul>
             <Link
-              onClick={handleModal}
+              
               to={tier.ctaLink}
               className={`cta-btn w-full text-center px-6 py-3 rounded-lg font-semibold shadow transition-colors duration-200 ${
                 tier.highlight
@@ -152,7 +152,7 @@ const Pricing = () => {
             >
               {tier.cta}
             </Link>
-            <Modal ref={modalRef} />
+            
           </div>
         ))}
       </section>
@@ -234,13 +234,13 @@ const Pricing = () => {
             required.
           </p>
           <Link
-            onClick={handleModal}
+            
             to="#"
             className="cta-btn px-8 py-3 rounded-lg bg-base-100 text-primary font-semibold text-lg shadow hover:bg-base-200 transition-colors duration-200"
           >
             Start Free
           </Link>
-          <Modal ref={modalRef} />
+
         </div>
       </section>
     </div>

@@ -3,6 +3,7 @@ import { create } from "zustand";
 export const useAuthStore = create((set) => ({
     // user: null ,
    user: {
+    _id:4372894274162791,
     name: "Suryansh Singh",
     email: "suryansh1440@gmail.com",
     role:"ADMIN",

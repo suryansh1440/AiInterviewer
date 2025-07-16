@@ -2,9 +2,11 @@ import React from 'react'
 import { useAuthStore } from '../store/useAuthStore'
 import { Lock } from 'lucide-react'
 import { Link } from 'react-router-dom'
+import { useModalStore } from '../store/useModalStore'
 
 const AuthUserPermission = ({ children }) => {
     const { user } = useAuthStore();
+    const { setOpenLogin } = useModalStore();
     if (user) return <>{children}</>;
     return (
         <div className="flex flex-col items-center justify-center min-h-[60vh] gap-6 text-center mt-25">
@@ -14,9 +16,14 @@ const AuthUserPermission = ({ children }) => {
                 You must be logged in to access this page.<br/>
                 Please log in to continue.
             </p>
-            <Link to="/" className="btn btn-primary btn-lg mt-2">
+            <div className='flex flex-row gap-4'>
+            <button onClick={setOpenLogin} className="btn btn-primary btn-lg mt-2">     
                 Go to Login
+            </button>
+            <Link to="/" className="btn btn-primary btn-lg mt-2">
+                Go to Home
             </Link>
+            </div>
         </div>
     );
 }

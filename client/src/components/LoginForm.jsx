@@ -1,8 +1,16 @@
 import styles from "../modules/LoginForm.module.css";
 import clsx from "clsx";
-export default function LoginForm({ handleRotation }) {
+export default function LoginForm({ handleRotation, onClose }) {
+  const handleLogin = (e) => {
+    e.preventDefault();
+    
+    setTimeout(() => {
+      console.log("okkk");
+      onClose();
+    }, 10000);
+  };
   return (
-    <form method="dialog" className={styles.container}>
+    <form className={styles.container}>
       <h2 className="col-span-2 row-start-2 row-end-3 justify-self-center text-3xl mb-4 self-start !text-black">
         Welcome to{" "}
         <span className={clsx(styles.highlight, "text-white relative px-2")}>
@@ -43,7 +51,7 @@ export default function LoginForm({ handleRotation }) {
           </span>
           Remember Me
         </label>
-        <button className="bg-blue-500 text-white p-2 rounded hover:bg-blue-600">
+        <button onClick={handleLogin} className="bg-blue-500 text-white p-2 rounded hover:bg-blue-600">
           Login
         </button>
       </div>
@@ -57,7 +65,7 @@ export default function LoginForm({ handleRotation }) {
           Create Account
         </button>
       </p>
-      <button className="col-start-2 col-end-3 row-start-1 row-end-2 justify-self-end text-base text-black">
+      <button type="button" onClick={onClose} className="col-start-2 col-end-3 row-start-1 row-end-2 justify-self-end text-base text-black">
         &#10005;
       </button>
     </form>

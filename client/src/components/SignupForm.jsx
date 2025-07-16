@@ -1,8 +1,12 @@
 import styles from "../modules/SignupForm.module.css";
 
-export default function SignupForm({ handleRotation }) {
+export default function SignupForm({ handleRotation, onClose }) {
+  const handleSignup = (e) => {
+    e.preventDefault();
+    // signup logic here
+  };
   return (
-    <form method="dialog" className={styles.container}>
+    <form className={styles.container}>
       <h2 className="col-span-2 row-start-2 row-end-3 justify-self-center text-3xl mb-4 self-start text-black">
         Create New Account
       </h2>
@@ -22,7 +26,7 @@ export default function SignupForm({ handleRotation }) {
           placeholder="Password"
           className="border border-gray-300 p-2 px-4  placeholder-gray-400 rounded"
         />
-        <button className="bg-blue-500 text-white p-2 rounded hover:bg-blue-600">
+        <button onClick={handleSignup} className="bg-blue-500 text-white p-2 rounded hover:bg-blue-600">
           Sign Up
         </button>
       </div>
@@ -36,7 +40,7 @@ export default function SignupForm({ handleRotation }) {
           Login
         </button>
       </p>
-      <button className="col-start-2 col-end-3 row-start-1 row-end-2 justify-self-end text-base text-black">
+      <button type="button" onClick={onClose} className="col-start-2 col-end-3 row-start-1 row-end-2 justify-self-end text-base text-black">
         &#10005;
       </button>
     </form>

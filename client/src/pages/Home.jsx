@@ -1,6 +1,7 @@
 import React from "react";
-
+import { useModalStore } from "../store/useModalStore";
 import { Link } from "react-router-dom";
+import { useAuthStore } from "../store/useAuthStore";
 
 const features = [
   {
@@ -49,6 +50,8 @@ const testimonials = [
 ];
 
 const Home = () => {
+  const { setOpenLogin } = useModalStore();
+  const { user } = useAuthStore();
   return (
     <div className="bg-base-200 min-h-screen">
       {/* Hero Section */}
@@ -64,12 +67,22 @@ const Home = () => {
             Get instant, actionable feedback to boost your confidence and
             skills.
           </p>
-          <Link
-            to="/start"
-            className="cta-btn mt-2 px-8 py-3 rounded-lg bg-primary text-primary-content text-lg font-semibold shadow-lg hover:bg-primary-focus transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary/40"
-          >
-            Start Free Interview
-          </Link>
+          {user ? (
+            <Link
+              to={user.interviewLeft==0 ? "/pricing" : "/start"}
+              className="cta-btn mt-2 px-8 py-3 rounded-lg bg-primary text-primary-content text-lg font-semibold shadow-lg hover:bg-primary-focus transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary/40"
+            >
+              Start Free Interview
+            </Link>
+          ) : (
+            <button
+              type="button"
+              onClick={setOpenLogin}
+              className="cta-btn mt-2 px-8 py-3 rounded-lg bg-primary text-primary-content text-lg font-semibold shadow-lg hover:bg-primary-focus transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary/40"
+            >
+              Start Free Interview
+            </button>
+          )}
 
           <div className="flex gap-4 mt-4">
             <img

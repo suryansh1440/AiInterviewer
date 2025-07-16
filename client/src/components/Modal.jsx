@@ -13,11 +13,17 @@ const Modal = forwardRef((props, ref) => {
     wrapperRef.current.style.transform = "rotateY(0deg)";
   };
 
+  const handleClose = () => {
+    if (ref && ref.current) {
+      ref.current.close();
+    }
+  };
+
   return createPortal(
     <dialog className={styles.modalBox} ref={ref}>
       <div className={styles.formWrapper} ref={wrapperRef}>
-        <LoginForm handleRotation={wrapperRotationRight} />
-        <SignupForm handleRotation={wrapperRotationLeft} />
+        <LoginForm handleRotation={wrapperRotationRight} onClose={handleClose} />
+        <SignupForm handleRotation={wrapperRotationLeft} onClose={handleClose} />
       </div>
     </dialog>,
     document.getElementById("modal-window")
