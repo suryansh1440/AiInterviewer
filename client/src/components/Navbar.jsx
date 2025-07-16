@@ -2,8 +2,10 @@ import React, { useState } from "react";
 import { Link} from "react-router-dom";
 import {useAuthStore} from "../store/useAuthStore"
 import { Award, XCircle } from "lucide-react";
+import { useModalStore } from "../store/useModalStore";
 const Navbar = () => {
   const {user} = useAuthStore();
+  const {setOpenModal} = useModalStore();
 
   return (
     <nav className="navbar w-full shadow-md px-8 py-3 flex items-center justify-between sticky top-0 z-30 backdrop-blur bg-base-100/70">
@@ -35,12 +37,12 @@ const Navbar = () => {
         ) : (
           <>
             <li>
-              <Link
-                to="#"
+              <button
+              onClick={setOpenModal}
                 className="ml-2 px-5 py-2 rounded-md bg-primary text-primary-content font-semibold shadow hover:bg-primary-focus transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary/30"
               >
                 Login
-              </Link>
+              </button>
             </li>
           </>
         )}

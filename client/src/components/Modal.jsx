@@ -1,10 +1,11 @@
-import { createPortal } from "react-dom";
-import { forwardRef, useRef } from "react";
+import { useRef } from "react";
 import LoginForm from "./LoginForm";
 import SignupForm from "./SignupForm";
 import styles from "../modules/Modal.module.css";
-const Modal = forwardRef((props, ref) => {
+
+const Modal = () => {
   const wrapperRef = useRef(null);
+
 
   const wrapperRotationRight = () => {
     wrapperRef.current.style.transform = "rotateY(180deg)";
@@ -13,21 +14,14 @@ const Modal = forwardRef((props, ref) => {
     wrapperRef.current.style.transform = "rotateY(0deg)";
   };
 
-  const handleClose = () => {
-    if (ref && ref.current) {
-      ref.current.close();
-    }
-  };
-
-  return createPortal(
-    <dialog className={styles.modalBox} ref={ref}>
+  return(
+    <div className={styles.modalBox}>
       <div className={styles.formWrapper} ref={wrapperRef}>
-        <LoginForm handleRotation={wrapperRotationRight} onClose={handleClose} />
-        <SignupForm handleRotation={wrapperRotationLeft} onClose={handleClose} />
+        <LoginForm handleRotation={wrapperRotationRight} />
+        <SignupForm handleRotation={wrapperRotationLeft} />
       </div>
-    </dialog>,
-    document.getElementById("modal-window")
+    </div>
   );
-});
+};
 
 export default Modal;

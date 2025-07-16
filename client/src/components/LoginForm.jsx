@@ -1,21 +1,20 @@
 import styles from "../modules/LoginForm.module.css";
 import clsx from "clsx";
-export default function LoginForm({ handleRotation, onClose }) {
+import { useModalStore } from "../store/useModalStore";
+
+export default function LoginForm({ handleRotation }) {
+  const { setCloseModal } = useModalStore();
   const handleLogin = (e) => {
     e.preventDefault();
-    
-    setTimeout(() => {
-      console.log("okkk");
-      onClose();
-    }, 10000);
+    // login logic 
+    setCloseModal();
   };
+
   return (
-    <form className={styles.container}>
+    <form className={styles.container} onSubmit={handleLogin}>
       <h2 className="col-span-2 row-start-2 row-end-3 justify-self-center text-3xl mb-4 self-start !text-black">
         Welcome to{" "}
-        <span className={clsx(styles.highlight, "text-white relative px-2")}>
-          AI Interview
-        </span>
+        <span className={clsx(styles.highlight, "text-white relative px-2")}>AI Interview</span>
       </h2>
       <div className="login-body col-span-2 row-start-3 row-end-4 grid gap-4">
         <input
@@ -31,27 +30,26 @@ export default function LoginForm({ handleRotation, onClose }) {
         <label className="flex items-center text-black">
           <input
             type="checkbox"
-            className="appearance-none w-4 h-4 border border-gray-400 bg-white mr-2 peer checked:bg-blue-600 checked:border-transparent
-"
+            className="appearance-none w-4 h-4 border border-gray-400 bg-white mr-2 peer checked:bg-blue-600 checked:border-transparent"
           />
-          <span class="absolute w-4 h-4 pointer-events-none peer-checked:block">
+          <span className="absolute w-4 h-4 pointer-events-none peer-checked:block">
             <svg
-              class="w-4 h-4 text-white"
+              className="w-4 h-4 text-white"
               fill="none"
               stroke="currentColor"
-              stroke-width="3"
+              strokeWidth="3"
               viewBox="0 0 24 24"
             >
               <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
+                strokeLinecap="round"
+                strokeLinejoin="round"
                 d="M5 13l4 4L19 7"
               />
             </svg>
           </span>
           Remember Me
         </label>
-        <button onClick={handleLogin} className="bg-blue-500 text-white p-2 rounded hover:bg-blue-600">
+        <button type="submit" className="bg-blue-500 text-white p-2 rounded hover:bg-blue-600">
           Login
         </button>
       </div>
@@ -65,7 +63,7 @@ export default function LoginForm({ handleRotation, onClose }) {
           Create Account
         </button>
       </p>
-      <button type="button" onClick={onClose} className="col-start-2 col-end-3 row-start-1 row-end-2 justify-self-end text-base text-black">
+      <button type="button" onClick={setCloseModal} className="col-start-2 col-end-3 row-start-1 row-end-2 justify-self-end text-base text-black">
         &#10005;
       </button>
     </form>
