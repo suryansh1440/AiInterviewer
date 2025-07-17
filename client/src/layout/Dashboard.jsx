@@ -5,17 +5,12 @@ import { useAuthStore } from '../store/useAuthStore';
 
 
 const Dashboard = () => {
-  const {user} = useAuthStore();
   const navigate = useNavigate();
-  useEffect(()=>{
-    if(!user){
-      navigate("/")
-    }
-  },[])
+
   return (
-    <div className="min-h-[90vh] flex bg-base-100">
+    <div className="min-h-[90vh] flex bg-base-100 scrollbar-hide">
       <DashboardSidebar />
-      <main className="flex-1 p-3 max-h-[90vh] overflow-y-auto">
+      <main className="flex-1 p-3 max-h-[90vh] overflow-y-auto scrollbar-hide">
         <Outlet/>
       </main>
     </div>

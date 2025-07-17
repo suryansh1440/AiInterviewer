@@ -3,7 +3,7 @@ import { create } from "zustand";
 export const useInterviewHistoryStore = create((set) => ({
     interviews: [
         {
-            id: 1,
+            _id: 1,
             topic: "Frontend Development",
             date: "2024-06-01",
             score: 85,
@@ -17,7 +17,7 @@ export const useInterviewHistoryStore = create((set) => ({
             ]
         },
         {
-            id: 2,
+            _id: 2,
             topic: "Backend Development",
             date: "2024-05-20",
             score: 78,
@@ -31,7 +31,7 @@ export const useInterviewHistoryStore = create((set) => ({
             ]
         },
         {
-            id: 3,
+            _id: 3,
             topic: "Data Structures",
             date: "2024-04-15",
             score: 92,
@@ -45,7 +45,7 @@ export const useInterviewHistoryStore = create((set) => ({
             ]
         },
         {
-            id: 4,
+            _id: 4,
             topic: "System Design",
             date: "2024-03-10",
             score: 65,
@@ -59,7 +59,7 @@ export const useInterviewHistoryStore = create((set) => ({
             ]
         },
         {
-            id: 5,
+            _id: 5,
             topic: "DevOps",
             date: "2024-02-05",
             score: 88,
@@ -73,5 +73,7 @@ export const useInterviewHistoryStore = create((set) => ({
             ]
         }
     ],
+    showInterview: 1,
+    setShowInterview: (id) => set({ showInterview: id }),
 
 }))
