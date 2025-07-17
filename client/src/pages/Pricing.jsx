@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useAuthStore } from "../store/useAuthStore"; 
 import Modal from "../components/Modal";
+import { useModalStore } from "../store/useModalStore";
 
 const pricingTiers = [
   {
@@ -88,88 +89,15 @@ const faqs = [
 
 const Pricing = () => {
   const [openFaq, setOpenFaq] = useState(null);
-  const modalRef = useRef(null);
   const { user } = useAuthStore(); // Get user data from store
+  const {setOpenModal} = useModalStore();
 
-  const handleModal = () => {
-    modalRef.current.showModal();
-  };
-
-  // Function to get button content and behavior based on interviews left
-  const getButtonContent = (tier) => {
-    if (tier.title !== "Free") {
-      return {
-        text: tier.cta,
-        link: tier.ctaLink,
-        disabled: false,
-        className: tier.highlight
-          ? "bg-primary text-primary-content hover:bg-primary-focus"
-          : "bg-base-100 text-primary border border-primary hover:bg-base-200"
-      };
+  const handleSubmitPricing = (title)=>{
+    if(!user){
+      setOpenModal();
     }
-
-    // For Free tier, check interviews left
-    const interviewsLeft = user?.interviewLeft || 0;
-    
-    if (interviewsLeft === 0) {
-      return {
-        text: "Claimed",
-        link: "#",
-        disabled: true,
-        className: "bg-gray-300 text-gray-500 cursor-not-allowed"
-      };
-    } else if (interviewsLeft === 1) {
-      return {
-        text: "One Left - Go!",
-        link: "/start", // Replace with your actual start interview route
-        disabled: false,
-        className: "bg-primary text-primary-content hover:bg-primary-focus"
-      };
-    } else if (interviewsLeft === 2) {
-      return {
-        text: "Start Free",
-        link: "/start", // Replace with your actual start interview route
-        disabled: false,
-        className: "bg-primary text-primary-content hover:bg-primary-focus"
-      };
-    }
-
-    // Default case
-    return {
-      text: "Start Free",
-      link: "/start",
-      disabled: false,
-      className: "bg-primary text-primary-content hover:bg-primary-focus"
-    };
-  };
-
-  // Function to get CTA button content for bottom section
-  const getBottomCTAContent = () => {
-    const interviewsLeft = user?.interviewLeft || 0;
-    
-    if (interviewsLeft === 0) {
-      return {
-        text: "Claimed",
-        link: "#",
-        disabled: true,
-        className: "px-8 py-3 rounded-lg bg-gray-300 text-gray-500 font-semibold text-lg cursor-not-allowed"
-      };
-    } else if (interviewsLeft === 1) {
-      return {
-        text: "1 Interview Left",
-        link: "/start",
-        disabled: false,
-        className: "px-8 py-3 rounded-lg bg-base-100 text-primary font-semibold text-lg shadow hover:bg-base-200 transition-colors duration-200"
-      };
-    } else {
-      return {
-        text: "Start Free",
-        link: "/start",
-        disabled: false,
-        className: "px-8 py-3 rounded-lg bg-base-100 text-primary font-semibold text-lg shadow hover:bg-base-200 transition-colors duration-200"
-      };
-    }
-  };
+    return;
+  }
 
   return (
     <div className="bg-base-200 min-h-screen">
@@ -186,62 +114,61 @@ const Pricing = () => {
 
       {/* Pricing Tiers */}
       <section className="pricing-tiers flex flex-col md:flex-row gap-8 justify-center items-stretch max-w-6xl mx-auto py-16 px-4">
-        {pricingTiers.map((tier, idx) => {
-          const buttonContent = getButtonContent(tier);
-          
-          return (
-            <div
-              key={tier.title}
-              className={`tier relative flex-1 flex flex-col items-center bg-base-100/60 backdrop-blur-lg rounded-3xl shadow-xl p-8 border border-base-200 transition-transform duration-300 hover:scale-105 ${
-                tier.highlight ? "z-10 shadow-2xl border-primary" : ""
-              }`}
-            >
-              {tier.badge && (
-                <div className="popular-badge absolute -top-5 left-1/2 -translate-x-1/2 bg-gradient-to-r from-primary to-secondary text-primary-content text-xs font-bold px-4 py-1 rounded-full shadow-lg uppercase tracking-wider">
-                  {tier.badge}
-                </div>
-              )}
-              <div className="tier-title text-2xl font-bold mb-2 text-primary">
-                {tier.title}
+        {pricingTiers.map((tier, idx) => (
+          <div
+            key={tier.title}
+            className={`tier relative flex-1 flex flex-col items-center bg-base-100/60 backdrop-blur-lg rounded-3xl shadow-xl p-8 border border-base-200 transition-transform duration-300 hover:scale-105 ${
+              tier.highlight ? "z-10 shadow-2xl border-primary" : ""
+            }`}
+          >
+            {tier.badge && (
+              <div className="popular-badge absolute -top-5 left-1/2 -translate-x-1/2 bg-gradient-to-r from-primary to-secondary text-primary-content text-xs font-bold px-4 py-1 rounded-full shadow-lg uppercase tracking-wider">
+                {tier.badge}
               </div>
-              <div className="tier-price text-4xl font-extrabold mb-1 text-base-content">
-                {tier.price}
-                <span className="text-base font-medium text-base-content/70">
-                  {tier.priceNote}
-                </span>
-              </div>
-              <div className="tier-desc text-base-content/70 mb-4 text-center">
-                {tier.desc}
-              </div>
-              <ul className="mb-6 space-y-2 w-full">
-                {tier.features.map((f, i) => (
-                  <li
-                    key={i}
-                    className="flex items-center gap-2 text-base-content"
-                  >
-                    <span className="text-primary">✔</span> {f}
-                  </li>
-                ))}
-              </ul>
-              
-              {buttonContent.disabled ? (
-                <button
-                  disabled
-                  className={`w-full text-center px-6 py-3 rounded-lg font-semibold shadow transition-colors duration-200 ${buttonContent.className}`}
-                >
-                  {buttonContent.text}
-                </button>
-              ) : (
-                <Link
-                  to={buttonContent.link}
-                  className={`w-full text-center px-6 py-3 rounded-lg font-semibold shadow transition-colors duration-200 ${buttonContent.className}`}
-                >
-                  {buttonContent.text}
-                </Link>
-              )}
+            )}
+            <div className="tier-title text-2xl font-bold mb-2 text-primary">
+              {tier.title}
             </div>
-          );
-        })}
+            <div className="tier-price text-4xl font-extrabold mb-1 text-base-content">
+              {tier.price}
+              <span className="text-base font-medium text-base-content/70">
+                {tier.priceNote}
+              </span>
+            </div>
+            <div className="tier-desc text-base-content/70 mb-4 text-center">
+              {tier.desc}
+            </div>
+            <ul className="mb-6 space-y-2 w-full">
+              {tier.features.map((f, i) => (
+                <li
+                  key={i}
+                  className="flex items-center gap-2 text-base-content"
+                >
+                  <span className="text-primary">✔</span> {f}
+                </li>
+              ))}
+            </ul>
+            {tier.title === 'Free' && user?.freeInterview === 'claimed' ? (
+              <button
+                disabled
+                className="w-full text-center px-6 py-3 rounded-lg font-semibold shadow transition-colors duration-200 bg-gray-300 text-gray-500 cursor-not-allowed"
+              >
+                Claimed
+              </button>
+            ) : (
+              <button
+                onClick={() => handleSubmitPricing(tier.title)}
+                className={`w-full text-center px-6 py-3 rounded-lg font-semibold shadow transition-colors duration-200 ${
+                  tier.highlight
+                    ? "bg-primary text-primary-content hover:bg-primary-focus"
+                    : "bg-base-100 text-primary border border-primary hover:bg-base-200"
+                }`}
+              >
+                {tier.cta}
+              </button>
+            )}
+          </div>
+        ))}
       </section>
 
       {/* Comparison Table */}
@@ -317,32 +244,23 @@ const Pricing = () => {
         <div className="inline-block bg-gradient-to-r from-primary to-secondary text-primary-content px-10 py-6 rounded-2xl shadow-xl">
           <h3 className="text-2xl font-bold mb-2">Ready to get started?</h3>
           <p className="mb-4">
-            {user?.interviewLeft === 0 
-              ? "You've used all your free interviews. Upgrade to continue practicing!"
-              : user?.interviewLeft === 1
-              ? "You have 1 free interview left. Use it now!"
-              : "Sign up now and get your first 2 interviews free. No credit card required."
-            }
+            Sign up now and get your first 2 interviews free. No credit card required.
           </p>
-          
-          {(() => {
-            const ctaContent = getBottomCTAContent();
-            return ctaContent.disabled ? (
-              <button
-                disabled
-                className={ctaContent.className}
-              >
-                {ctaContent.text}
-              </button>
-            ) : (
-              <Link
-                to={ctaContent.link}
-                className={ctaContent.className}
-              >
-                {ctaContent.text}
-              </Link>
-            );
-          })()}
+          {user?.freeInterview === 'Claimed' ? (
+            <button
+              disabled
+              className="px-8 py-3 rounded-lg bg-gray-300 text-gray-500 font-semibold text-lg cursor-not-allowed"
+            >
+              Claimed
+            </button>
+          ) : (
+            <a
+              href="#"
+              className="px-8 py-3 rounded-lg bg-base-100 text-primary font-semibold text-lg shadow hover:bg-base-200 transition-colors duration-200"
+            >
+              Start Free
+            </a>
+          )}
         </div>
       </section>
     </div>

@@ -21,11 +21,12 @@ const Start = () => {
   const navigate = useNavigate();
 
   const handleStartClick = () => {
-    if (user) {
-      navigate('/interview/id=1234');
-    } else {
-      setOpenModal(true); // 👈 Open login/create account modal
+    if (!user) {
+      setOpenModal(); 
+      return;
     }
+    navigate('/interview/id=1234');
+    
   };
 
   return (

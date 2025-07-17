@@ -1,7 +1,7 @@
 import { create } from "zustand";
 
 export const useAuthStore = create((set) => ({
-  //user: null,
+  // user: null,
   
   user: {
     _id: 4372894274162791,
@@ -12,6 +12,7 @@ export const useAuthStore = create((set) => ({
     phone: "+91 3216549870",
     createdAt: "01-01-25",
     lastLogin: "02-03-25",
+    freeInterview:"claimed",
     level: 1,
     interviewLeft:10,
     subscription:"none",
