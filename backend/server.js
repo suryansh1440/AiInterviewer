@@ -1,20 +1,29 @@
-const dotenv = require("dotenv");
-const mongoose = require("mongoose");
-const app = require("./app");
+import express from 'express';
+import dotenv from "dotenv"
+import { connectDB } from "./lib/db.js"
+import cookieParser from "cookie-parser"
+import cors from "cors"
 
-dotenv.config({ path: "./config.env" });
+dotenv.config()
 
-const DB = process.env.DATABASE.replace(
-  "<PASSWORD>",
-  process.env.DATABASE_PASSWORD
-);
+const app = express();
 
-mongoose.connect(DB).then(() => {
-  console.log("DB CONNECTION SUCCESSFUL");
-});
+const PORT = process.env.PORT;
+app.use(cookieParser());
+app.use(cors({
+    origin: "http://localhost:5173",
+    credentials:true
+}))
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
-const port = process.env.PORT || 8001;
 
-app.listen(port, (req, res) => {
-  console.log(`App running on the port ${port}`);
+
+app.get("/",(req,res)=>{
+    res.send("Hello World");
+})
+
+app.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}`);
+    connectDB();
 });
