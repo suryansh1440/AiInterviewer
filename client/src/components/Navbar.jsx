@@ -1,18 +1,27 @@
 import React, { useState } from "react";
 import { Link} from "react-router-dom";
 import {useAuthStore} from "../store/useAuthStore"
-import { Award, XCircle } from "lucide-react";
+import { Award, XCircle, Crown } from "lucide-react";
 import { useModalStore } from "../store/useModalStore";
 const Navbar = () => {
   const {user} = useAuthStore();
   const {setOpenModal} = useModalStore();
 
+  const isPro = user && user.subscription === 'pro';
+
   return (
     <nav className="navbar w-full shadow-md px-8 py-3 flex items-center justify-between sticky top-0 z-30 backdrop-blur bg-base-100/70">
       <Link to="/">
-    <div className="logo text-2xl font-bold text-base-content flex items-center select-none">
-        AI Interview<span className="dot text-primary ml-1">.</span>
-      </div>
+        <div className="logo text-2xl font-bold text-base-content flex items-center select-none relative" style={{minWidth: 'fit-content'}}>
+          <span className="relative inline-block mr-1">
+            {isPro && (
+              <Crown className="w-6 h-6 text-yellow-400 absolute left-[-15%] -top-3 -rotate-20 drop-shadow" style={{zIndex:2}} />
+            )}
+            <span className="inline-block">A</span>I
+          </span>
+          Interview
+          <span className="dot text-primary ml-1">.</span>
+        </div>
       </Link>
       <ul className="nav-links flex items-center gap-6 text-base-content font-medium">
         <li><Link to="/" className="hover:text-primary transition-colors duration-200">Home</Link></li>
