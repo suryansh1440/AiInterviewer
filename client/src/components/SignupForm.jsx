@@ -19,7 +19,7 @@ export default function SignupForm({ handleRotation, onClose }) {
             "bg-primary text-primary-content px-2 rounded dark:bg-primary dark:text-primary-content"
           }
         >
-          Create New Account
+        Create New Account
         </span>
       </h2>
       <div className="signup-body col-span-2 row-start-3 row-end-4 grid gap-4">

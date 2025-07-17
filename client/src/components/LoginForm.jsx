@@ -39,7 +39,7 @@ export default function LoginForm({ handleRotation }) {
           <input
             type="checkbox"
             className="checkbox mr-2"
-          />
+              />
           Remember Me
         </label>
         <button type="submit" className="btn btn-primary w-full">
