@@ -1,11 +1,26 @@
 import styles from "../modules/LoginForm.module.css";
 import clsx from "clsx";
+import { useModalStore } from "../store/useModalStore";
+
 export default function LoginForm({ handleRotation }) {
+  const { setCloseModal } = useModalStore();
+  const handleLogin = (e) => {
+    e.preventDefault();
+    // login logic 
+    setCloseModal();
+  };
+
   return (
-    <form method="dialog" className={styles.container}>
-      <h2 className="col-span-2 row-start-2 row-end-3 justify-self-center text-3xl mb-4 self-start !text-black">
+    <form className={clsx(styles.container, "bg-base-100 text-base-content")} onSubmit={handleLogin}>
+      <h2 className="col-span-2 row-start-2 row-end-3 justify-self-center text-3xl mb-4 self-start">
         Welcome to{" "}
-        <span className={clsx(styles.highlight, "text-white relative px-2")}>
+        <span
+          className={clsx(
+            styles.highlight,
+            "bg-primary text-primary-content px-2",
+            "dark:bg-primary dark:text-primary-content"
+          )}
+        >
           AI Interview
         </span>
       </h2>
@@ -13,51 +28,35 @@ export default function LoginForm({ handleRotation }) {
         <input
           type="text"
           placeholder="Username"
-          className="border border-gray-300 p-2 px-4 rounded  placeholder-gray-400"
+          className="input input-bordered w-full"
         />
         <input
           type="password"
           placeholder="Password"
-          className="border border-gray-300 p-2 px-4 rounded placeholder-gray-400"
+          className="input input-bordered w-full"
         />
-        <label className="flex items-center text-black">
+        <label className="flex items-center">
           <input
             type="checkbox"
-            className="appearance-none w-4 h-4 border border-gray-400 bg-white mr-2 peer checked:bg-blue-600 checked:border-transparent
-"
-          />
-          <span class="absolute w-4 h-4 pointer-events-none peer-checked:block">
-            <svg
-              class="w-4 h-4 text-white"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="3"
-              viewBox="0 0 24 24"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                d="M5 13l4 4L19 7"
+            className="checkbox mr-2"
               />
-            </svg>
-          </span>
           Remember Me
         </label>
-        <button className="bg-blue-500 text-white p-2 rounded hover:bg-blue-600">
+        <button type="submit" className="btn btn-primary w-full">
           Login
         </button>
       </div>
-      <p className="col-span-2 row-start-4 row-end-5 flex flex-col items-center self-end text-gray-500 ">
+      <p className="col-span-2 row-start-4 row-end-5 flex flex-col items-center self-end text-base-content">
         Don't have an account?{" "}
         <button
           type="button"
           onClick={handleRotation}
-          className="text-sm underline text-blue-500"
+          className="btn btn-link text-sm p-0 min-h-0 h-auto"
         >
           Create Account
         </button>
       </p>
-      <button className="col-start-2 col-end-3 row-start-1 row-end-2 justify-self-end text-base text-black">
+      <button type="button" onClick={setCloseModal} className="col-start-2 col-end-3 row-start-1 row-end-2 justify-self-end text-base">
         &#10005;
       </button>
     </form>
