@@ -1,6 +1,8 @@
 import React from 'react';
 import { Mic, Zap, Computer, Building, DollarSign, Settings, Heart, Scale, BarChart3, TrendingUp } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
+import { useAuthStore } from '../store/useAuthStore';
+import { useModalStore } from '../store/useModalStore';
 
 const categories = [
   { id: 'tech', label: 'Tech & Programming', icon: Computer },
@@ -14,13 +16,26 @@ const categories = [
 ];
 
 const Start = () => {
+  const { user } = useAuthStore();
+  const { setOpenModal } = useModalStore();
+  const navigate = useNavigate();
+
+  const handleStartClick = () => {
+    if (user) {
+      navigate('/interview/id=1234');
+    } else {
+      setOpenModal(true); // 👈 Open login/create account modal
+    }
+  };
+
   return (
     <div className="min-h-screen bg-base-200 font-inter">
-      {/* Topic Selection Section */}
       <section className="max-w-4xl mx-auto px-6 py-16">
         <div className="text-center mb-12">
           <h2 className="text-4xl font-bold text-base-content mb-4">Choose Your Topic</h2>
-          <p className="text-base-content/70 text-lg">Select trending categories or specify your own topic for AI-generated interview questions</p>
+          <p className="text-base-content/70 text-lg">
+            Select trending categories or specify your own topic for AI-generated interview questions
+          </p>
         </div>
 
         <div className="bg-base-100 rounded-2xl shadow-xl p-8 space-y-8">
@@ -31,7 +46,10 @@ const Start = () => {
               {categories.map((category) => {
                 const IconComponent = category.icon;
                 return (
-                  <div key={category.id} className="p-4 rounded-xl border-2 border-base-200 bg-base-200 text-primary text-left shadow hover:shadow-lg transition-all duration-200">
+                  <div
+                    key={category.id}
+                    className="p-4 rounded-xl border-2 border-base-200 bg-base-200 text-primary text-left shadow hover:shadow-lg transition-all duration-200"
+                  >
                     <IconComponent className="w-6 h-6 mb-2" />
                     <span className="text-sm font-medium text-base-content">{category.label}</span>
                   </div>
@@ -49,9 +67,7 @@ const Start = () => {
                 placeholder="Type your topic..."
                 className="w-full px-4 py-4 border border-base-300 rounded-xl focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 text-base-content bg-base-100"
               />
-              <button
-                className="absolute right-3 top-1/2 -translate-y-1/2 p-2 bg-primary rounded-full hover:bg-primary-focus transition-all"
-              >
+              <button className="absolute right-3 top-1/2 -translate-y-1/2 p-2 bg-primary rounded-full hover:bg-primary-focus transition-all">
                 <Mic className="w-5 h-5 text-primary-content" />
               </button>
             </div>
@@ -67,7 +83,7 @@ const Start = () => {
             />
           </div>
 
-          {/* Random Topic Section (STATIC) */}
+          {/* Random Topic Section */}
           <div className="bg-base-200 rounded-xl p-6 border border-primary/20">
             <p className="text-base-content mb-4 font-medium">Let AI pick a random topic from your field of study</p>
             <div className="space-y-4">
@@ -83,12 +99,13 @@ const Start = () => {
             </div>
           </div>
 
-          {/* Start Button */}
-          <Link to="/interview/id=1234">
-          <button className="w-full bg-gradient-to-r from-accent to-primary text-primary-content py-4 px-8 rounded-xl font-semibold text-lg hover:from-accent-focus hover:to-primary-focus transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-1">
+          {/* ✅ Start Interview Button */}
+          <button
+            onClick={handleStartClick}
+            className="w-full bg-gradient-to-r from-accent to-primary text-primary-content py-4 px-8 rounded-xl font-semibold text-lg hover:from-accent-focus hover:to-primary-focus transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-1"
+          >
             Start Interview
           </button>
-          </Link>
         </div>
       </section>
     </div>
