@@ -13,7 +13,8 @@ export const useAuthStore = create((set) => ({
     createdAt: "01-01-25",
     lastLogin: "02-03-25",
     level: 1,
-    interviewLeft: 1,
+    interviewLeft:10,
+    subscription:"none",
     stats: {
       totalInterviews: 12,
       averageScore: "87%",

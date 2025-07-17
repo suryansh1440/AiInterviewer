@@ -1,8 +1,12 @@
 import React from "react";
 import { Link } from "react-router-dom";
+import { useAuthStore } from "../store/useAuthStore";
+import { useModalStore } from "../store/useModalStore";
 
 
 const About = () => {
+  const {user} = useAuthStore();
+  const {setOpenModal} = useModalStore();
   return (
     <div className="min-h-[120vh] bg-base-200 flex items-center justify-center">
       <div className="pt-4 flex justify-center w-full">
@@ -69,7 +73,14 @@ const About = () => {
           <div className="text-center mt-14">
             <h2 className="text-3xl font-bold text-base-content mb-2">Ready to Start?</h2>
             <p className="text-base-content/70 mb-6">Join thousands of successful candidates who have improved their interview skills with AI Interview</p>
-            <Link to="/start" className="bg-primary text-primary-content px-10 py-3 rounded-lg font-semibold text-lg shadow-lg hover:bg-primary-focus transition inline-block">Get Started</Link>
+            {user ? (
+
+              <Link to="/start" className="bg-primary text-primary-content px-10 py-3 rounded-lg font-semibold text-lg shadow-lg hover:bg-primary-focus transition inline-block">Get Started</Link>
+            ):
+            (
+              <button onClick={setOpenModal} className="bg-primary text-primary-content px-10 py-3 rounded-lg font-semibold text-lg shadow-lg hover:bg-primary-focus transition inline-block">Get Started</button>
+
+            )}
           </div>
         </div>
       </div>
