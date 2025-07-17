@@ -6,22 +6,24 @@ import { useThemeStore } from './store/useThemeStore'
 import Modal from './components/Modal'
 import { useModalStore } from './store/useModalStore'
 
+
 const App = () => {
-  const {theme}= useThemeStore();
-  const {isOpenModal} = useModalStore();
+  const { theme } = useThemeStore();
+  const { isOpenModal } = useModalStore();
 
   return (
     <div data-theme={theme} className="relative">
-      <Navbar/>
+      <Navbar />
       <div className='min-h-[90vh]'>
-        <Outlet/>
+        <Outlet />
       </div>
-      <Footer/>
+      <Footer />
       {isOpenModal && (
         <>
-          <div className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm transition-opacity duration-300" />
+          <div className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm transition-opacity duration-300">
+          </div>
           <div className="z-50">
-            <Modal/>
+            <Modal />
           </div>
         </>
       )}

@@ -12,9 +12,15 @@ export default function SignupForm({ handleRotation, onClose }) {
   };
 
   return (
-    <form className={clsx(styles.container, "bg-base-100 dark:bg-base-200")} onSubmit={handleSignup}>
-      <h2 className="col-span-2 row-start-2 row-end-3 justify-self-center text-3xl mb-4 self-start text-base-content">
-        Create New Account
+    <form className={clsx(styles.container, "bg-base-100 text-base-content")} onSubmit={handleSignup}>
+      <h2 className="col-span-2 row-start-2 row-end-3 justify-self-center text-3xl mb-4 self-start">
+        <span
+          className={
+            "bg-primary text-primary-content px-2 rounded dark:bg-primary dark:text-primary-content"
+          }
+        >
+          Create New Account
+        </span>
       </h2>
       <div className="signup-body col-span-2 row-start-3 row-end-4 grid gap-4">
         <input
@@ -32,7 +38,7 @@ export default function SignupForm({ handleRotation, onClose }) {
           placeholder="Password"
           className="input input-bordered w-full"
         />
-        <button type="submit" className="btn btn-primary">
+        <button type="submit" className="btn btn-primary w-full">
           Sign Up
         </button>
       </div>
@@ -41,12 +47,12 @@ export default function SignupForm({ handleRotation, onClose }) {
         <button
           type="button"
           onClick={handleRotation}
-          className="text-sm underline text-primary"
+          className="btn btn-link text-sm p-0 min-h-0 h-auto"
         >
-          Login here
+          Login
         </button>
       </p>
-      <button type="button" onClick={setCloseModal} className="col-start-2 col-end-3 row-start-1 row-end-2 justify-self-end text-base text-base-content">
+      <button type="button" onClick={setCloseModal} className="col-start-2 col-end-3 row-start-1 row-end-2 justify-self-end text-base">
         &#10005;
       </button>
     </form>

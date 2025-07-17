@@ -11,8 +11,8 @@ export default function LoginForm({ handleRotation }) {
   };
 
   return (
-    <form className={clsx(styles.container, "bg-base-100 dark:bg-base-200")} onSubmit={handleLogin}>
-      <h2 className="col-span-2 row-start-2 row-end-3 justify-self-center text-3xl mb-4 self-start text-primary">
+    <form className={clsx(styles.container, "bg-base-100 text-base-content")} onSubmit={handleLogin}>
+      <h2 className="col-span-2 row-start-2 row-end-3 justify-self-center text-3xl mb-4 self-start">
         Welcome to{" "}
         <span
           className={clsx(
@@ -35,10 +35,10 @@ export default function LoginForm({ handleRotation }) {
           placeholder="Password"
           className="input input-bordered w-full"
         />
-        <label className="flex items-center text-base-content">
+        <label className="flex items-center">
           <input
             type="checkbox"
-            className="checkbox checkbox-primary mr-2"
+            className="checkbox mr-2"
           />
           Remember Me
         </label>
@@ -46,17 +46,17 @@ export default function LoginForm({ handleRotation }) {
           Login
         </button>
       </div>
-      <p className="col-span-2 row-start-4 row-end-5 flex flex-col items-center self-end text-base-content ">
+      <p className="col-span-2 row-start-4 row-end-5 flex flex-col items-center self-end text-base-content">
         Don't have an account?{" "}
         <button
           type="button"
           onClick={handleRotation}
-          className="text-sm underline text-primary"
+          className="btn btn-link text-sm p-0 min-h-0 h-auto"
         >
           Create Account
         </button>
       </p>
-      <button type="button" onClick={setCloseModal} className="col-start-2 col-end-3 row-start-1 row-end-2 justify-self-end text-base text-base-content">
+      <button type="button" onClick={setCloseModal} className="col-start-2 col-end-3 row-start-1 row-end-2 justify-self-end text-base">
         &#10005;
       </button>
     </form>
