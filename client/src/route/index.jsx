@@ -47,7 +47,7 @@ const router = createBrowserRouter([
       },
       {
         path: "/start",
-        element: suspense(Start),
+        element: <AuthUserPermission>{suspense(Start)}</AuthUserPermission> ,
       },
       {
         path: "/setting",
@@ -59,7 +59,7 @@ const router = createBrowserRouter([
       },
       {
         path: "/interview/:id",
-        element: suspense(InterviewPage),
+        element:<AuthUserPermission>{suspense(InterviewPage)}</AuthUserPermission>,
       },
       {
         path: "/dashboard",

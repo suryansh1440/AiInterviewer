@@ -10,6 +10,7 @@ export const useAuthStore = create((set) => ({
   isUpdatingProfile: false,
   isChangePassword: false,
   isCheckingAuth:false,
+  isDeletingAccount: false,
 
 
   
@@ -48,7 +49,7 @@ export const useAuthStore = create((set) => ({
       set({user:res.data});
       toast.success("Logged in successfully")
     }catch(error){
-      toast.error(error.response.data);
+      toast.error(error.response.data.message);
     }finally{
       set({isLoggingIn:false});
     }    
@@ -89,7 +90,20 @@ export const useAuthStore = create((set) => ({
     } finally {
       set({ isUpdatingProfile: false });
     }
-  }
+  },
+
+  deleteAccount: async (data) => {
+    set({ isDeletingAccount: true });
+    try {
+      await axiosInstance.post("/auth/delete-account",data);
+      set({ user: null });
+      toast.success("Account deleted successfully");
+    } catch (error) {
+      toast.error(error.response?.data?.message);
+    } finally {
+      set({ isDeletingAccount: false });
+    }
+  },
   
 
 }));

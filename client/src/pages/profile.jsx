@@ -1,22 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { UserRound, Award, BarChart2, BellDot, TrendingUp } from "lucide-react";
 import { useAuthStore } from "../store/useAuthStore";
+import { useInterviewHistoryStore } from "../store/useInterviewHistoryStore";
 import { formatDate } from "../lib/utils";
 import ChangePasswordModal from "../components/ChangePasswordModal";
 import UpdateProfileModal from "../components/UpdateProfileModal";
+import DeleteAccountModal from "../components/DeleteAccountModal";
+import { useNavigate } from "react-router-dom";
 
-
-const stats = [
-  { label: "Total Interviews", value: 12, icon: <BarChart2 className="w-6 h-6 text-primary" /> },
-  { label: "Average Score", value: "87%", icon: <Award className="w-6 h-6 text-primary" /> },
-  { label: "Level", value: 5, icon: <TrendingUp className="w-6 h-6 text-primary" /> },
-];
-
-const interviewHistory = [
-  { date: "2024-07-08", domain: "Full Stack", score: "85%", status: "Passed" },
-  { date: "2024-07-05", domain: "Frontend", score: "90%", status: "Passed" },
-  { date: "2024-07-02", domain: "Backend", score: "88%", status: "Passed" },
-];
 
 const activity = [
   { icon: <BarChart2 className="w-5 h-5 text-primary" />, text: "Completed Full Stack Interview", date: "2024-07-08" },
@@ -26,9 +17,36 @@ const activity = [
 
 const Profile = () => {
   const {user} = useAuthStore();
+  const { interviews, setShowInterview } = useInterviewHistoryStore();
   const [showChangePass, setShowChangePass] = useState(false);
   const [showUpdateProfile, setShowUpdateProfile] = useState(false);
-  
+  const [showDeleteAccount, setShowDeleteAccount] = useState(false);
+  const navigate = useNavigate();
+
+  // Extract stats from user
+  const stats = [
+    {
+      label: "Total Interviews",
+      value: user?.stats?.totalInterviews ?? "-",
+      icon: <BarChart2 className="w-6 h-6 text-primary" />,
+    },
+    {
+      label: "Average Score",
+      value: user?.stats?.averageScore ?? "-",
+      icon: <Award className="w-6 h-6 text-primary" />,
+    },
+    {
+      label: "Level",
+      value: user?.stats?.level ?? user?.level ?? "-",
+      icon: <TrendingUp className="w-6 h-6 text-primary" />,
+    },
+  ];
+
+  // Show only the 3 most recent interviews (sorted by date desc)
+  const recentInterviews = [...interviews]
+    .sort((a, b) => new Date(b.date) - new Date(a.date))
+    .slice(0, 3);
+
   return (
     <div className="min-h-screen bg-base-200 flex flex-col items-center py-10 px-2">
       <div className="w-full max-w-6xl px-4 relative">
@@ -43,7 +61,7 @@ const Profile = () => {
             <h2 className="text-3xl font-bold text-primary mb-1">{user?.name}</h2>
             <div className="flex items-center gap-3 mb-2">
               <span className="bg-primary/10 text-primary px-3 py-1 rounded-full text-base font-semibold flex items-center gap-1">
-                <TrendingUp className="w-5 h-5" /> {user?.stats?.level}
+                <TrendingUp className="w-5 h-5" /> {user?.stats?.level ?? user?.level ?? "-"}
               </span>
               <span className="bg-base-200 text-primary px-3 py-1 rounded-full text-base font-semibold">Last login: {formatDate(user?.lastLogin)}</span>
             </div>
@@ -65,10 +83,10 @@ const Profile = () => {
             <div className="w-40 mt-2">
               <div className="flex justify-between mb-1">
                 <span className="text-sm font-medium text-primary">Level Progress</span>
-                <span className="text-sm font-medium text-primary">6%</span>
+                <span className="text-sm font-medium text-primary">{user?.stats?.levelProgress ?? user?.levelProgress ?? 0}%</span>
               </div>
               <div className="w-full bg-base-200 rounded-full h-3">
-                <div className="bg-primary h-3 rounded-full" style={{ width: "60%" }}></div>
+                <div className="bg-primary h-3 rounded-full" style={{ width: `${user?.stats?.levelProgress ?? user?.levelProgress ?? 0}%` }}></div>
               </div>
             </div>
           </div>
@@ -98,29 +116,37 @@ const Profile = () => {
           </div>
           {/* Interview History */}
           <div className="flex-1">
-            <h3 className="text-xl font-bold text-primary mb-3">Interview History</h3>
+            <h3 className="text-xl font-bold text-primary mb-3">Recent Interviews</h3>
             <div className="overflow-x-auto">
               <table className="min-w-full">
                 <thead>
                   <tr className="bg-base-200">
                     <th className="py-3 px-4 text-left text-base font-bold text-primary">Date</th>
-                    <th className="py-3 px-4 text-left text-base font-bold text-primary">Domain</th>
+                    <th className="py-3 px-4 text-left text-base font-bold text-primary">Topic</th>
                     <th className="py-3 px-4 text-left text-base font-bold text-primary">Score</th>
                     <th className="py-3 px-4 text-left text-base font-bold text-primary">Status</th>
                     <th className="py-3 px-4 text-left text-base font-bold text-primary">View</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {interviewHistory.map((row, i) => (
-                    <tr key={i} className="border-t hover:bg-base-100 transition">
-                      <td className="py-3 px-4 text-base">{row.date}</td>
-                      <td className="py-3 px-4 text-base">{row.domain}</td>
+                  {recentInterviews.map((row, i) => (
+                    <tr key={row._id || i} className="border-t hover:bg-base-100 transition">
+                      <td className="py-3 px-4 text-base">{formatDate(row.date)}</td>
+                      <td className="py-3 px-4 text-base">{row.topic}</td>
                       <td className="py-3 px-4 text-base">{row.score}</td>
                       <td className="py-3 px-4 text-base">
-                        <span className="px-3 py-1 rounded-full bg-success/20 text-success text-sm font-bold">{row.status}</span>
+                        <span className={`px-3 py-1 rounded-full text-sm font-bold ${row.status === 'Passed' ? 'bg-success/20 text-success' : 'bg-error/20 text-error'}`}>{row.status}</span>
                       </td>
                       <td className="py-3 px-4 text-base">
-                        <button className="bg-primary text-primary-content px-4 py-2 rounded hover:bg-primary-focus transition text-sm font-bold">View</button>
+                        <button
+                          className="bg-primary text-primary-content px-4 py-2 rounded hover:bg-primary-focus transition text-sm font-bold"
+                          onClick={() => {
+                            setShowInterview(row._id);
+                            navigate("/dashboard/attempt");
+                          }}
+                        >
+                          View
+                        </button>
                       </td>
                     </tr>
                   ))}
@@ -133,11 +159,12 @@ const Profile = () => {
         <div className="flex flex-col md:flex-row gap-4 justify-end mt-6">
           <button className="bg-base-200 text-base-content px-6 py-2 rounded hover:bg-base-300 transition font-bold text-base" onClick={() => setShowUpdateProfile(true)}>Edit Profile</button>
           <button className="bg-base-200 text-base-content px-6 py-2 rounded hover:bg-base-300 transition font-bold text-base" onClick={() => setShowChangePass(true)}>Change Password</button>
-          <button className="bg-error text-error-content px-6 py-2 rounded hover:bg-error/80 transition font-bold text-base">Delete Account</button>
+          <button className="bg-error text-error-content px-6 py-2 rounded hover:bg-error/80 transition font-bold text-base" onClick={() => setShowDeleteAccount(true)}>Delete Account</button>
         </div>
       </div>
       <ChangePasswordModal open={showChangePass} onClose={() => setShowChangePass(false)} />
       <UpdateProfileModal open={showUpdateProfile} onClose={() => setShowUpdateProfile(false)} />
+      <DeleteAccountModal open={showDeleteAccount} onClose={() => setShowDeleteAccount(false)} onDelete={() => setShowDeleteAccount(false)} />
       <div className="h-16" />
     </div>
   );

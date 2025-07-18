@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { signup,login,logout, checkAuth, updateProfile, changePassword } from "../controller/auth.controller.js";
+import { signup,login,logout, checkAuth, updateProfile, changePassword, deleteAccount,getAllUsers } from "../controller/auth.controller.js";
 import { protectRoute } from "../middleware/auth.middleware.js";
 
 
@@ -13,6 +13,8 @@ authRouter.post("/logout",logout)
 authRouter.get("/check",protectRoute,checkAuth)
 authRouter.put("/update-profile",protectRoute,updateProfile)
 authRouter.put("/changePassword",protectRoute,changePassword)
+authRouter.post("/delete-account",protectRoute,deleteAccount)
+authRouter.post("/get-users",protectRoute,getAllUsers)
 
 
 

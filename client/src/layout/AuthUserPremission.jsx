@@ -6,7 +6,7 @@ import { useModalStore } from '../store/useModalStore'
 
 const AuthUserPermission = ({ children }) => {
     const { user } = useAuthStore();
-    const { setOpenLogin } = useModalStore();
+    const { setOpenModal } = useModalStore();
     if (user) return <>{children}</>;
     return (
         <div className="flex flex-col items-center justify-center min-h-[60vh] gap-6 text-center mt-25">
@@ -17,7 +17,7 @@ const AuthUserPermission = ({ children }) => {
                 Please log in to continue.
             </p>
             <div className='flex flex-row gap-4'>
-            <button onClick={setOpenLogin} className="btn btn-primary btn-lg mt-2">     
+            <button onClick={setOpenModal} className="btn btn-primary btn-lg mt-2">     
                 Go to Login
             </button>
             <Link to="/" className="btn btn-primary btn-lg mt-2">
