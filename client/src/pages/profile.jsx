@@ -1,6 +1,9 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { UserRound, Award, BarChart2, BellDot, TrendingUp } from "lucide-react";
 import { useAuthStore } from "../store/useAuthStore";
+import { formatDate } from "../lib/utils";
+import ChangePasswordModal from "../components/ChangePasswordModal";
+import UpdateProfileModal from "../components/UpdateProfileModal";
 
 
 const stats = [
@@ -23,6 +26,8 @@ const activity = [
 
 const Profile = () => {
   const {user} = useAuthStore();
+  const [showChangePass, setShowChangePass] = useState(false);
+  const [showUpdateProfile, setShowUpdateProfile] = useState(false);
   
   return (
     <div className="min-h-screen bg-base-200 flex flex-col items-center py-10 px-2">
@@ -30,7 +35,7 @@ const Profile = () => {
         {/* Profile Info */}
         <div className="flex flex-col md:flex-row items-center md:items-start gap-8 mb-10 mt-2">
           <img
-            src={user?.profilePic}
+            src={user?.profilePic || "/avatar.png"}
             alt="Profile"
             className="w-32 h-32 rounded-full border-4 border-primary shadow-md object-cover mb-3 md:mb-0"
           />
@@ -38,13 +43,13 @@ const Profile = () => {
             <h2 className="text-3xl font-bold text-primary mb-1">{user?.name}</h2>
             <div className="flex items-center gap-3 mb-2">
               <span className="bg-primary/10 text-primary px-3 py-1 rounded-full text-base font-semibold flex items-center gap-1">
-                <TrendingUp className="w-5 h-5" /> {user?.level}
+                <TrendingUp className="w-5 h-5" /> {user?.stats?.level}
               </span>
-              <span className="bg-base-200 text-primary px-3 py-1 rounded-full text-base font-semibold">Last login: {user?.lastLogin}</span>
+              <span className="bg-base-200 text-primary px-3 py-1 rounded-full text-base font-semibold">Last login: {formatDate(user?.lastLogin)}</span>
             </div>
             <p className="text-base-content/70 text-base mb-1">{user?.email}</p>
             <p className="text-base-content/70 text-base mb-3">{user?.phone}</p>
-            <button className="bg-primary text-primary-content px-6 py-2 rounded-lg font-bold shadow hover:bg-primary-focus transition mb-2 text-base">Edit Profile</button>
+            <button className="bg-primary text-primary-content px-6 py-2 rounded-lg font-bold shadow hover:bg-primary-focus transition mb-2 text-base" onClick={() => setShowUpdateProfile(true)}>Edit Profile</button>
           </div>
           {/* Stats */}
           <div className="flex flex-col gap-2 items-center md:items-end">
@@ -126,11 +131,13 @@ const Profile = () => {
         </div>
         {/* Action Buttons */}
         <div className="flex flex-col md:flex-row gap-4 justify-end mt-6">
-          <button className="bg-base-200 text-base-content px-6 py-2 rounded hover:bg-base-300 transition font-bold text-base">Edit Profile</button>
-          <button className="bg-base-200 text-base-content px-6 py-2 rounded hover:bg-base-300 transition font-bold text-base">Change Password</button>
+          <button className="bg-base-200 text-base-content px-6 py-2 rounded hover:bg-base-300 transition font-bold text-base" onClick={() => setShowUpdateProfile(true)}>Edit Profile</button>
+          <button className="bg-base-200 text-base-content px-6 py-2 rounded hover:bg-base-300 transition font-bold text-base" onClick={() => setShowChangePass(true)}>Change Password</button>
           <button className="bg-error text-error-content px-6 py-2 rounded hover:bg-error/80 transition font-bold text-base">Delete Account</button>
         </div>
       </div>
+      <ChangePasswordModal open={showChangePass} onClose={() => setShowChangePass(false)} />
+      <UpdateProfileModal open={showUpdateProfile} onClose={() => setShowUpdateProfile(false)} />
       <div className="h-16" />
     </div>
   );

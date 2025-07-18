@@ -6,12 +6,27 @@ import { useThemeStore } from './store/useThemeStore'
 import Modal from './components/Modal'
 import { useModalStore } from './store/useModalStore'
 import {Toaster} from "react-hot-toast"
+import { useAuthStore } from './store/useAuthStore'
+import { Loader } from 'lucide-react'
 
 
 const App = () => {
   const { theme } = useThemeStore();
   const { isOpenModal } = useModalStore();
   const location = useLocation();
+  const {user,checkAuth,isCheckingAuth} = useAuthStore()
+
+
+  useEffect(()=>{
+    checkAuth()
+  },[checkAuth])
+
+  if(isCheckingAuth && !user) return (
+    <div className='flex items-center justify-center h-screen'>
+      <Loader className='size-10 animate-spin' />
+
+    </div>
+  )
 
   return (
     <div data-theme={theme} className="relative">

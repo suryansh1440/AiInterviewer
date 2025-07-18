@@ -1,32 +1,94 @@
 import { create } from "zustand";
 import toast from "react-hot-toast";
+import {axiosInstance} from "../lib/axios.js"
+
 
 export const useAuthStore = create((set) => ({
   user: null,
+  isLoggingIn:false,
+  isSigningUp:false,
+  isUpdatingProfile: false,
+  isChangePassword: false,
+  isCheckingAuth:false,
+
+
   
-  // user: {
-  //   _id: 4372894274162791,
-  //   name: "Ankit",
-  //   email: "suryansh1440@gmail.com",
-  //   role: "ADMIN",
-  //   profilePic: "https://randomuser.me/api/portraits/men/75.jpg",
-  //   phone: "+91 3216549870",
-  //   freeInterview:"claimed",
-  //   subscription:"none",
-  //   stats: {
-  //     totalInterviews: 12,
-  //     averageScore: "87%",
-  //     level: 1,
-  //     levelProgress:0,
-  //   },
-  //   interviewLeft:10,
-  //   interviewLeftExpire:null,
-  //   lastLogin: "02-03-25",
-  //   createdAt: "01-01-25",
-  //   updatedAt: "01-01-25",
-  // },
+  checkAuth: async()=>{
+    set({isCheckingAuth:true})
+    try{
+        const res = await axiosInstance.get("/auth/check");
+        set({user:res.data})
+
+    }catch(error){
+        console.log("Error in checkAuth",error)
+        set({user:null})
+    }finally{
+        set({isCheckingAuth:false})
+    }
+},
+
+  signup : async(data)=>{
+    set({isSigningUp:true});
+    try{
+      const res = await axiosInstance.post("/auth/signup",data);
+      set({user:res.data});
+      toast.success("Account created Successfully");
+
+    }catch(error){
+      toast.error(error.response.data.message);
+    }finally{
+      set({isSigningUp:false})
+    }
+  },
+
   login : async(data)=>{
-    toast.success("Logged in success")
+    set({isLoggingIn:true});
+    try{
+      const res = await axiosInstance.post("/auth/login",data);
+      set({user:res.data});
+      toast.success("Logged in successfully")
+    }catch(error){
+      toast.error(error.response.data);
+    }finally{
+      set({isLoggingIn:false});
+    }    
+  },
+
+  logout: async()=>{
+    try{
+      await axiosInstance.post("/auth/logout")
+      set({user:null})
+      toast.success("Logged out successfully")
+
+    }catch(error){
+      toast.error(error.response.data.message)
+    }
+  },
+
+  changePassword: async(data)=>{
+    set({isChangePassword:true})
+    try{
+      await axiosInstance.put("/auth/changePassword",data);
+      toast.success("Password changed successfully");
+
+    }catch(error){
+      toast.error(error.response.data.message)
+    }finally{
+      set({isChangePassword:false})
+    }
+  },
+
+  updateProfile: async (data) => {
+    set({ isUpdatingProfile: true });
+    try {
+      const res = await axiosInstance.put("/auth/update-profile", data);
+      set({ user: res.data });
+      toast.success("Profile updated successfully");
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Failed to update profile");
+    } finally {
+      set({ isUpdatingProfile: false });
+    }
   }
   
 

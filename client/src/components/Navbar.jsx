@@ -37,7 +37,7 @@ const Navbar = () => {
               id="accountBtn"
               className="flex items-center gap-2 px-4 py-2 rounded-md hover:bg-base-200 transition-colors duration-200 border border-base-200 focus:outline-none focus:ring-2 focus:ring-primary/30"
             >
-              <img src={user.profilePic} alt={user.name} className="w-7 h-7 rounded-full border-2 border-primary shadow-sm object-cover" />
+              <img src={user.profilePic || "/avatar.png"} alt={user.name} className="w-7 h-7 rounded-full border-2 border-primary shadow-sm object-cover" />
               <span className="font-semibold">{user.name}</span>
             </button>
               </Link>

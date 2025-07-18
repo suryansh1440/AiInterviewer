@@ -1,11 +1,13 @@
 import React from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { User, LayoutDashboard, History, LogOut } from 'lucide-react';
 import { useAuthStore } from '../store/useAuthStore';
 
 const DashboardSidebar = () => {
   const location = useLocation();
-  const { user } = useAuthStore();
+  const { user,logout } = useAuthStore();
+  const navigate = useNavigate();
+
   return (
     <aside className="max-h-[90vh] w-64 bg-base-200 flex flex-col py-6 px-4 border-r border-base-300">
       <div className="flex flex-col flex-grow">
@@ -57,7 +59,7 @@ const DashboardSidebar = () => {
       </div>
       {/* Logout at bottom */}
       <div className="mt-auto">
-        <button className="btn btn-error btn-outline w-full flex items-center justify-center rounded-lg text-lg font-medium">
+        <button onClick={()=>{logout(); navigate("/")}} className="btn btn-error btn-outline w-full flex items-center justify-center rounded-lg text-lg font-medium">
           <LogOut className="w-5 h-5 mr-3" /> Logout
         </button>
       </div>
