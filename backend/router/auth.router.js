@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { signup,login,logout, checkAuth } from "../controller/auth.controller.js";
+import { signup,login,logout, checkAuth, updateProfile, changePassword } from "../controller/auth.controller.js";
 import { protectRoute } from "../middleware/auth.middleware.js";
 
 
@@ -11,6 +11,8 @@ authRouter.post("/login",login)
 authRouter.post("/logout",logout)
 
 authRouter.get("/check",protectRoute,checkAuth)
+authRouter.put("/update-profile",protectRoute,updateProfile)
+authRouter.put("/changePassword",protectRoute,changePassword)
 
 
 
