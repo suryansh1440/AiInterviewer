@@ -5,6 +5,7 @@ import { Outlet, useLocation } from 'react-router-dom'
 import { useThemeStore } from './store/useThemeStore'
 import Modal from './components/Modal'
 import { useModalStore } from './store/useModalStore'
+import {Toaster} from "react-hot-toast"
 
 
 const App = () => {
@@ -28,6 +29,7 @@ const App = () => {
           </div>
         </>
       )}
+      <Toaster/>
     </div>
   )
 }

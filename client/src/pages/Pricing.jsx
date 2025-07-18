@@ -97,7 +97,7 @@ const Pricing = () => {
       setOpenModal();
     }
     return;
-  }
+    }
 
   return (
     <div className="bg-base-200 min-h-screen">
@@ -115,47 +115,47 @@ const Pricing = () => {
       {/* Pricing Tiers */}
       <section className="pricing-tiers flex flex-col md:flex-row gap-8 justify-center items-stretch max-w-6xl mx-auto py-16 px-4">
         {pricingTiers.map((tier, idx) => (
-          <div
-            key={tier.title}
-            className={`tier relative flex-1 flex flex-col items-center bg-base-100/60 backdrop-blur-lg rounded-3xl shadow-xl p-8 border border-base-200 transition-transform duration-300 hover:scale-105 ${
-              tier.highlight ? "z-10 shadow-2xl border-primary" : ""
-            }`}
-          >
-            {tier.badge && (
-              <div className="popular-badge absolute -top-5 left-1/2 -translate-x-1/2 bg-gradient-to-r from-primary to-secondary text-primary-content text-xs font-bold px-4 py-1 rounded-full shadow-lg uppercase tracking-wider">
-                {tier.badge}
+            <div
+              key={tier.title}
+              className={`tier relative flex-1 flex flex-col items-center bg-base-100/60 backdrop-blur-lg rounded-3xl shadow-xl p-8 border border-base-200 transition-transform duration-300 hover:scale-105 ${
+                tier.highlight ? "z-10 shadow-2xl border-primary" : ""
+              }`}
+            >
+              {tier.badge && (
+                <div className="popular-badge absolute -top-5 left-1/2 -translate-x-1/2 bg-gradient-to-r from-primary to-secondary text-primary-content text-xs font-bold px-4 py-1 rounded-full shadow-lg uppercase tracking-wider">
+                  {tier.badge}
+                </div>
+              )}
+              <div className="tier-title text-2xl font-bold mb-2 text-primary">
+                {tier.title}
               </div>
-            )}
-            <div className="tier-title text-2xl font-bold mb-2 text-primary">
-              {tier.title}
-            </div>
-            <div className="tier-price text-4xl font-extrabold mb-1 text-base-content">
-              {tier.price}
-              <span className="text-base font-medium text-base-content/70">
-                {tier.priceNote}
-              </span>
-            </div>
-            <div className="tier-desc text-base-content/70 mb-4 text-center">
-              {tier.desc}
-            </div>
-            <ul className="mb-6 space-y-2 w-full">
-              {tier.features.map((f, i) => (
-                <li
-                  key={i}
-                  className="flex items-center gap-2 text-base-content"
-                >
-                  <span className="text-primary">✔</span> {f}
-                </li>
-              ))}
-            </ul>
+              <div className="tier-price text-4xl font-extrabold mb-1 text-base-content">
+                {tier.price}
+                <span className="text-base font-medium text-base-content/70">
+                  {tier.priceNote}
+                </span>
+              </div>
+              <div className="tier-desc text-base-content/70 mb-4 text-center">
+                {tier.desc}
+              </div>
+              <ul className="mb-6 space-y-2 w-full">
+                {tier.features.map((f, i) => (
+                  <li
+                    key={i}
+                    className="flex items-center gap-2 text-base-content"
+                  >
+                    <span className="text-primary">✔</span> {f}
+                  </li>
+                ))}
+              </ul>
             {tier.title === 'Free' && user?.freeInterview === 'claimed' ? (
-              <button
-                disabled
+                <button
+                  disabled
                 className="w-full text-center px-6 py-3 rounded-lg font-semibold shadow transition-colors duration-200 bg-gray-300 text-gray-500 cursor-not-allowed"
-              >
+                >
                 Claimed
-              </button>
-            ) : (
+                </button>
+              ) : (
               <button
                 onClick={() => handleSubmitPricing(tier.title)}
                 className={`w-full text-center px-6 py-3 rounded-lg font-semibold shadow transition-colors duration-200 ${
@@ -163,11 +163,11 @@ const Pricing = () => {
                     ? "bg-primary text-primary-content hover:bg-primary-focus"
                     : "bg-base-100 text-primary border border-primary hover:bg-base-200"
                 }`}
-              >
+                >
                 {tier.cta}
               </button>
-            )}
-          </div>
+              )}
+            </div>
         ))}
       </section>
 
@@ -247,13 +247,13 @@ const Pricing = () => {
             Sign up now and get your first 2 interviews free. No credit card required.
           </p>
           {user?.freeInterview === 'Claimed' ? (
-            <button
-              disabled
+              <button
+                disabled
               className="px-8 py-3 rounded-lg bg-gray-300 text-gray-500 font-semibold text-lg cursor-not-allowed"
-            >
+              >
               Claimed
-            </button>
-          ) : (
+              </button>
+            ) : (
             <a
               href="#"
               className="px-8 py-3 rounded-lg bg-base-100 text-primary font-semibold text-lg shadow hover:bg-base-200 transition-colors duration-200"
