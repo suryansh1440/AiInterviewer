@@ -11,6 +11,8 @@
     "start": "nodemon server.js"
   },
   "dependencies": {
+    "@google/generative-ai": "^0.24.1",
+    "axios": "^1.10.0",
     "bcryptjs": "^3.0.2",
     "cloudinary": "^2.7.0",
     "cookie-parser": "^1.4.7",
@@ -21,6 +23,7 @@
     "mongodb": "^6.17.0",
     "mongoose": "^8.16.3",
     "morgan": "^1.10.0",
-    "nodemon": "^3.1.10"
+    "nodemon": "^3.1.10",
+    "pdf-parse": "^1.1.1"
   }
 }
