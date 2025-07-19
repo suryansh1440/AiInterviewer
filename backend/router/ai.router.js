@@ -1,9 +1,10 @@
-import { Router } from "express";
-import { readPdf } from "../controller/ai.controller.js";
+import { Router } from 'express';
+import { getRandomTopic, readPdf } from '../controller/ai.controller.js';
 
-const aiRouter = Router();
+const router = Router();
 
-aiRouter.post("/readPdf",readPdf)
+router.post('/readPdf', readPdf);
+router.post('/getRandomTopic', getRandomTopic);
 
 
-export default aiRouter;
+export default router;

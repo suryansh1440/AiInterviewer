@@ -5,6 +5,7 @@ import { useAuthStore } from '../store/useAuthStore';
 import { useModalStore } from '../store/useModalStore';
 import toast from 'react-hot-toast';
 import UpdateProfileModal from '../components/UpdateProfileModal';
+import { useInterviewStore } from '../store/useInterviewStore';
 
 const categories = [
   { id: 'tech', label: 'Tech & Programming', icon: Computer },
@@ -33,15 +34,15 @@ const Start = () => {
   const { user } = useAuthStore();
   const { setOpenModal } = useModalStore();
   const navigate = useNavigate();
+  const {isGettingRandomTopic,isGettingResume,resumeData,randomTopic,getRandomTopic,readResume} = useInterviewStore()
 
-  // State for topic and subtopic
+
   const [topic, setTopic] = useState('');
   const [subtopic, setSubtopic] = useState('');
-  // Resume toggle and modal
   const [includeResume, setIncludeResume] = useState(!!(user && user.resume && user.resume.endsWith('.pdf')));
   const [showResumeModal, setShowResumeModal] = useState(false);
 
-  const handleStartClick = () => {
+  const handleStartClick = async () => {
     if (!user) {
       setOpenModal(); 
       return;
@@ -51,7 +52,8 @@ const Start = () => {
       navigate('/pricing')
       return;
     }
-    navigate('/interview/id=1234');
+    
+    navigate(`/interview/id=${user._id}`);
   };
 
   // Autofill topic/subtopic on category click
@@ -64,12 +66,30 @@ const Start = () => {
   };
 
   // Generate random topic/subtopic
-  const handleRandomTopic = () => {
-    const keys = Object.keys(categoryTopics);
-    const randomKey = keys[Math.floor(Math.random() * keys.length)];
-    const cat = categoryTopics[randomKey];
-    setTopic(cat.topic);
-    setSubtopic(cat.subtopic);
+  const handleRandomTopic = async () => {
+    if (!user.resume || user.resume === "") {
+      return;
+    }
+    // If topics already exist, use them
+    if (randomTopic && Array.isArray(randomTopic) && randomTopic.length > 0) {
+      const randomIdx = Math.floor(Math.random() * randomTopic.length);
+      const selected = randomTopic[randomIdx];
+      setTopic(selected.topic || '');
+      setSubtopic(selected.subtopic || '');
+    } else {
+      let resumeText = resumeData;
+      if (!resumeText) {
+        resumeText = await readResume(user.resume);
+      }
+      // Use the returned topics directly
+      const topics = await getRandomTopic(resumeText);
+      if (topics && Array.isArray(topics) && topics.length > 0) {
+        const randomIdx = Math.floor(Math.random() * topics.length);
+        const selected = topics[randomIdx];
+        setTopic(selected.topic || '');
+        setSubtopic(selected.subtopic || '');
+      }
+    }
   };
 
   // Handle resume toggle
@@ -183,13 +203,23 @@ const Start = () => {
           </div>
 
           {/* Random Topic Section */}
-          <button
-            className="w-full bg-gradient-to-r from-primary to-secondary text-primary-content py-3 px-6 rounded-lg font-medium hover:from-primary-focus hover:to-secondary-focus transition-all duration-200 flex items-center justify-center gap-2"
-            onClick={handleRandomTopic}
-          >
-            <Zap className="w-5 h-5" />
-            Generate Random Topic
-          </button>
+          {includeResume && (
+            <button
+              className="w-full bg-gradient-to-r from-primary to-secondary text-primary-content py-4 px-6 rounded-xl font-bold text-lg hover:from-primary-focus hover:to-secondary-focus transition-all duration-200 flex flex-col items-center justify-center gap-1 shadow-lg border-2 border-primary/30 disabled:opacity-60 disabled:cursor-not-allowed"
+              onClick={handleRandomTopic}
+              disabled={isGettingRandomTopic || isGettingResume}
+            >
+              <span className="flex items-center gap-2">
+                <Zap className="w-6 h-6 text-yellow-300 drop-shadow" />
+                {isGettingResume
+                  ? 'Getting Resume...'
+                  : isGettingRandomTopic
+                  ? 'Getting Random Topic...'
+                  : 'Generate Random Topic'}
+              </span>
+              <span className="text-xs text-primary-content/80 font-normal mt-1">based on your resume</span>
+            </button>
+          )}
 
           {/* ✅ Start Interview Button */}
           <button
