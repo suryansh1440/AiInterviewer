@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { UserRound, Award, BarChart2, BellDot, TrendingUp } from "lucide-react";
+import { UserRound, Award, BarChart2, BellDot, TrendingUp, FileText } from "lucide-react";
 import { useAuthStore } from "../store/useAuthStore";
 import { useInterviewHistoryStore } from "../store/useInterviewHistoryStore";
 import { formatDate } from "../lib/utils";
@@ -67,7 +67,21 @@ const Profile = () => {
             </div>
             <p className="text-base-content/70 text-base mb-1">{user?.email}</p>
             <p className="text-base-content/70 text-base mb-3">{user?.phone}</p>
-            <button className="bg-primary text-primary-content px-6 py-2 rounded-lg font-bold shadow hover:bg-primary-focus transition mb-2 text-base" onClick={() => setShowUpdateProfile(true)}>Edit Profile</button>
+            <div className="flex gap-3 w-full justify-center md:justify-start mb-3">
+              {user?.resume && user.resume.endsWith('.pdf') && (
+                <a
+                  href={user.resume}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="btn btn-outline btn-primary flex items-center gap-2 font-bold shadow-sm hover:bg-primary hover:text-primary-content transition px-6 py-2 text-base"
+                  style={{ minWidth: 160 }}
+                >
+                  <FileText className="w-5 h-5" />
+                  <span>View Resume</span>
+                </a>
+              )}
+              <button className="btn btn-outline btn-primary flex items-center gap-2 font-bold shadow-sm hover:bg-primary hover:text-primary-content transition px-6 py-2 text-base" onClick={() => setShowUpdateProfile(true)}>Edit Profile</button>
+            </div>
           </div>
           {/* Stats */}
           <div className="flex flex-col gap-2 items-center md:items-end">

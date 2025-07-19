@@ -36,6 +36,7 @@ export const signup = async (req, res) => {
       email: newUser.email,
       profilePic: newUser.profilePic,
       phone: newUser.phone,
+      resume:newUser.resume,
       role: newUser.role,
       freeInterview: newUser.freeInterview,
       level: newUser.level,
@@ -79,6 +80,7 @@ export const login = async (req, res) => {
       email: user.email,
       profilePic: user.profilePic,
       phone: user.phone,
+      resume: user.resume,
       role: user.role,
       freeInterview: user.freeInterview,
       level: user.level,
@@ -112,7 +114,7 @@ export const logout = async (req, res) => {
 export const updateProfile = async (req, res) => {
   try {
     const userId = req.user._id;
-    let { name, phone, profilePic } = req.body;
+    let { name, phone, profilePic, resume } = req.body;
     const user = await User.findById(userId);
     if (!user) {
       return res.status(404).json({ message: "User not found" });
@@ -127,9 +129,31 @@ export const updateProfile = async (req, res) => {
       profilePicUrl = profilePic; // already a URL
     }
 
+    // Handle resume upload if it's a new file (base64 string)
+    let resumeUrl = user.resume;
+    if (resume && resume !== user.resume && resume.startsWith("data:")) {
+      // PDF validation: Only allow PDF files
+      if (!resume.startsWith("data:application/pdf")) {
+        return res.status(400).json({ message: "Resume must be a PDF file." });
+      }
+      // Set public_id to always end with .pdf
+      const publicId = `resumes/${user._id}_${Date.now()}.pdf`;
+      const uploadResponse = await cloudinary.uploader.upload(resume, {
+        resource_type: "raw",
+        public_id: publicId,
+        overwrite: true,
+        use_filename: false,
+        unique_filename: false,
+      });
+      resumeUrl = uploadResponse.secure_url;
+    } else if (resume && !resume.startsWith("data:")) {
+      resumeUrl = resume; // already a URL or file name
+    }
+
     user.name = name || user.name;
     user.phone = phone || user.phone;
     user.profilePic = profilePicUrl;
+    user.resume = resumeUrl;
     await user.save();
 
     return res.status(200).json({
@@ -149,6 +173,7 @@ export const updateProfile = async (req, res) => {
       interviewLeftExpire: user.interviewLeftExpire,
       createdAt: user.createdAt,
       updatedAt: user.updatedAt,
+      resume: user.resume,
     });
   } catch (error) {
     console.log("Error in updateProfile controller", error.message);
