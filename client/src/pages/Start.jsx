@@ -3,6 +3,7 @@ import { Mic, Zap, Computer, Building, DollarSign, Settings, Heart, Scale, BarCh
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/useAuthStore';
 import { useModalStore } from '../store/useModalStore';
+import toast from 'react-hot-toast';
 
 const categories = [
   { id: 'tech', label: 'Tech & Programming', icon: Computer },
@@ -23,6 +24,11 @@ const Start = () => {
   const handleStartClick = () => {
     if (!user) {
       setOpenModal(); 
+      return;
+    }
+    if(user.interviewLeft==0){
+      toast.error("You don't have credits")
+      navigate('/pricing')
       return;
     }
     navigate('/interview/id=1234');

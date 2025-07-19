@@ -24,6 +24,10 @@ const userSchema = new mongoose.Schema(
       type: String,
       default: "",
     },
+    resume:{
+      type:String,
+      default:"",
+    },
     role: {
       type: String,
       default: "USER",

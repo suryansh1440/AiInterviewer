@@ -1,6 +1,6 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useEffect } from 'react';
 import { useUsersStore } from '../store/useUsersStore';
-import { Sparkles, TrendingUp, Trophy, Ban, Star, Crown, Users, UserCheck, UserPlus } from 'lucide-react';
+import { Sparkles, TrendingUp, Trophy, Ban, Star, Crown, Users, UserCheck, UserPlus, Loader } from 'lucide-react';
 import {
   PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, AreaChart, Area, Legend
 } from 'recharts';
@@ -19,8 +19,13 @@ const SUB_COLORS = ['#d1d5db', '#3b82f6', '#facc15'];
 const LEVEL_COLORS = ['#38bdf8', '#fbbf24', '#22c55e'];
 
 const AdminPanel = () => {
-  const { AllUsers, deleteUser } = useUsersStore();
+  const { AllUsers, getAllUsers, isGettingAllUsers, deleteUser } = useUsersStore();
   const today = new Date().toISOString().slice(0, 10);
+
+  useEffect(() => {
+    getAllUsers();
+    // eslint-disable-next-line
+  }, []);
 
   // 1. User Growth Over Time (by join date)
   const userGrowthData = useMemo(() => {
@@ -51,15 +56,23 @@ const AdminPanel = () => {
   // 3. Level Distribution
   const levelDist = useMemo(() => {
     return [
-      { name: 'Beginner', value: AllUsers.filter(u => u.level === 1).length },
-      { name: 'Intermediate', value: AllUsers.filter(u => u.level === 2).length },
-      { name: 'Advanced', value: AllUsers.filter(u => u.level === 3).length },
+      { name: 'Beginner', value: AllUsers.filter(u => u.stats.level === 1).length },
+      { name: 'Intermediate', value: AllUsers.filter(u => u.stats.level === 2).length },
+      { name: 'Advanced', value: AllUsers.filter(u => u.stats.level === 3).length },
     ];
   }, [AllUsers]);
 
   const totalUsers = AllUsers.length;
   const proUsers = AllUsers.filter(u => u.subscription === 'pro').length;
   const todayLoginUsers = AllUsers.filter(u => u.createdAt.slice(0, 10) === today).length;
+
+
+  if(isGettingAllUsers) return (
+    <div className='flex items-center justify-center h-screen'>
+    <Loader className='size-10 animate-spin' />
+
+  </div>
+  )
 
   return (
     <div className="p-6 bg-base-100 min-h-screen">
@@ -158,14 +171,14 @@ const AdminPanel = () => {
             {AllUsers.map(user => (
               <tr key={user._id} className="hover">
                 <td>
-                  <img src={user.profilePic} alt={user.name} className="w-10 h-10 rounded-full object-cover border border-base-300" />
+                  <img src={user.profilePic|| "/avatar.png"} alt={user.name} className="w-10 h-10 rounded-full object-cover border border-base-300" />
                 </td>
                 <td>{user.name}</td>
                 <td>{user.email}</td>
                 <td>
                   <span className="badge badge-outline flex items-center gap-1">
-                    {levelMap[user.level]?.icon}
-                    {levelMap[user.level]?.label || user.level}
+                    {levelMap[user.stats?.level ?? user.level]?.icon}
+                    {levelMap[user.stats?.level ?? user.level]?.label || user.stats?.level || user.level}
                   </span>
                 </td>
                 <td>
