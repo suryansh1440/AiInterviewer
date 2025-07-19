@@ -4,6 +4,7 @@ import { connectDB } from "./lib/db.js"
 import cookieParser from "cookie-parser"
 import cors from "cors"
 import authRouter from './router/auth.router.js';
+import aiRouter from './router/ai.router.js';
 
 
 dotenv.config()
@@ -19,7 +20,13 @@ app.use(cors({
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
+
+
 app.use("/api/auth",authRouter)
+app.use("/api/ai",aiRouter)
+
+
+
 
 app.get("/",(req,res)=>{
     res.send("Hello World");

@@ -10,6 +10,7 @@ import { useAuthStore } from './store/useAuthStore'
 import { Loader } from 'lucide-react'
 
 
+
 const App = () => {
   const { theme } = useThemeStore();
   const { isOpenModal } = useModalStore();
