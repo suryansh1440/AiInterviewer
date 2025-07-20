@@ -1,25 +1,88 @@
 import React, { useEffect, useState } from 'react'
 import { useAuthStore } from '../store/useAuthStore';
-import { PhoneCall, PhoneOff } from 'lucide-react';
-import { useInterviewStore } from '../store/useInterviewStore';
+import { PhoneOff } from 'lucide-react';
+import { vapi } from '../lib/vapi.sdk';
+import { useNavigate } from 'react-router-dom';
 
 const Agent = () => {
-    const [isSpeaking, setIsSpeaking] = useState(true);
+    const [isSpeaking, setIsSpeaking] = useState(false);
     const { user } = useAuthStore();
-    const [callStatus, setCallStatus] = useState("Active");
-    const { messages } = useInterviewStore();
-    const [lastMessage, setLastMessage] = useState(messages[messages.length - 1]);
+    const [callStatus, setCallStatus] = useState("Inactive");
+    const [messages,setMessages] = useState([]);
     const [fadeIn, setFadeIn] = useState(false);
+    const navigate = useNavigate();
 
-    useEffect(() => {
-        setLastMessage(messages[messages.length - 1]);
-    }, [messages]);
+    const lastMessage = messages[messages.length - 1];
 
     useEffect(() => {
         setFadeIn(false);
         const timeout = setTimeout(() => setFadeIn(true), 10);
         return () => clearTimeout(timeout);
     }, [lastMessage]);
+
+    useEffect(() => {
+        const onCallStart = () => {
+            setCallStatus("Active");
+        };
+
+        const onCallEnd = () => {
+            setCallStatus("Finished");
+        };
+
+        const onMessage = (message) => {
+            if (message.type === 'transcript' && message.transcriptType === 'final') {
+                const newMessage = {
+                    role: message.role,
+                    content: message.transcript
+                };
+                setMessages(prev => [...prev, newMessage]);
+            }
+        };
+
+        const onSpeechStart = ()=>{
+            setIsSpeaking(true);
+        }
+
+        const onSpeechEnd = ()=>{
+            setIsSpeaking(false);
+        }
+
+        const onError=(error)=>{
+            console.log("error",error)
+        }
+
+
+        vapi.on('call-start',onCallStart);
+        vapi.on('call-end',onCallEnd);
+        vapi.on('message',onMessage);
+        vapi.on('speech-start',onSpeechStart);
+        vapi.on('speech-end',onSpeechEnd);
+        vapi.on('error',onError);
+
+        return ()=>{
+            vapi.off('call-start',onCallStart);
+            vapi.off('call-end',onCallEnd);
+            vapi.off('message',onMessage);
+            vapi.off('speech-start',onSpeechStart);
+            vapi.off('speech-end',onSpeechEnd);
+            vapi.off('error',onError);
+        }
+    }, []);
+
+    useEffect(()=>{
+        if(callStatus === "Finished"){
+            navigate('/');
+        }
+    },[messages,callStatus,user._id]);
+
+
+    const handleDisconnect = async ()=>{
+        setCallStatus("Finished");
+            await vapi.stop();
+    }
+
+
+
 
     return (
         <>
@@ -57,10 +120,10 @@ const Agent = () => {
                 <div className="w-full flex justify-center my-4">
                     <div className="bg-gradient-to-bl from-gray-900 from-10% via-black via-50% to-black to-100% rounded-xl shadow-inner p-4 border border-base-300 max-w-2xl w-full flex justify-center">
                         <p
-                            key={lastMessage}
+                            key={lastMessage?.content}
                             className={`text-base font-medium text-center text-base-content break-words transition-opacity duration-500 ${fadeIn ? 'opacity-100' : 'opacity-0'}`}
                         >
-                            {lastMessage}
+                            {lastMessage?.content}
                         </p>
                     </div>
                 </div>
@@ -68,21 +131,13 @@ const Agent = () => {
 
             {/* call buttons */}
             <div className='w-full flex justify-center'>
-                {callStatus !== "Active" ? (
+                {callStatus === "Active" && (
                     <button
-                        className="btn btn-success flex items-center gap-2 px-8 py-3 rounded-full text-lg font-semibold shadow-md hover:scale-105 transition-transform duration-150 animate-pulse"
-                    >
-                        <PhoneCall className="w-5 h-5" />
-                        <span>
-                            {callStatus === 'Inactive' || callStatus === 'Finished' ? "Call" : "..."}
-                        </span>
-                    </button>
-                ) : (
-                    <button
+                        onClick={handleDisconnect}
                         className="btn btn-error flex items-center gap-2 px-8 py-3 rounded-full text-lg font-semibold shadow-md hover:scale-105 transition-transform duration-150"
                     >
                         <PhoneOff className="w-5 h-5" />
-                        <span>End</span>
+                        <span>End Interview</span>
                     </button>
                 )}
             </div>

@@ -34,26 +34,43 @@ const Start = () => {
   const { user } = useAuthStore();
   const { setOpenModal } = useModalStore();
   const navigate = useNavigate();
-  const {isGettingRandomTopic,isGettingResume,resumeData,randomTopic,getRandomTopic,readResume} = useInterviewStore()
+  const {isGettingRandomTopic,isGettingResume,resumeData,randomTopic,getRandomTopic,readResume,setInterviewData,generateQuestion,isGeneratingQuestion,handleCall,isStartingInterview} = useInterviewStore()
 
 
   const [topic, setTopic] = useState('');
-  const [subtopic, setSubtopic] = useState('');
+  const [subTopic, setSubTopic] = useState('');
   const [includeResume, setIncludeResume] = useState(!!(user && user.resume && user.resume.endsWith('.pdf')));
   const [showResumeModal, setShowResumeModal] = useState(false);
+  const [numQuestions, setNumQuestions] = useState(2);
+  const [difficulty, setDifficulty] = useState('easy');
 
   const handleStartClick = async () => {
     if (!user) {
       setOpenModal(); 
       return;
     }
-    if(user.interviewLeft==0){
+    if(user.interviewLeft==0 && user.subscription!=='pro'){
       toast.error("You don't have credits")
       navigate('/pricing')
       return;
     }
-    
-    navigate(`/interview/id=${user._id}`);
+
+    const interviewData = {
+      topic,
+      subTopic,
+      level:difficulty,
+      amount:numQuestions
+    }
+    const interview = await generateQuestion(interviewData)
+    setInterviewData(interview)
+    console.log(interview)
+
+    // start vapi 
+
+    // const call = await handleCall(user)
+    // if(call){
+      navigate(`/interview/id=${interview._id}`);
+    // }
   };
 
   // Autofill topic/subtopic on category click
@@ -61,7 +78,7 @@ const Start = () => {
     const cat = categoryTopics[categoryId];
     if (cat) {
       setTopic(cat.topic);
-      setSubtopic(cat.subtopic);
+      setSubTopic(cat.subtopic);
     }
   };
 
@@ -75,7 +92,7 @@ const Start = () => {
       const randomIdx = Math.floor(Math.random() * randomTopic.length);
       const selected = randomTopic[randomIdx];
       setTopic(selected.topic || '');
-      setSubtopic(selected.subtopic || '');
+      setSubTopic(selected.subtopic || '');
     } else {
       let resumeText = resumeData;
       if (!resumeText) {
@@ -87,7 +104,7 @@ const Start = () => {
         const randomIdx = Math.floor(Math.random() * topics.length);
         const selected = topics[randomIdx];
         setTopic(selected.topic || '');
-        setSubtopic(selected.subtopic || '');
+        setSubTopic(selected.subtopic || '');
       }
     }
   };
@@ -197,9 +214,39 @@ const Start = () => {
               type="text"
               placeholder="e.g., Computer Networks, DBMS, Algorithms..."
               className="w-full px-4 py-4 border border-base-300 rounded-xl focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 text-base-content bg-base-100"
-              value={subtopic}
-              onChange={e => setSubtopic(e.target.value)}
+              value={subTopic}
+              onChange={e => setSubTopic(e.target.value)}
             />
+          </div>
+
+          {/* Number of Questions and Difficulty Selectors (side by side, compact) */}
+          <div className="flex flex-row gap-4 items-center justify-center bg-base-200 rounded-lg shadow p-3 my-2">
+            <div className="flex flex-col items-center">
+              <label htmlFor="numQuestions" className="text-sm font-semibold text-base-content mb-1">No. of Questions</label>
+              <select
+                id="numQuestions"
+                value={numQuestions}
+                onChange={e => setNumQuestions(Number(e.target.value))}
+                className="px-3 py-1 border border-primary rounded-md text-base-content bg-base-100 text-base font-medium focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent/20 transition-all duration-150 w-20 shadow-sm"
+              >
+                {[2,3,4,5].map(n => (
+                  <option key={n} value={n}>{n}</option>
+                ))}
+              </select>
+            </div>
+            <div className="flex flex-col items-center">
+              <label htmlFor="difficulty" className="text-sm font-semibold text-base-content mb-1">Difficulty</label>
+              <select
+                id="difficulty"
+                value={difficulty}
+                onChange={e => setDifficulty(e.target.value)}
+                className="px-3 py-1 border border-primary rounded-md text-base-content bg-base-100 text-base font-medium focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent/20 transition-all duration-150 w-24 shadow-sm"
+              >
+                <option value="easy">Easy</option>
+                <option value="medium">Medium</option>
+                <option value="hard">Hard</option>
+              </select>
+            </div>
           </div>
 
           {/* Random Topic Section */}
@@ -225,8 +272,13 @@ const Start = () => {
           <button
             onClick={handleStartClick}
             className="w-full bg-gradient-to-r from-accent to-primary text-primary-content py-4 px-8 rounded-xl font-semibold text-lg hover:from-accent-focus hover:to-primary-focus transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-1"
+            disabled={isGeneratingQuestion || isStartingInterview}
           >
-            Start Interview
+            {isGeneratingQuestion
+              ? 'Generating Questions...'
+              : isStartingInterview
+                ? 'Starting Interview...'
+                : 'Start Interview'}
           </button>
         </div>
       </section>

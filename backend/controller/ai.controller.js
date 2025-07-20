@@ -2,8 +2,7 @@ import axios from 'axios';
 import pdfParse from 'pdf-parse';
 import {generateText} from "ai"
 import {google} from "@ai-sdk/google"
-import { GoogleGenerativeAI } from "@google/generative-ai";
-import InterviewQuestion from '../modals/interviewQuestion.modal.js';
+import Interview from '../modals/interview.modal.js';
 
 export const readPdf = async (req, res) => {
   const { url } = req.body;
@@ -56,33 +55,24 @@ export const generateQuestion = async (req,res)=>{
       return res.status(400).json({message:"Please enter all the inputs"})
     }
 
-    const prompt = `Given the topic ${topic} and subtopic ${subTopic} and the difficulty level ${level}, generate ${amount} interview questions. Each question should be clear concise and suitable for an AI voice agent to read aloud Do not use any special characters in the questions only letters numbers and spaces Return only a valid JSON array of strings with no explanations or extra text Example output:\n[\n  "What is a data structure",\n  "Explain the concept of a linked list",\n  "How do you implement a stack in code"\n]\nNow generate the questions.`;
-
-    // Explicitly pass the API key to the google() model
-    
-    
+    const prompt = `Given the topic ${topic} and subtopic ${subTopic} and the difficulty level ${level}, generate ${amount} interview questions. Each question should be clear concise and suitable for an AI voice agent to read aloud Do not use any special characters in the questions only letters numbers and spaces Return only a valid JSON array of strings with no explanations or extra text Example output:\n[\n  "What is a data structure",\n  "Explain the concept of a linked list",\n  "How do you implement a stack in code"\n]\nNow generate the questions.`;    
 
     const {text} = await generateText({
       model : google('gemini-2.0-flash-001'),
       prompt
     })
 
-    // Clean the response text (remove code block markers if present)
     const cleanText = text.replace(/```json\n?|\n?```/g, '').trim();
     const questions = JSON.parse(cleanText);
 
-    // Save the interview as a single document
-    await InterviewQuestion.create({
+    const interview = await Interview.create({
       userId,
       topic,
       subTopic,
       level,
       questions,
-      finalized: true
-    });
-
-    res.status(200).json({message:"questions generated successfully"});
-
+    })
+    res.status(200).json({interview});
   }catch(error){
     console.log("error in getQuestion controller",error);
     return res.status(500).json({message:"Internal server Error"})
