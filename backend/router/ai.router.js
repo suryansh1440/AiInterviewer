@@ -1,10 +1,12 @@
 import { Router } from 'express';
-import { getRandomTopic, readPdf } from '../controller/ai.controller.js';
+import { generateQuestion, getRandomTopic, readPdf } from '../controller/ai.controller.js';
+import { protectRoute } from '../middleware/auth.middleware.js';
 
 const router = Router();
 
 router.post('/readPdf', readPdf);
-router.post('/getRandomTopic', getRandomTopic);
+router.post('/getRandomTopic',protectRoute,getRandomTopic);
+router.post('/generateQuestion',protectRoute ,generateQuestion)
 
 
 export default router;

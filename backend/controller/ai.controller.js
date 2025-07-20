@@ -1,7 +1,9 @@
 import axios from 'axios';
 import pdfParse from 'pdf-parse';
-// Add Gemini SDK import
+import {generateText} from "ai"
+import {google} from "@ai-sdk/google"
 import { GoogleGenerativeAI } from "@google/generative-ai";
+import InterviewQuestion from '../modals/interviewQuestion.modal.js';
 
 export const readPdf = async (req, res) => {
   const { url } = req.body;
@@ -28,21 +30,61 @@ export const getRandomTopic = async (req, res) => {
 
     const prompt = `Given the following resume text, generate 5 random, relevant, and diverse interview topics. For each topic, also generate a relevant subtopic. Return only a valid JSON array of 5 objects, each with the following structure: { "topic": "<topic>", "subtopic": "<subtopic>" }. Do not include any explanations, introductions, or extra text—only the JSON array.\n\nExample output:\n[\n  { "topic": "Machine Learning", "subtopic": "Supervised Learning" },\n  { "topic": "Web Development", "subtopic": "React.js" },\n  { "topic": "Cloud Computing", "subtopic": "AWS Services" },\n  { "topic": "Data Structures", "subtopic": "Trees" },\n  { "topic": "Cybersecurity", "subtopic": "Network Security" }\n]\n\nResume:\n${resumeText}`;
 
-    const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-
-    // Generate content
-    const result = await model.generateContent(prompt);
-    const response = await result.response;
-    const text = response.text();
+    // Use the same model initialization as generateQuestio
+    const { text } = await generateText({
+       model:google('gemini-2.0-flash-001'), 
+       prompt 
+      });
 
     // Clean the response text
     const cleanText = text.replace(/```json\n?|\n?```/g, '').trim();
-
     const topics = JSON.parse(cleanText);
     res.status(200).json({ topics });
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
+
+
+export const generateQuestion = async (req,res)=>{
+  const {topic,subTopic,level,amount} = req.body;
+  const userId = req.user._id;
+  try{
+    if(!topic || !subTopic || !level || !amount) {
+      return res.status(400).json({message:"Please enter all the inputs"})
+    }
+
+    const prompt = `Given the topic ${topic} and subtopic ${subTopic} and the difficulty level ${level}, generate ${amount} interview questions. Each question should be clear concise and suitable for an AI voice agent to read aloud Do not use any special characters in the questions only letters numbers and spaces Return only a valid JSON array of strings with no explanations or extra text Example output:\n[\n  "What is a data structure",\n  "Explain the concept of a linked list",\n  "How do you implement a stack in code"\n]\nNow generate the questions.`;
+
+    // Explicitly pass the API key to the google() model
+    
+    
+
+    const {text} = await generateText({
+      model : google('gemini-2.0-flash-001'),
+      prompt
+    })
+
+    // Clean the response text (remove code block markers if present)
+    const cleanText = text.replace(/```json\n?|\n?```/g, '').trim();
+    const questions = JSON.parse(cleanText);
+
+    // Save the interview as a single document
+    await InterviewQuestion.create({
+      userId,
+      topic,
+      subTopic,
+      level,
+      questions,
+      finalized: true
+    });
+
+    res.status(200).json({message:"questions generated successfully"});
+
+  }catch(error){
+    console.log("error in getQuestion controller",error);
+    return res.status(500).json({message:"Internal server Error"})
   }
 };
