@@ -47,7 +47,7 @@ const userSchema = new mongoose.Schema(
     subscription: {
       type: String,
       enum: {
-        values: ["starter", "pro"],
+        values: ["none","starter", "pro"],
         message: "Please provide valid subscription type",
       },
       default: "none",

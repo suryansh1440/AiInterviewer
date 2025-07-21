@@ -79,7 +79,7 @@ export default function UpdateProfileModal({ open, onClose }) {
       {/* Backdrop */}
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity duration-300" onClick={onClose} />
       {/* Modal */}
-      <div className="relative bg-base-100 rounded-3xl shadow-2xl p-10 w-full max-w-lg flex flex-col items-center border border-primary/20 z-10 animate-fade-in">
+      <div className="relative bg-base-100 rounded-2xl shadow-xl p-6 w-full max-w-md flex flex-col items-center border border-primary/20 z-10 animate-fade-in">
         <button
           className="absolute top-4 right-4 text-2xl text-base-content/60 hover:text-error bg-base-200 rounded-full p-2 shadow-md transition"
           onClick={onClose}
@@ -87,14 +87,14 @@ export default function UpdateProfileModal({ open, onClose }) {
         >
           <X className="w-6 h-6" />
         </button>
-        <h2 className="text-3xl font-bold mb-8 text-primary text-center tracking-tight">Update Profile</h2>
-        <form onSubmit={handleSubmit} className="flex flex-col gap-6 w-full max-w-md">
+        <h2 className="text-xl font-bold mb-4 text-primary text-center tracking-tight">Update Profile</h2>
+        <form onSubmit={handleSubmit} className="flex flex-col gap-4 w-full max-w-md">
           <div className="flex flex-col items-center gap-2">
-            <div className="relative w-28 h-28 mb-2">
+            <div className="relative w-20 h-20 mb-2">
               <img
                 src={preview || "/avatar.png"}
                 alt="Profile Preview"
-                className="w-28 h-28 rounded-full object-cover border-4 border-primary shadow"
+                className="w-20 h-20 rounded-full object-cover border-2 border-primary shadow"
               />
               <button
                 type="button"
@@ -102,7 +102,7 @@ export default function UpdateProfileModal({ open, onClose }) {
                 onClick={() => fileInputRef.current.click()}
                 aria-label="Upload profile picture"
               >
-                <ImageIcon className="w-5 h-5" />
+                <ImageIcon className="w-4 h-4" />
               </button>
               <input
                 type="file"
