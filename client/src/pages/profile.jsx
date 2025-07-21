@@ -194,7 +194,9 @@ const Profile = () => {
         {/* Action Buttons */}
         <div className="flex flex-col md:flex-row gap-4 justify-end mt-6">
           <button className="bg-base-200 text-base-content px-6 py-2 rounded hover:bg-base-300 transition font-bold text-base" onClick={() => setShowUpdateProfile(true)}>Edit Profile</button>
-          <button className="bg-base-200 text-base-content px-6 py-2 rounded hover:bg-base-300 transition font-bold text-base" onClick={() => setShowChangePass(true)}>Change Password</button>
+          {user?.authProvider === 'local' && (
+            <button className="bg-base-200 text-base-content px-6 py-2 rounded hover:bg-base-300 transition font-bold text-base" onClick={() => setShowChangePass(true)}>Change Password</button>
+          )}
           <button className="bg-error text-error-content px-6 py-2 rounded hover:bg-error/80 transition font-bold text-base" onClick={() => setShowDeleteAccount(true)}>Delete Account</button>
         </div>
       </div>

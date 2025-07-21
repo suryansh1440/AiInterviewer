@@ -16,9 +16,13 @@ const userSchema = new mongoose.Schema(
     },
     password: {
       type: String,
-      required: true,
       minlength: 6,
       select:false,
+    },
+    authProvider: {
+      type: String,
+      enum: ['local', 'google','github'],
+      default: 'local',
     },
     profilePic: {
       type: String,

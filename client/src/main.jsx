@@ -1,13 +1,13 @@
-import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import './index.css'
 import { RouterProvider } from 'react-router-dom'
 import router from './route/index.jsx'
-import { pdfjs } from 'react-pdf';
+import { GoogleOAuthProvider } from '@react-oauth/google';
 
-// Set the workerSrc globally for react-pdf
-pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.js`;
+const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID
 
 createRoot(document.getElementById('root')).render(
-  <RouterProvider router={router}/>
+  <GoogleOAuthProvider clientId={clientId}>
+    <RouterProvider router={router}/>
+  </GoogleOAuthProvider>
 )

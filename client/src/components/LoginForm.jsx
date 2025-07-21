@@ -4,10 +4,12 @@ import { useModalStore } from "../store/useModalStore";
 import { useAuthStore } from "../store/useAuthStore";
 import { useState } from "react";
 import { Eye, EyeOff } from "lucide-react";
+import { GoogleLogin } from '@react-oauth/google';
+import toast from "react-hot-toast";
 
 export default function LoginForm({ handleRotation }) {
   const { setCloseModal } = useModalStore();
-  const { login, isLoggingIn } = useAuthStore();
+  const { login, isLoggingIn, googleLogin } = useAuthStore();
   const [data, setData] = useState({ email: "", password: "" });
   const [showPassword, setShowPassword] = useState(false);
 
@@ -72,6 +74,22 @@ export default function LoginForm({ handleRotation }) {
         <button type="submit" className="btn btn-primary w-full" disabled={isLoggingIn}>
           {isLoggingIn ? "Logging in..." : "Login"}
         </button>
+        <div className="flex items-center my-2">
+          <div className="flex-grow border-t border-base-200"></div>
+          <span className="mx-2 text-base-content/60">or</span>
+          <div className="flex-grow border-t border-base-200"></div>
+        </div>
+        <GoogleLogin
+          onSuccess={async credentialResponse => {
+            if (credentialResponse.credential) {
+              await googleLogin(credentialResponse.credential);
+              setCloseModal();
+            }
+          }}
+          onError={() => {
+            toast.error('Google login failed');
+          }}
+        />
       </div>
       <p className="col-span-2 row-start-4 row-end-5 flex flex-col items-center self-end text-base-content">
         Don't have an account?{" "}
