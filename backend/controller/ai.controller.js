@@ -1,8 +1,9 @@
 import axios from 'axios';
 import pdfParse from 'pdf-parse';
-import {generateObject, generateText} from "ai"
+import {generateText} from "ai"
 import {google} from "@ai-sdk/google"
 import Interview from '../modals/interview.modal.js';
+import User from '../modals/user.modal.js';
 
 export const readPdf = async (req, res) => {
   const { url } = req.body;
@@ -70,6 +71,14 @@ export const generateQuestion = async (req,res)=>{
       level,
       questions,
     })
+
+    // Increment user's totalInterviews
+    const user = await User.findById(userId);
+    if (user) {
+      user.stats.totalInterviews = (user.stats.totalInterviews || 0) + 1;
+      await user.save();
+    }
+
     res.status(200).json({interview});
   }catch(error){
     console.log("error in getQuestion controller",error);
@@ -110,6 +119,27 @@ export const createFeedback = async (req,res)=>{
       { feedback, status: 'completed' },
       { new: true }
     );
+
+    // Update user's stats.averageScore based on feedback
+    const user = await User.findById(userId);
+    if (user && feedback && typeof feedback.totalScore === 'number') {
+      // Calculate new averageScore
+      const prevTotal = user.stats.averageScore && user.stats.totalInterviews > 1
+        ? parseFloat(user.stats.averageScore) * (user.stats.totalInterviews - 1)
+        : 0;
+      const newTotal = prevTotal + feedback.totalScore;
+      const avg = newTotal / user.stats.totalInterviews;
+      user.stats.averageScore = avg.toFixed(2);
+      // Update level progress
+      user.stats.levelProgress = (user.stats.levelProgress || 0) + 20;
+      if (user.stats.levelProgress >= 100) {
+        if (user.stats.level < 3) {
+          user.stats.level += 1;
+        }
+        user.stats.levelProgress = 0;
+      }
+      await user.save();
+    }
 
     res.status(200).json({ interview: updatedInterview });
   }catch(error){

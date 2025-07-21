@@ -61,8 +61,8 @@ export const login = async (req, res) => {
     if (!email || !password) {
       return res.status(400).json({ message: "All fields are required" });
     }
-    const user = await User.findOne({ email });
-    if (!user) {
+    const user = await User.findOne({ email }).select('+password');
+    if (!user || !user.password) {
       return res.status(400).json({ message: "Invalid Credentials" });
     }
     const isCorrectPassword = await bcrypt.compare(password, user.password);
@@ -205,7 +205,7 @@ export const changePassword = async (req, res) => {
         .status(400)
         .json({ message: "New password must be at least 6 characters" });
     }
-    const user = await User.findById(userId);
+    const user = await User.findById(userId).select('+password');
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
@@ -230,7 +230,7 @@ export const deleteAccount = async (req, res) => {
     if (!password) {
       return res.status(400).json({ message: "Password is required" });
     }
-    const user = await User.findById(userId);
+    const user = await User.findById(userId).select('+password');
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
