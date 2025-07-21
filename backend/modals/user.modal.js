@@ -8,8 +8,6 @@ const userSchema = new mongoose.Schema(
       required: true,
       unique: true,
       validate: [validator.isEmail, "Please provide a valid email address"],
-      trim: true,
-      lowercase: true,
     },
     name: {
       type: String,
@@ -20,7 +18,7 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: true,
       minlength: 6,
-      select: false,
+      select:false,
     },
     profilePic: {
       type: String,
@@ -36,24 +34,20 @@ const userSchema = new mongoose.Schema(
     },
     role: {
       type: String,
-      enum: {
-        values: ["USER", "ADMIN"],
-        message: "Please provide valid user role",
-      },
       default: "USER",
     },
     freeInterview: {
       type: String,
       enum: {
-        values: ["Claimed", "Not Claimed"],
+        values: ["claimed", "not_claimed"],
         message: "Free interview is either claimed or not claimed",
       },
-      default: "Not Claimed",
+      default: "not_claimed",
     },
     subscription: {
       type: String,
       enum: {
-        values: ["Free", "Starter", "Pro"],
+        values: ["starter", "pro"],
         message: "Please provide valid subscription type",
       },
       default: "none",
@@ -67,10 +61,6 @@ const userSchema = new mongoose.Schema(
     lastLogin: {
       type: Date,
       default: null,
-    },
-    interviewStartDates: {
-      type: [Date],
-      default: [],
     },
     interviewLeft: {
       type: Number,

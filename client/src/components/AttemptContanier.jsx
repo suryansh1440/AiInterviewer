@@ -16,7 +16,7 @@ const AttemptContanier = () => {
   return (
     <main className="flex-1 px-0 py-12 bg-gradient-to-br from-base-100 via-primary/5 to-secondary/10 flex flex-col items-center w-full overflow-y-auto max-h-[90vh] scrollbar-thin scrollbar-thumb-primary/30 scrollbar-track-base-200">
       {/* Interview Summary (full width, no box) */}
-      <section className="w-full max-w-6xl mx-auto mb-12 flex flex-col md:flex-row md:items-center md:justify-between gap-12 border-b-2 border-base-300 pb-10 px-10">
+      <section className="w-full h-[90vh] max-w-6xl mx-auto mb-12 flex flex-col md:flex-row md:items-center md:justify-between gap-12 border-b-2 border-base-300 pb-10 px-10">
         <div className="flex-1 flex flex-col gap-3">
           <div className="flex items-center gap-3 mb-2">
             <Star className="w-7 h-7 text-accent" />

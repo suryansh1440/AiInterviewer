@@ -69,7 +69,7 @@ const Home = () => {
           </p>
           {user ? (
             <Link
-              to={user.interviewLeft==0 ? "/pricing" : "/start"}
+              to={user.interviewLeft==0 && user.subscription!=='pro' ? "/pricing" : "/start"}
               className="cta-btn mt-2 px-8 py-3 rounded-lg bg-primary text-primary-content text-lg font-semibold shadow-lg hover:bg-primary-focus transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary/40"
             >
               Start Free Interview

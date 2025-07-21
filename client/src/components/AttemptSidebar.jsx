@@ -1,6 +1,5 @@
 import React from 'react';
-import { useAuthStore } from '../store/useAuthStore';
-import { Calendar, CheckCircle, XCircle, User } from 'lucide-react';
+import { Calendar, CheckCircle, XCircle } from 'lucide-react';
 import { useInterviewStore } from '../store/useInterviewStore';
 
 const statusColor = {
@@ -10,7 +9,6 @@ const statusColor = {
 
 const AttemptSidebar = () => {
   const { interviews, showInterview, setShowInterview } = useInterviewStore();
-  const { user } = useAuthStore();
 
   return (
     <aside className="w-72 max-h-[90vh] bg-base-200 border-r border-base-300 p-4 flex flex-col gap-4">

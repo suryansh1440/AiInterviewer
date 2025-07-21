@@ -21,7 +21,7 @@ export default function LoginForm({ handleRotation }) {
   };
 
   return (
-    <form className={clsx(styles.container, "bg-base-100 text-base-content")} onSubmit={handleLogin}>
+    <form className={clsx(styles.container, "bg-base-100 text-base-content ")} onSubmit={handleLogin}>
       <h2 className="col-span-2 row-start-2 row-end-3 justify-self-center text-3xl mb-4 self-start">
         Welcome to{" "}
         <span
