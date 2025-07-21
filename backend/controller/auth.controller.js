@@ -36,7 +36,7 @@ export const signup = async (req, res) => {
       email: newUser.email,
       profilePic: newUser.profilePic,
       phone: newUser.phone,
-      resume:newUser.resume,
+      resume: newUser.resume,
       role: newUser.role,
       freeInterview: newUser.freeInterview,
       level: newUser.level,
@@ -54,7 +54,6 @@ export const signup = async (req, res) => {
     return res.status(500).json({ message: "Internal Server Error" });
   }
 };
-
 
 export const login = async (req, res) => {
   const { email, password } = req.body;
@@ -99,17 +98,15 @@ export const login = async (req, res) => {
   }
 };
 
-
 export const logout = async (req, res) => {
   // Clear the auth token cookie (assuming it's called 'token')
-  res.clearCookie('jwt', {
+  res.clearCookie("jwt", {
     httpOnly: true,
-    sameSite: 'strict',
-    secure: process.env.NODE_ENV === 'production',
+    sameSite: "strict",
+    secure: process.env.NODE_ENV === "production",
   });
-  return res.status(200).json({ message: 'Logged out successfully' });
+  return res.status(200).json({ message: "Logged out successfully" });
 };
-
 
 export const updateProfile = async (req, res) => {
   try {
@@ -122,7 +119,11 @@ export const updateProfile = async (req, res) => {
 
     // Handle profilePic upload if it's a new file (base64 string)
     let profilePicUrl = user.profilePic;
-    if (profilePic && profilePic !== user.profilePic && profilePic.startsWith("data:")) {
+    if (
+      profilePic &&
+      profilePic !== user.profilePic &&
+      profilePic.startsWith("data:")
+    ) {
       const uploadResponse = await cloudinary.uploader.upload(profilePic);
       profilePicUrl = uploadResponse.secure_url;
     } else if (profilePic && !profilePic.startsWith("data:")) {
@@ -181,27 +182,28 @@ export const updateProfile = async (req, res) => {
   }
 };
 
-
-export const checkAuth = async (req,res) =>{
-    try{
-        return res.status(200).json(req.user)
-
-    }catch(error){
-        console.log("Error in checkauth controller",error.message)
-        return res.status(500).json({message:"Internal Server Error"})
-    }
-}
-
+export const checkAuth = async (req, res) => {
+  try {
+    return res.status(200).json(req.user);
+  } catch (error) {
+    console.log("Error in checkauth controller", error.message);
+    return res.status(500).json({ message: "Internal Server Error" });
+  }
+};
 
 export const changePassword = async (req, res) => {
   try {
     const userId = req.user?._id;
     const { oldPassword, newPassword } = req.body;
     if (!oldPassword || !newPassword) {
-      return res.status(400).json({ message: "Old and new password are required" });
+      return res
+        .status(400)
+        .json({ message: "Old and new password are required" });
     }
     if (newPassword.length < 6) {
-      return res.status(400).json({ message: "New password must be at least 6 characters" });
+      return res
+        .status(400)
+        .json({ message: "New password must be at least 6 characters" });
     }
     const user = await User.findById(userId);
     if (!user) {
@@ -211,7 +213,7 @@ export const changePassword = async (req, res) => {
     if (!isMatch) {
       return res.status(400).json({ message: "Old password is incorrect" });
     }
-    const salt = await bcrypt.genSalt(10);
+    const salt = await bcrypt.genSalt(12);
     user.password = await bcrypt.hash(newPassword, salt);
     await user.save();
     return res.status(200).json({ message: "Password changed successfully" });
@@ -220,7 +222,6 @@ export const changePassword = async (req, res) => {
     return res.status(500).json({ message: "Internal Server Error" });
   }
 };
-
 
 export const deleteAccount = async (req, res) => {
   try {
@@ -238,10 +239,10 @@ export const deleteAccount = async (req, res) => {
       return res.status(400).json({ message: "Password is incorrect" });
     }
     await user.deleteOne();
-    res.clearCookie('jwt', {
+    res.clearCookie("jwt", {
       httpOnly: true,
-      sameSite: 'strict',
-      secure: process.env.NODE_ENV === 'production',
+      sameSite: "strict",
+      secure: process.env.NODE_ENV === "production",
     });
     return res.status(200).json({ message: "Account deleted successfully" });
   } catch (error) {
@@ -249,7 +250,6 @@ export const deleteAccount = async (req, res) => {
     return res.status(500).json({ message: "Internal Server Error" });
   }
 };
-
 
 export const getAllUsers = async (req, res) => {
   try {
@@ -260,5 +260,3 @@ export const getAllUsers = async (req, res) => {
     return res.status(500).json({ message: "Internal Server Error" });
   }
 };
-
-
