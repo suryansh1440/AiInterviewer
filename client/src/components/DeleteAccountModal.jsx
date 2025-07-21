@@ -21,11 +21,15 @@ export default function DeleteAccountModal({ open, onClose }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!password){
-      toast.error("Enter the password")
-      return;
-    } 
-    await deleteAccount({password:password});
+    if (user?.authProvider === 'local') {
+      if (!password){
+        toast.error("Enter the password")
+        return;
+      }
+      await deleteAccount({password:password});
+    } else {
+      await deleteAccount({});
+    }
     navigate("/");
   };
 
@@ -46,28 +50,34 @@ export default function DeleteAccountModal({ open, onClose }) {
         <div className="mb-6 text-base-content/80 text-center">
           <p className="mb-2 font-semibold">Are you sure you want to delete your account?</p>
           <p className="mb-2">This action is <span className="text-error font-bold">irreversible</span>. All your data, interviews, and progress will be permanently deleted.</p>
-          <p className="mb-2">To confirm, please enter your password below.</p>
+          {user?.authProvider === 'local' ? (
+            <p className="mb-2">To confirm, please enter your password below.</p>
+          ) : (
+            <p className="mb-2">Click delete to confirm. No password required for Google/GitHub users.</p>
+          )}
         </div>
         <form onSubmit={handleSubmit} className="flex flex-col gap-6 w-full max-w-sm">
-          <div className="relative">
-            <input
-              type={showPassword ? "text" : "password"}
-              placeholder="Password"
-              className="input input-bordered w-full pr-12 text-lg"
-              value={password}
-              onChange={e => setPassword(e.target.value)}
-              autoComplete="current-password"
-            />
-            <button
-              type="button"
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-base-content/60 hover:text-error"
-              tabIndex={-1}
-              onClick={() => setShowPassword(v => !v)}
-              aria-label={showPassword ? "Hide password" : "Show password"}
-            >
-              <Lock className="w-6 h-6" />
-            </button>
-          </div>
+          {user?.authProvider === 'local' && (
+            <div className="relative">
+              <input
+                type={showPassword ? "text" : "password"}
+                placeholder="Password"
+                className="input input-bordered w-full pr-12 text-lg"
+                value={password}
+                onChange={e => setPassword(e.target.value)}
+                autoComplete="current-password"
+              />
+              <button
+                type="button"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-base-content/60 hover:text-error"
+                tabIndex={-1}
+                onClick={() => setShowPassword(v => !v)}
+                aria-label={showPassword ? "Hide password" : "Show password"}
+              >
+                <Lock className="w-6 h-6" />
+              </button>
+            </div>
+          )}
           <button type="submit" className="btn btn-error w-full text-lg py-3 mt-2 shadow-lg" disabled={isDeletingAccount}>
             {isDeletingAccount ? "Deleting..." : "Delete Account"}
           </button>

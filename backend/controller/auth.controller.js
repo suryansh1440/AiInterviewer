@@ -2,6 +2,9 @@ import User from "../modals/user.modal.js";
 import bcrypt from "bcryptjs";
 import { generateToken } from "../lib/utils.js";
 import cloudinary from "../lib/cloudinary.js";
+import { OAuth2Client } from 'google-auth-library';
+
+const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 export const signup = async (req, res) => {
   const { name, email, password, phone } = req.body;
@@ -38,6 +41,7 @@ export const signup = async (req, res) => {
       phone: newUser.phone,
       resume: newUser.resume,
       role: newUser.role,
+      authProvider:newUser.authProvider,
       freeInterview: newUser.freeInterview,
       level: newUser.level,
       levelProgress: newUser.levelProgress,
@@ -81,6 +85,7 @@ export const login = async (req, res) => {
       phone: user.phone,
       resume: user.resume,
       role: user.role,
+      authProvider: user.authProvider,
       freeInterview: user.freeInterview,
       level: user.level,
       levelProgress: user.levelProgress,
@@ -164,6 +169,7 @@ export const updateProfile = async (req, res) => {
       profilePic: user.profilePic,
       phone: user.phone,
       role: user.role,
+      authProvider:user.authProvider,
       freeInterview: user.freeInterview,
       level: user.level,
       levelProgress: user.levelProgress,
@@ -227,17 +233,20 @@ export const deleteAccount = async (req, res) => {
   try {
     const userId = req.user._id;
     const { password } = req.body;
-    if (!password) {
-      return res.status(400).json({ message: "Password is required" });
-    }
     const user = await User.findById(userId).select('+password');
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
-    const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) {
-      return res.status(400).json({ message: "Password is incorrect" });
+    if (user.authProvider === 'local') {
+      if (!password) {
+        return res.status(400).json({ message: "Password is required" });
+      }
+      const isMatch = await bcrypt.compare(password, user.password);
+      if (!isMatch) {
+        return res.status(400).json({ message: "Password is incorrect" });
+      }
     }
+    // For Google or other providers, skip password check
     await user.deleteOne();
     res.clearCookie("jwt", {
       httpOnly: true,
@@ -260,3 +269,77 @@ export const getAllUsers = async (req, res) => {
     return res.status(500).json({ message: "Internal Server Error" });
   }
 };
+
+export const googleLogin = async (req, res) => {
+  const { credential } = req.body;
+  if (!credential) {
+    return res.status(400).json({ message: 'No credential provided' });
+  }
+  try {
+    // Verify the Google ID token
+    const ticket = await client.verifyIdToken({
+      idToken: credential,
+      audience: process.env.GOOGLE_CLIENT_ID,
+    });
+    const payload = ticket.getPayload();
+    if (!payload || !payload.email) {
+      return res.status(400).json({ message: 'Invalid Google token' });
+    }
+    // Find or create user
+    let user = await User.findOne({ email: payload.email });
+    if (!user) {
+      user = new User({
+        name: payload.name,
+        email: payload.email,
+        profilePic: payload.picture,
+        authProvider: 'google',
+        password: undefined, // No password for Google users
+      });
+      await user.save();
+    } else {
+      // Update profilePic and name if changed
+      let updated = false;
+      if (user.profilePic !== payload.picture) {
+        user.profilePic = payload.picture;
+        updated = true;
+      }
+      if (user.name !== payload.name) {
+        user.name = payload.name;
+        updated = true;
+      }
+      if (user.authProvider !== 'google') {
+        user.authProvider = 'google';
+        updated = true;
+      }
+      if (updated) await user.save();
+    }
+    // Set lastLogin
+    user.lastLogin = new Date();
+    await user.save();
+    generateToken(user._id, res);
+    return res.status(200).json({
+      _id: user._id,
+      name: user.name,
+      email: user.email,
+      profilePic: user.profilePic,
+      phone: user.phone,
+      role: user.role,
+      authProvider: user.authProvider,
+      freeInterview: user.freeInterview,
+      level: user.level,
+      levelProgress: user.levelProgress,
+      subscription: user.subscription,
+      stats: user.stats,
+      lastLogin: user.lastLogin,
+      interviewLeft: user.interviewLeft,
+      interviewLeftExpire: user.interviewLeftExpire,
+      createdAt: user.createdAt,
+      updatedAt: user.updatedAt,
+      resume: user.resume,
+    });
+  } catch (error) {
+    console.log('Error in googleLogin controller', error);
+    return res.status(500).json({ message: 'Google login failed' });
+  }
+};
+
