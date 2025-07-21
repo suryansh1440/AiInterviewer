@@ -1,4 +1,3 @@
-const validator = require("validator");
 const User = require("../modals/user.modal");
 
 //getting number of free, starter and pro subscribers
