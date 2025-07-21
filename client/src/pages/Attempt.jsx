@@ -1,11 +1,30 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import AttemptSidebar from '../components/AttemptSidebar';
 import AttemptContanier from '../components/AttemptContanier';
-import { useInterviewHistoryStore } from '../store/useInterviewHistoryStore';
 import { Link } from 'react-router-dom';
+import { useInterviewStore } from '../store/useInterviewStore';
+import { Loader } from 'lucide-react';
 
 const Attempt = () => {
-  const { interviews } = useInterviewHistoryStore();
+  const { interviews,isGettingInterviews,isCreatingFeedback } = useInterviewStore();
+
+
+  if(isGettingInterviews) return (
+    <div className='flex items-center justify-center h-screen'>
+    <Loader className='size-10 animate-spin' />
+  </div>
+  )
+
+  if(isCreatingFeedback) return (
+    <div className='flex items-center justify-center h-screen bg-base-200'>
+        <div className='flex flex-col items-center gap-6 p-10 rounded-2xl shadow-xl bg-base-100 border border-primary/20'>
+            <Loader className='w-16 h-16 text-primary animate-spin' />
+            <div className='text-xl font-bold text-primary'>Generating Interview Feedback...</div>
+            <div className='text-base text-base-content/70'>Please wait while we analyze your interview and generate detailed feedback.</div>
+        </div>
+    </div>
+)
+
 
   if (!interviews || interviews.length === 0) {
     return (

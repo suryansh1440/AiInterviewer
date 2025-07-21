@@ -3,6 +3,9 @@ import { useAuthStore } from '../store/useAuthStore';
 import { PhoneOff } from 'lucide-react';
 import { vapi } from '../lib/vapi.sdk';
 import { useNavigate } from 'react-router-dom';
+import { useInterviewStore } from '../store/useInterviewStore';
+import toast from 'react-hot-toast';
+import { Loader } from 'lucide-react';
 
 const Agent = () => {
     const [isSpeaking, setIsSpeaking] = useState(false);
@@ -11,6 +14,7 @@ const Agent = () => {
     const [messages,setMessages] = useState([]);
     const [fadeIn, setFadeIn] = useState(false);
     const navigate = useNavigate();
+    const {createFeedback,interviewData,isCreatingFeedback} = useInterviewStore();
 
     const lastMessage = messages[messages.length - 1];
 
@@ -59,19 +63,24 @@ const Agent = () => {
         vapi.on('speech-end',onSpeechEnd);
         vapi.on('error',onError);
 
-        return ()=>{
-            vapi.off('call-start',onCallStart);
-            vapi.off('call-end',onCallEnd);
-            vapi.off('message',onMessage);
-            vapi.off('speech-start',onSpeechStart);
-            vapi.off('speech-end',onSpeechEnd);
-            vapi.off('error',onError);
+        return () => {
+            if (typeof vapi.off === 'function') {
+                vapi.off('call-start',onCallStart);
+                vapi.off('call-end',onCallEnd);
+                vapi.off('message',onMessage);
+                vapi.off('speech-start',onSpeechStart);
+                vapi.off('speech-end',onSpeechEnd);
+                vapi.off('error',onError);
+            }
         }
     }, []);
 
-    useEffect(()=>{
+    useEffect(() => {
         if(callStatus === "Finished"){
-            navigate('/');
+            (async () => {
+                const interview = await createFeedback(interviewData._id,messages);
+                navigate("/dashboard/attempt");
+            })();
         }
     },[messages,callStatus,user._id]);
 
@@ -81,7 +90,15 @@ const Agent = () => {
             await vapi.stop();
     }
 
-
+    if(isCreatingFeedback) return (
+        <div className='flex items-center justify-center h-screen bg-base-200'>
+            <div className='flex flex-col items-center gap-6 p-10 rounded-2xl shadow-xl bg-base-100 border border-primary/20'>
+                <Loader className='w-16 h-16 text-primary animate-spin' />
+                <div className='text-xl font-bold text-primary'>Generating Interview Feedback...</div>
+                <div className='text-base text-base-content/70'>Please wait while we analyze your interview and generate detailed feedback.</div>
+            </div>
+        </div>
+    )
 
 
     return (

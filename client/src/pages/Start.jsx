@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Mic, Zap, Computer, Building, DollarSign, Settings, Heart, Scale, BarChart3, TrendingUp } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/useAuthStore';
@@ -44,6 +44,13 @@ const Start = () => {
   const [numQuestions, setNumQuestions] = useState(2);
   const [difficulty, setDifficulty] = useState('easy');
 
+  // useEffect(() => {
+  //   if (user && user.interviewLeft === 0 && user.subscription !== 'pro') {
+  //     toast.error("No interview credits left. Please upgrade or buy more.");
+  //     navigate("/pricing");
+  //   }
+  // }, [user, navigate]);
+
   const handleStartClick = async () => {
     if (!user) {
       setOpenModal(); 
@@ -67,10 +74,10 @@ const Start = () => {
 
     // start vapi 
 
-    // const call = await handleCall(user)
-    // if(call){
+    const call = await handleCall(interview.questions)
+    if(call){
       navigate(`/interview/id=${interview._id}`);
-    // }
+    }
   };
 
   // Autofill topic/subtopic on category click

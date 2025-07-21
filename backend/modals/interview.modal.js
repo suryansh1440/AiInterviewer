@@ -27,6 +27,10 @@ const interviewSchema = new mongoose.Schema({
     enum: ['not_completed', 'completed'],
     default: 'not_completed'
   },
+  feedback: {
+    type: mongoose.Schema.Types.Mixed,
+    default: {},
+  }
 },{timestamps:true});
 
 const Interview = mongoose.model('Interview', interviewSchema);

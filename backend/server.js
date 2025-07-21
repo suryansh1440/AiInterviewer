@@ -5,6 +5,7 @@ import cookieParser from "cookie-parser"
 import cors from "cors"
 import authRouter from './router/auth.router.js';
 import aiRouter from './router/ai.router.js';
+import interviewRouter from './router/interview.router.js'
 
 
 dotenv.config()
@@ -24,6 +25,7 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
 app.use("/api/auth",authRouter)
 app.use("/api/ai",aiRouter)
+app.use("/api/interview",interviewRouter)
 
 
 

@@ -35,7 +35,7 @@ const App = () => {
       <div className='min-h-[90vh]'>
         <Outlet />
       </div>
-      {!location.pathname.startsWith('/dashboard') && <Footer />}
+      {!location.pathname.startsWith('/dashboard') && !location.pathname.startsWith('/interview/id=')  && <Footer />}
       {isOpenModal && (
         <>
           <div className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm transition-opacity duration-300">

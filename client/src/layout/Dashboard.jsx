@@ -1,11 +1,18 @@
 import React, { useEffect } from 'react';
-import { Link, Outlet, useNavigate } from 'react-router-dom';
+import {Outlet } from 'react-router-dom';
 import DashboardSidebar from '../components/DashboardSidebar';
-import { useAuthStore } from '../store/useAuthStore';
+import { useInterviewStore } from '../store/useInterviewStore';
+
+
 
 
 const Dashboard = () => {
-  const navigate = useNavigate();
+  const {getInterviews} = useInterviewStore();
+
+
+  useEffect(()=>{
+    getInterviews()
+  },[])
 
   return (
     <div className="min-h-[90vh] flex bg-base-100 scrollbar-hide">

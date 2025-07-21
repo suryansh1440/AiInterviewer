@@ -1,5 +1,4 @@
-import { useState } from "react";
-import { THEMES } from "../theme";
+import { THEMES } from "../constant";
 import { useThemeStore } from "../store/useThemeStore";
 
 const Setting = () => {

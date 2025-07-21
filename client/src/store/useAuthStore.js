@@ -1,6 +1,8 @@
 import { create } from "zustand";
 import toast from "react-hot-toast";
 import {axiosInstance} from "../lib/axios.js"
+import { useUsersStore } from './useUsersStore';
+import { useInterviewStore } from './useInterviewStore';
 
 
 export const useAuthStore = create((set) => ({
@@ -59,6 +61,13 @@ export const useAuthStore = create((set) => ({
     try{
       await axiosInstance.post("/auth/logout")
       set({user:null})
+      // Clear AllUsers
+      useUsersStore.getState().AllUsers = [];
+      // Clear interview-related data
+      useInterviewStore.getState().interviews = [];
+      useInterviewStore.getState().randomTopic = [];
+      useInterviewStore.getState().interviewData = null;
+      useInterviewStore.getState().resumeData = null;
       toast.success("Logged out successfully")
 
     }catch(error){

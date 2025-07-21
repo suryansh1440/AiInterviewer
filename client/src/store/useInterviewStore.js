@@ -2,8 +2,10 @@ import { create } from "zustand";
 import { axiosInstance } from "../lib/axios";
 import toast from "react-hot-toast";
 import { vapi } from '../lib/vapi.sdk';
+import { interviewer } from '../constant';
 
 export const useInterviewStore = create((set, get) => ({
+    interviews: [],
     interviewData: null,
     resumeData: null,
     randomTopic:[],
@@ -11,7 +13,13 @@ export const useInterviewStore = create((set, get) => ({
     isGettingRandomTopic: false,
     isGeneratingQuestion: false,
     isStartingInterview:false,
+    isCreatingFeedback: false,
+    showInterview: null,
+    isGettingInterviews:false,
 
+
+    setShowInterview: (id) => set({ showInterview: id }),
+    
     setInterviewData: (data)=>{
         set({interviewData:data})
     },
@@ -55,23 +63,27 @@ export const useInterviewStore = create((set, get) => ({
         }
     },
 
-    handleCall: async (user) => {
+    handleCall: async (questions) => {
         set({isStartingInterview:true})
         const { interviewData } = get();
         if (!interviewData) {
             throw new Error('No interview data set');
         }
         try {
+            let formattedQuestions = "";
+            if (questions) {
+                formattedQuestions = questions
+                  .map((question) => `- ${question}`)
+                  .join("\n");
+            }
             await vapi.start(
-                undefined,
-                undefined,
-                undefined,
-                import.meta.env.VITE_PUBLIC_VAPI_WORKFLOW_ID,{
-                variableValues: {
-                    userid: user._id,
-                    username: user.name,
-                },
-            });
+                interviewer,
+                {
+                    variableValues: {
+                        questions: formattedQuestions,
+                    }
+                }
+            );
             return true;
         } catch (error) {
             console.log('Vapi start error', error);
@@ -81,5 +93,47 @@ export const useInterviewStore = create((set, get) => ({
             set({isStartingInterview:false})
         }
     },
+
+    createFeedback: async (interviewId, transcript) => {
+        set({ isCreatingFeedback: true });
+        try {
+            const res = await axiosInstance.post("/ai/createFeedback", {
+                interviewId,
+                transcript
+            });
+            set({ interviewData: res.data.interview }); 
+            set({showInterview:interviewId});
+            set((state) => ({
+                interviews: [
+                    res.data.interview,
+                    ...state.interviews.filter(i => i._id !== interviewId)
+                ]
+            }));
+            return res.data.interview;
+        } catch (error) {
+            toast.error(error.response?.data?.message || "Failed to create feedback");
+            return null;
+        } finally {
+            set({ isCreatingFeedback: false });
+        }
+    },
+
+    getInterviews: async () => {
+        set({ isGettingInterviews: true });
+        try {
+            const res = await axiosInstance.get('/interview/getInterviews');
+            set({ interviews: res.data.interviews });
+            if(res.data.interviews.length >0){
+                set({showInterview:res.data.interviews[0]._id})
+            }
+            return res.data.interviews;
+        } catch (error) {
+            toast.error(error.response?.data?.message || 'Failed to fetch interviews');
+            return [];
+        } finally {
+            set({ isGettingInterviews: false });
+        }
+    },
+
 
 }));

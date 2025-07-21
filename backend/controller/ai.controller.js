@@ -1,6 +1,6 @@
 import axios from 'axios';
 import pdfParse from 'pdf-parse';
-import {generateText} from "ai"
+import {generateObject, generateText} from "ai"
 import {google} from "@ai-sdk/google"
 import Interview from '../modals/interview.modal.js';
 
@@ -45,8 +45,6 @@ export const getRandomTopic = async (req, res) => {
   }
 };
 
-
-
 export const generateQuestion = async (req,res)=>{
   const {topic,subTopic,level,amount} = req.body;
   const userId = req.user._id;
@@ -76,5 +74,46 @@ export const generateQuestion = async (req,res)=>{
   }catch(error){
     console.log("error in getQuestion controller",error);
     return res.status(500).json({message:"Internal server Error"})
+  }
+};
+
+export const createFeedback = async (req,res)=>{
+  const {interviewId,transcript,} = req.body;
+  const userId = req.user._id;
+  try{
+    if(!interviewId || !transcript){
+      return res.status(400).json({message:"Transcript not found"})
+    }
+
+    const formattedTranscript = transcript.map((sentence)=>(
+      `-${sentence.role}: ${sentence.content}\n`
+    )).join('');
+
+    const prompt = `You are an expert technical interviewer and assessment coach. You will be given the transcript of a candidate's interview. Assess the candidate in the following categories: Communication Skills, Technical Knowledge, Problem Solving, Cultural Fit, and Confidence and Clarity. For each category, provide a score from 0 to 20 and a short comment. Also, provide a totalScore (0-100), a list of strengths, a list of areas for improvement, and a finalAssessment (1-2 sentences). Return only a valid JSON object in the following format:\n\n{
+  totalScore: number,\n  categoryScores: [\n    { name: "Communication Skills", score: number, comment: string },\n    { name: "Technical Knowledge", score: number, comment: string },\n    { name: "Problem Solving", score: number, comment: string },\n    { name: "Cultural Fit", score: number, comment: string },\n    { name: "Confidence and Clarity", score: number, comment: string }\n  ],\n  strengths: string[],\n  areasForImprovement: string[],\n  finalAssessment: string\n}\n\nTranscript:\n${formattedTranscript}`;
+
+    const system = `You are an expert technical interviewer and assessment coach. Your job is to analyze the provided interview transcript and return a JSON object with the following structure:\n\n{
+  totalScore: number,\n  categoryScores: [\n    { name: "Communication Skills", score: number, comment: string },\n    { name: "Technical Knowledge", score: number, comment: string },\n    { name: "Problem Solving", score: number, comment: string },\n    { name: "Cultural Fit", score: number, comment: string },\n    { name: "Confidence and Clarity", score: number, comment: string }\n  ],\n  strengths: string[],\n  areasForImprovement: string[],\n  finalAssessment: string\n}\n\nDo not include any explanations or extra text. Only return the JSON object. All scores should be integers between 0 and 20. Comments should be concise and actionable.\n`;
+
+    const { text } = await generateText({
+      model: google('gemini-2.0-flash-001'),
+      prompt,
+      system
+    });
+
+    const cleanText = text.replace(/```json\n?|\n?```/g, '').trim();
+    const feedback = JSON.parse(cleanText);
+
+    // Update the interview document with the feedback and set status to completed
+    const updatedInterview = await Interview.findByIdAndUpdate(
+      interviewId,
+      { feedback, status: 'completed' },
+      { new: true }
+    );
+
+    res.status(200).json({ interview: updatedInterview });
+  }catch(error){
+    console.log("Error in createFeedback",error);
+    return res.status(500).json({message:"Internal Server Error"})
   }
 };
