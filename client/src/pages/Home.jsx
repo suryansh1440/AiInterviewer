@@ -136,7 +136,7 @@ const Home = () => {
       <section className="pricing-teaser bg-gradient-to-r from-primary to-secondary text-primary-content py-16 px-4 text-center">
         <h2 className="text-3xl md:text-4xl font-bold mb-4">Start Free</h2>
         <p className="text-lg md:text-xl mb-6">
-          Your first 2 interviews are on us.
+          Your first interview are on us.
           <br />
           Subscribe anytime to unlock unlimited practice sessions.
         </p>

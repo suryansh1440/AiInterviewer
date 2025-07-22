@@ -9,12 +9,12 @@ const pricingTiers = [
     title: "Free",
     price: "₹0",
     priceNote: "",
-    desc: "Get started with 2 free interviews",
+    desc: "Get started with 1 free interviews",
     features: [
-      "2 AI-powered interviews",
+      "1 AI-powered interviews",
       "Basic feedback",
-      "Access to all domains",
       "Email support",
+      "validity 1 month"
     ],
     cta: "Start Free",
     ctaLink: "#",
@@ -24,13 +24,13 @@ const pricingTiers = [
     title: "Starter",
     price: "₹49",
     priceNote: "",
-    desc: "5 interviews & advanced feedback",
+    desc: "2 interviews & advanced feedback",
     features: [
-      "5 AI-powered interviews",
+      "2 AI-powered interviews",
       "Advanced AI feedback",
       "Voice analysis",
-      "Access to all domains",
       "Priority support",
+      "Validity 1 month"
     ],
     cta: "Get Starter",
     ctaLink: "#",
@@ -39,7 +39,7 @@ const pricingTiers = [
   },
   {
     title: "Pro",
-    price: "₹149",
+    price: "₹500",
     priceNote: "/month",
     desc: "1 month unlimited interviews",
     features: [
@@ -56,18 +56,17 @@ const pricingTiers = [
 ];
 
 const comparisonRows = [
-  ["AI-Powered Interviews", "2", "5", "Unlimited (1 month)"],
+  ["AI-Powered Interviews", "1", "2", "Unlimited (1 month)"],
   ["Feedback Quality", "Basic", "Advanced", "Advanced"],
   ["Voice Analysis", "-", "✔", "✔"],
   ["Progress Tracking", "-", "-", "✔"],
-  ["Team Management", "-", "-", "-"],
   ["Support", "Email", "Priority", "Dedicated"],
 ];
 
 const faqs = [
   {
     q: "Can I try AI Interviewer for free?",
-    a: "Yes! You get 2 free interviews when you sign up. No credit card required.",
+    a: "Yes! You get 1 free interview when you sign up. No credit card required.",
   },
   {
     q: "What payment methods do you accept?",
@@ -244,7 +243,7 @@ const Pricing = () => {
         <div className="inline-block bg-gradient-to-r from-primary to-secondary text-primary-content px-10 py-6 rounded-2xl shadow-xl">
           <h3 className="text-2xl font-bold mb-2">Ready to get started?</h3>
           <p className="mb-4">
-            Sign up now and get your first 2 interviews free. No credit card required.
+            Sign up now and get your first interview free. No credit card required.
           </p>
           {user?.freeInterview === 'Claimed' ? (
               <button
