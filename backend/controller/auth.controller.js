@@ -3,6 +3,7 @@ import bcrypt from "bcryptjs";
 import { generateToken } from "../lib/utils.js";
 import cloudinary from "../lib/cloudinary.js";
 import { OAuth2Client } from 'google-auth-library';
+import axios from "axios";
 
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
@@ -340,6 +341,81 @@ export const googleLogin = async (req, res) => {
   } catch (error) {
     console.log('Error in googleLogin controller', error);
     return res.status(500).json({ message: 'Google login failed' });
+  }
+};
+
+export const githubLogin = (req, res) => {
+  const redirectUrl = `https://github.com/login/oauth/authorize?client_id=${process.env.GITHUB_CLIENT_ID}&redirect_uri=${process.env.GITHUB_CALLBACK_URL}&scope=user:email`;
+  res.redirect(redirectUrl);
+};
+
+export const githubCallback = async (req, res) => {
+  const code = req.query.code;
+  if (!code) return res.status(400).json({ message: "No code provided" });
+  try {
+    // Exchange code for access token
+    const tokenRes = await axios.post(
+      "https://github.com/login/oauth/access_token",
+      {
+        client_id: process.env.GITHUB_CLIENT_ID,
+        client_secret: process.env.GITHUB_CLIENT_SECRET,
+        code,
+        redirect_uri: process.env.GITHUB_CALLBACK_URL,
+      },
+      { headers: { Accept: "application/json" } }
+    );
+    const accessToken = tokenRes.data.access_token;
+    if (!accessToken) return res.status(400).json({ message: "Failed to get access token" });
+
+    // Fetch user info
+    const userRes = await axios.get("https://api.github.com/user", {
+      headers: { Authorization: `token ${accessToken}` },
+    });
+    let email = userRes.data.email;
+    if (!email) {
+      const emailsRes = await axios.get("https://api.github.com/user/emails", {
+        headers: { Authorization: `token ${accessToken}` },
+      });
+      email = emailsRes.data.find(e => e.primary && e.verified)?.email;
+    }
+    if (!email) return res.status(400).json({ message: "No email found in GitHub profile" });
+
+    // Find or create user
+    let user = await User.findOne({ email });
+    if (!user) {
+      user = new User({
+        name: userRes.data.name || userRes.data.login,
+        email,
+        profilePic: userRes.data.avatar_url,
+        authProvider: "github",
+        password: undefined,
+      });
+      await user.save();
+    } else {
+      let updated = false;
+      if (user.profilePic !== userRes.data.avatar_url) {
+        user.profilePic = userRes.data.avatar_url;
+        updated = true;
+      }
+      if (user.name !== (userRes.data.name || userRes.data.login)) {
+        user.name = userRes.data.name || userRes.data.login;
+        updated = true;
+      }
+      if (user.authProvider !== "github") {
+        user.authProvider = "github";
+        updated = true;
+      }
+      if (updated) await user.save();
+    }
+    user.lastLogin = new Date();
+    await user.save();
+    // Set JWT cookie in backend
+    generateToken(user._id, res); // sets the cookie
+    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+    return res.redirect(`${frontendUrl}/`);
+  } catch (err) {
+    console.log("Error in githubCallback controller", err.message);
+    return res.status(500).json({ message: "GitHub login failed", details: err.message });
   }
 };
 
