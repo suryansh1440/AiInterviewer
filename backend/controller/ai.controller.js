@@ -111,6 +111,20 @@ export const generateQuestion = async (req,res)=>{
     if(!topic || !subTopic || !level || !amount) {
       return res.status(400).json({message:"Please enter all the inputs"})
     }
+    const user = await User.findById(userId);
+    if(user.interviewLeft <= 0 && user.subscription!=='pro'){
+      return res.status(400).json({message:"You have no interviews left"})
+    }
+    if(user.subscription==='pro' || user.subscription==='starter'){
+      if(user.interviewLeftExpire < Date.now()){
+        user.interviewLeft = 0;
+        user.subscription = 'none';
+        await user.save();
+        return res.status(400).json({message:"Your subscription has expired"})
+      }
+    }
+
+
 
     const prompt = `Given the topic ${topic} and subtopic ${subTopic} and the difficulty level ${level}, generate ${amount} interview questions. Each question should be clear concise and suitable for an AI voice agent to read aloud Do not use any special characters in the questions only letters numbers and spaces Return only a valid JSON array of strings with no explanations or extra text Example output:\n[\n  "What is a data structure",\n  "Explain the concept of a linked list",\n  "How do you implement a stack in code"\n]\nNow generate the questions.`;    
 
@@ -131,8 +145,8 @@ export const generateQuestion = async (req,res)=>{
     })
 
     // Increment user's totalInterviews
-    const user = await User.findById(userId);
     if (user) {
+        user.interviewLeft = user.interviewLeft - 1;
       user.stats.totalInterviews = (user.stats.totalInterviews || 0) + 1;
       await user.save();
     }

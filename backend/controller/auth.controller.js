@@ -411,7 +411,7 @@ export const githubCallback = async (req, res) => {
     await user.save();
     // Set JWT cookie in backend
     generateToken(user._id, res); // sets the cookie
-    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+    const frontendUrl = process.env.FRONTEND_URL;
     return res.redirect(`${frontendUrl}/`);
   } catch (err) {
     console.log("Error in githubCallback controller", err.message);
