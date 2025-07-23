@@ -3,6 +3,7 @@ import { axiosInstance } from "../lib/axios";
 import toast from "react-hot-toast";
 import { vapi } from '../lib/vapi.sdk';
 import { interviewer } from '../constant';
+import { useAuthStore } from './useAuthStore';
 
 export const useInterviewStore = create((set, get) => ({
     interviews: [],
@@ -109,6 +110,10 @@ export const useInterviewStore = create((set, get) => ({
                     ...state.interviews.filter(i => i._id !== interviewId)
                 ]
             }));
+            // Update user in useAuthStore if user data is returned
+            if (res.data.user) {
+                useAuthStore.getState().setUser(res.data.user);
+            }
             return res.data.interview;
         } catch (error) {
             toast.error(error.response?.data?.message || "Failed to create feedback");

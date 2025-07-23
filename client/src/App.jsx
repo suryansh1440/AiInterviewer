@@ -30,7 +30,7 @@ const App = () => {
   )
 
   return (
-    <div data-theme={theme} className="relative">
+    <div data-theme={theme} className="relative overflow-hidden">
       <Navbar />
       <div className='min-h-[90vh]'>
         <Outlet />

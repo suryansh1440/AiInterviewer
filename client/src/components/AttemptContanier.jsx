@@ -14,15 +14,15 @@ const AttemptContanier = () => {
   if (!interview) return null;
 
   return (
-    <main className="flex-1 px-0 py-12 bg-gradient-to-br from-base-100 via-primary/5 to-secondary/10 flex flex-col items-center w-full overflow-y-auto max-h-[90vh] scrollbar-thin scrollbar-thumb-primary/30 scrollbar-track-base-200">
+    <main className="flex-1 px-0 py-8 bg-gradient-to-br from-base-100 via-primary/5 to-secondary/10 flex flex-col items-center w-full overflow-y-auto max-h-[90vh] scrollbar-thin scrollbar-thumb-primary/30 scrollbar-track-base-200">
       {/* Interview Summary (full width, no box) */}
-      <section className="w-full h-[90vh] max-w-6xl mx-auto mb-12 flex flex-col md:flex-row md:items-center md:justify-between gap-12 border-b-2 border-base-300 pb-10 px-10">
+      <section className="w-full h-auto max-w-6xl mx-auto mb-8 flex flex-col md:flex-row md:items-center md:justify-between gap-8 md:gap-12 border-b-2 border-base-300 pb-8 px-2 sm:px-4 md:px-10">
         <div className="flex-1 flex flex-col gap-3">
           <div className="flex items-center gap-3 mb-2">
             <Star className="w-7 h-7 text-accent" />
-            <span className="text-3xl font-bold text-primary">{interview.topic}</span>
+            <span className="text-2xl sm:text-3xl font-bold text-primary">{interview.topic}</span>
           </div>
-          <div className="flex flex-wrap gap-6 text-base-content/80 text-lg mt-2">
+          <div className="flex flex-wrap gap-4 sm:gap-6 text-base-content/80 text-base sm:text-lg mt-2">
             <span className="inline-flex items-center gap-2"><Calendar className="w-5 h-5" />{new Date(interview.createdAt).toLocaleDateString()}</span>
             <span className={`inline-flex items-center gap-2 font-semibold ${statusColor[interview.status]}`}>{interview.status === 'completed' ? <CheckCircle className="w-5 h-5" /> : <XCircle className="w-5 h-5" />} {interview.status.charAt(0).toUpperCase() + interview.status.slice(1)}</span>
             {interview.feedback && (
@@ -35,46 +35,46 @@ const AttemptContanier = () => {
           </div>
         </div>
         {interview.status === 'completed' && interview.feedback ? (
-          <div className="flex flex-col gap-3 min-w-[260px]">
-            <div className="font-semibold text-base-content/80 mb-1 text-xl">Feedback Summary</div>
-            <div className="flex flex-wrap gap-3 mb-2">
+          <div className="flex flex-col gap-3 min-w-[220px] w-full md:w-auto">
+            <div className="font-semibold text-base-content/80 mb-1 text-lg sm:text-xl">Feedback Summary</div>
+            <div className="flex flex-wrap gap-2 sm:gap-3 mb-2">
               {interview.feedback.categoryScores?.map((cat, idx) => (
-                <span key={idx} className="text-sm px-3 py-2 rounded bg-base-200 font-semibold border border-base-300">
+                <span key={idx} className="text-xs sm:text-sm px-2 sm:px-3 py-1 sm:py-2 rounded bg-base-200 font-semibold border border-base-300">
                   {cat.name}: <span className="font-bold ml-1">{cat.score}</span>
                 </span>
               ))}
             </div>
-            <div className="flex flex-row gap-8">
+            <div className="flex flex-col sm:flex-row gap-4 sm:gap-8">
               <div>
-                <div className="text-sm text-success font-semibold mb-1">Strengths</div>
-                <ul className="list-disc list-inside text-sm text-base-content/70">
+                <div className="text-xs sm:text-sm text-success font-semibold mb-1">Strengths</div>
+                <ul className="list-disc list-inside text-xs sm:text-sm text-base-content/70">
                   {interview.feedback.strengths?.map((s, i) => <li key={i}>{s}</li>)}
                 </ul>
               </div>
               <div>
-                <div className="text-sm text-error font-semibold mb-1">Areas for Improvement</div>
-                <ul className="list-disc list-inside text-sm text-base-content/70">
+                <div className="text-xs sm:text-sm text-error font-semibold mb-1">Areas for Improvement</div>
+                <ul className="list-disc list-inside text-xs sm:text-sm text-base-content/70">
                   {interview.feedback.areasForImprovement?.map((s, i) => <li key={i}>{s}</li>)}
                 </ul>
               </div>
             </div>
-            <div className="mt-3 text-base text-base-content/80 italic border-l-4 border-primary pl-3">
+            <div className="mt-3 text-sm sm:text-base text-base-content/80 italic border-l-4 border-primary pl-3">
               {interview.feedback.finalAssessment}
             </div>
           </div>
         ) : interview.status !== 'completed' && (
-          <div className="flex flex-col gap-3 min-w-[260px] items-center justify-center">
-            <div className="font-semibold text-base-content/60 text-lg mt-8">Feedback not generated yet.</div>
+          <div className="flex flex-col gap-3 min-w-[220px] w-full md:w-auto items-center justify-center">
+            <div className="font-semibold text-base-content/60 text-base sm:text-lg mt-8">Feedback not generated yet.</div>
           </div>
         )}
       </section>
       {/* Questions & Answers (full width, no box) */}
-      <section className="w-full max-w-6xl mx-auto flex flex-col gap-8 px-10">
-        <h2 className="text-2xl font-bold mb-4 text-primary flex items-center gap-3"><MessageCircle className="w-6 h-6 text-primary" />Questions</h2>
-        <ul className="space-y-6">
+      <section className="w-full max-w-6xl mx-auto flex flex-col gap-6 px-2 sm:px-4 md:px-10">
+        <h2 className="text-xl sm:text-2xl font-bold mb-4 text-primary flex items-center gap-3"><MessageCircle className="w-5 h-5 text-primary" />Questions</h2>
+        <ul className="space-y-4 sm:space-y-6">
           {interview.questions.map((q, idx) => (
-            <li key={idx} className="bg-base-200 rounded-xl p-7 shadow-sm flex flex-col gap-3 border border-base-300">
-              <div className="font-semibold text-lg text-base-content">Q{idx + 1}: {q}</div>
+            <li key={idx} className="bg-base-200 rounded-xl p-4 sm:p-7 shadow-sm flex flex-col gap-3 border border-base-300">
+              <div className="font-semibold text-base sm:text-lg text-base-content">Q{idx + 1}: {q}</div>
               {/* If you have answers, display them here. */}
             </li>
           ))}

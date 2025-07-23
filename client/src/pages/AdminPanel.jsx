@@ -154,7 +154,7 @@ const AdminPanel = () => {
         </div>
       </div>
       {/* User Table */}
-      <div className="overflow-x-auto rounded-box shadow">
+      <div className="overflow-x-auto overflow-y-auto rounded-box shadow h-[400px]">
         <table className="table w-full">
           <thead>
             <tr>

@@ -153,8 +153,22 @@ const Start = () => {
           <div>
             <h3 className="text-xl font-semibold text-base-content mb-6">Popular Categories</h3>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              {categories.map((category) => {
+              {/* Show only 4 categories on mobile, all on md+ */}
+              {categories.map((category, idx) => {
                 const IconComponent = category.icon;
+                // On mobile, only show first 4
+                if (idx > 3) {
+                  return (
+                    <div
+                      key={category.id}
+                      className="hidden md:block p-4 rounded-xl border-2 border-base-200 bg-base-200 text-primary text-left shadow hover:shadow-lg transition-all duration-200 cursor-pointer"
+                      onClick={() => handleCategoryClick(category.id)}
+                    >
+                      <IconComponent className="w-6 h-6 mb-2" />
+                      <span className="text-sm font-medium text-base-content">{category.label}</span>
+                    </div>
+                  );
+                }
                 return (
                   <div
                     key={category.id}
