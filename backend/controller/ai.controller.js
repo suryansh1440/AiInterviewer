@@ -213,7 +213,10 @@ export const createFeedback = async (req,res)=>{
       await user.save();
     }
 
-    res.status(200).json({ interview: updatedInterview });
+    res.status(200).json({
+       interview: updatedInterview,
+       user: user
+     });
   }catch(error){
     console.log("Error in createFeedback",error);
     return res.status(500).json({message:"Internal Server Error"})
