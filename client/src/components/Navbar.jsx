@@ -40,6 +40,7 @@ const Navbar = () => {
           <li><Link to="/" className="hover:text-primary transition-colors duration-200">Home</Link></li>
           <li><Link to="/about" className="hover:text-primary transition-colors duration-200">About</Link></li>
           {user && (<li><Link to="/start" className="hover:text-primary transition-colors duration-200">Interview</Link></li>)}
+          <li><Link to="/social/post" className="hover:text-primary transition-colors duration-200">Social</Link></li>
           <li><Link to="/pricing" className="hover:text-primary transition-colors duration-200">Pricing</Link></li>
           <li><Link to="/contact" className="hover:text-primary transition-colors duration-200">Contact</Link></li>
           <li><Link to="/setting" className="hover:text-primary transition-colors duration-200">Settings</Link></li>
@@ -70,7 +71,7 @@ const Navbar = () => {
         </ul>
         {/* Slide-in menu for mobile (sm and below) */}
         <ul
-          className={`fixed sm:hidden top-0 right-0 h-full w-64 bg-base-100/95 shadow-lg flex flex-col items-start gap-2 text-base-content font-medium p-6 transition-all duration-300 z-40 overflow-y-auto
+          className={`fixed sm:hidden  top-0 right-0 h-full w-64 bg-base-100/95 shadow-lg flex flex-col items-start gap-1 text-base-content font-medium p-6 transition-all duration-300 z-100 overflow-y-auto
           ${menuOpen ? 'translate-x-0' : 'translate-x-full'}`}
           style={{ height: '100vh' }}
         >
@@ -84,6 +85,7 @@ const Navbar = () => {
           <li><Link to="/" className="flex items-center gap-2 w-full px-4 py-3 rounded-lg hover:bg-base-200 transition-colors duration-200" onClick={() => setMenuOpen(false)}><svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0h6" /></svg> Home</Link></li>
           <li><Link to="/about" className="flex items-center gap-2 w-full px-4 py-3 rounded-lg hover:bg-base-200 transition-colors duration-200" onClick={() => setMenuOpen(false)}><svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" /><path d="M12 16v-4M12 8h.01" /></svg> About</Link></li>
           {user && (<li><Link to="/start" className="flex items-center gap-2 w-full px-4 py-3 rounded-lg hover:bg-base-200 transition-colors duration-200" onClick={() => setMenuOpen(false)}><svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 20h9" /><path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m0 0H3" /></svg> Interview</Link></li>)}
+          <li><Link to="/social/post" className="flex items-center gap-2 w-full px-4 py-3 rounded-lg hover:bg-base-200 transition-colors duration-200" onClick={() => setMenuOpen(false)}><svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 20h9" /><path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m0 0H3" /></svg> Social</Link></li>
           <li><Link to="/pricing" className="flex items-center gap-2 w-full px-4 py-3 rounded-lg hover:bg-base-200 transition-colors duration-200" onClick={() => setMenuOpen(false)}><svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M12 8c-1.657 0-3 1.343-3 3s1.343 3 3 3 3-1.343 3-3-1.343-3-3-3z" /><path d="M19.4 15a1.65 1.65 0 01-1.4.8H6a1.65 1.65 0 01-1.4-.8L2 12V7a2 2 0 012-2h16a2 2 0 012 2v5l-2.6 3z" /></svg> Pricing</Link></li>
           <li><Link to="/contact" className="flex items-center gap-2 w-full px-4 py-3 rounded-lg hover:bg-base-200 transition-colors duration-200" onClick={() => setMenuOpen(false)}><svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M21 10.5a8.38 8.38 0 01-1.9.5 4.48 4.48 0 00-7.6 0 8.38 8.38 0 01-1.9-.5" /><path d="M3 19v-2a4 4 0 014-4h10a4 4 0 014 4v2" /></svg> Contact</Link></li>
           <li><Link to="/setting" className="flex items-center gap-2 w-full px-4 py-3 rounded-lg hover:bg-base-200 transition-colors duration-200" onClick={() => setMenuOpen(false)}><svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3" /><path d="M19.4 15a1.65 1.65 0 01-1.4.8L16 17.2a1.65 1.65 0 01-2.8 0l-2-1.4a1.65 1.65 0 01-1.4-.8L4.6 15a1.65 1.65 0 01-.8-1.4V10.4a1.65 1.65 0 01.8-1.4L7.2 7.6a1.65 1.65 0 011.4-.8l2-1.4a1.65 1.65 0 012.8 0l2 1.4a1.65 1.65 0 011.4.8l2.6 1.4a1.65 1.65 0 01.8 1.4v3.2a1.65 1.65 0 01-.8 1.4z" /></svg> Settings</Link></li>

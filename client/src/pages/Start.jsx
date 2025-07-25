@@ -34,7 +34,7 @@ const Start = () => {
   const { user } = useAuthStore();
   const { setOpenModal } = useModalStore();
   const navigate = useNavigate();
-  const {isGettingRandomTopic,isGettingResume,resumeData,randomTopic,getRandomTopic,readResume,setInterviewData,generateQuestion,isGeneratingQuestion,handleCall,isStartingInterview} = useInterviewStore()
+  const {isGettingRandomTopic,isGettingResume,resumeData,randomTopic,getRandomTopic,readResume,setInterviewData,generateQuestion,isGeneratingQuestion,handleCall,isStartingInterview,getLeetCodeAnalysis,isGettingLeetCodeAnalysis} = useInterviewStore()
 
 
   const [topic, setTopic] = useState('');
@@ -43,13 +43,14 @@ const Start = () => {
   const [showResumeModal, setShowResumeModal] = useState(false);
   const [numQuestions, setNumQuestions] = useState(2);
   const [difficulty, setDifficulty] = useState('easy');
+  const [showLeetModal, setShowLeetModal] = useState(false);
+  const [leetToggle, setLeetToggle] = useState(!!user?.leetcodeUsername);
+  const [isGeneratingRandomTopic,setIsGeneratingRandomTopic] = useState(false);
 
-  // useEffect(() => {
-  //   if (user && user.interviewLeft === 0 && user.subscription !== 'pro') {
-  //     toast.error("No interview credits left. Please upgrade or buy more.");
-  //     navigate("/pricing");
-  //   }
-  // }, [user, navigate]);
+  useEffect(() => {
+    setLeetToggle(!!user?.leetcodeUsername);
+  }, [user?.leetcodeUsername]);
+
 
   const handleStartClick = async () => {
     if (!user) {
@@ -69,12 +70,27 @@ const Start = () => {
       amount:numQuestions
     }
     const interview = await generateQuestion(interviewData)
+    if(!interview){
+      return;
+    }
     setInterviewData(interview)
-    console.log(interview)
 
-    // start vapi 
+    let leet = 'no leetcode stats included';
+    if(leetToggle && user?.leetcodeUsername){
+      leet = await getLeetCodeAnalysis(user.leetcodeUsername);
+    }
+    let resume = 'no resume included';
+    if(includeResume){
+      if(!resumeData){
+        resume = await readResume(user.resume)
+      }else{
+        resume = resumeData;
+      }
+    }
 
-    const call = await handleCall(interview.questions)
+    // Ensure questions is always an array
+    const questions = Array.isArray(interview.questions) ? interview.questions : [];
+    const call = await handleCall(questions, leet, resume);
     if(call){
       navigate(`/interview/id=${interview._id}`);
     }
@@ -94,6 +110,7 @@ const Start = () => {
     if (!user.resume || user.resume === "") {
       return;
     }
+    setIsGeneratingRandomTopic(true);
     // If topics already exist, use them
     if (randomTopic && Array.isArray(randomTopic) && randomTopic.length > 0) {
       const randomIdx = Math.floor(Math.random() * randomTopic.length);
@@ -114,6 +131,7 @@ const Start = () => {
         setSubTopic(selected.subtopic || '');
       }
     }
+    setIsGeneratingRandomTopic(false);
   };
 
   // Handle resume toggle
@@ -135,6 +153,15 @@ const Start = () => {
     setShowResumeModal(false);
     if (user && user.resume && user.resume.endsWith('.pdf')) {
       setIncludeResume(true);
+    }
+  };
+
+  // Add a function to unlink LeetCode
+  const handleLeetToggle = () => {
+    if (!leetToggle && !user?.leetcodeUsername) {
+      setShowLeetModal(true);
+    }else{
+      setLeetToggle((prev) => !prev);
     }
   };
 
@@ -183,9 +210,10 @@ const Start = () => {
             </div>
           </div>
 
-          {/* Resume Option - improved and moved below categories */}
-          <div className="rounded-xl border border-primary/30 bg-base-200 p-6 flex flex-col md:flex-row items-center gap-4 shadow-sm">
-            <div className="flex-1 flex flex-col items-start gap-1">
+          {/* Resume and LeetCode Options - side by side on desktop, stacked on mobile */}
+          <div className="flex flex-col md:flex-row gap-6">
+            {/* Resume Box */}
+            <div className="flex-1 rounded-xl border border-primary/30 bg-base-200 p-6 flex flex-col items-start gap-2 shadow-sm">
               <span className="font-bold text-lg flex items-center gap-2 text-primary">
                 <svg className="w-6 h-6 text-primary" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M16 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" /><circle cx="9" cy="7" r="4" /><path strokeLinecap="round" strokeLinejoin="round" d="M23 21v-2a4 4 0 00-3-3.87" /></svg>
                 Resume for Interview
@@ -198,19 +226,46 @@ const Start = () => {
               ) : (
                 <span className="text-base-content/70 text-sm mt-1">No resume uploaded. Upload to include in your interview.</span>
               )}
+              <div className="flex flex-col items-center gap-2 mt-2 w-full">
+                <input
+                  type="checkbox"
+                  className="toggle toggle-lg toggle-primary"
+                  checked={includeResume}
+                  onChange={handleResumeToggle}
+                  id="resume-toggle"
+                />
+                <label htmlFor="resume-toggle" className="text-xs text-base-content/70">{includeResume ? 'Included' : 'Not Included'}</label>
+                {includeResume && !(user && user.resume && user.resume.endsWith('.pdf')) && (
+                  <span className="text-error text-xs mt-1">Please upload your resume to enable this option.</span>
+                )}
+              </div>
             </div>
-            <div className="flex flex-col items-center gap-2">
-              <input
-                type="checkbox"
-                className="toggle toggle-lg toggle-primary"
-                checked={includeResume}
-                onChange={handleResumeToggle}
-                id="resume-toggle"
-              />
-              <label htmlFor="resume-toggle" className="text-xs text-base-content/70">{includeResume ? 'Included' : 'Not Included'}</label>
-              {includeResume && !(user && user.resume && user.resume.endsWith('.pdf')) && (
-                <span className="text-error text-xs mt-1">Please upload your resume to enable this option.</span>
+            {/* LeetCode Box */}
+            <div className="flex-1 rounded-xl border border-warning/30 bg-base-200 p-6 flex flex-col items-start gap-2 shadow-sm">
+              <span className="font-bold text-lg flex items-center gap-2 text-warning">
+                <img src="https://leetcode.com/static/images/LeetCode_logo_rvs.png" alt="LeetCode" className="w-6 h-6 object-contain" />
+                LeetCode Analysis
+              </span>
+              {user?.leetcodeUsername ? (
+                <div className="flex items-center gap-2 mt-1">
+                  <span className="badge badge-success text-xs font-semibold">{user.leetcodeUsername}</span>
+                  <span className="text-success/70">Linked</span>
+                </div>
+              ) : (
+                <span className="text-base-content/70 text-sm mt-1">Link your LeetCode profile to personalize your interview experience.</span>
               )}
+              <div className="flex flex-col items-center gap-2 mt-2 w-full">
+                <input
+                  type="checkbox"
+                  className="toggle toggle-lg toggle-warning"
+                  checked={leetToggle}
+                  onChange={handleLeetToggle}
+                  id="leetcode-toggle"
+                />
+                <label htmlFor="leetcode-toggle" className="text-xs text-base-content/70 flex items-center gap-1">
+                  {user?.leetcodeUsername ? 'LeetCode Linked' : 'Analyze LeetCode'}
+                </label>
+              </div>
             </div>
           </div>
 
@@ -275,14 +330,12 @@ const Start = () => {
             <button
               className="w-full bg-gradient-to-r from-primary to-secondary text-primary-content py-4 px-6 rounded-xl font-bold text-lg hover:from-primary-focus hover:to-secondary-focus transition-all duration-200 flex flex-col items-center justify-center gap-1 shadow-lg border-2 border-primary/30 disabled:opacity-60 disabled:cursor-not-allowed"
               onClick={handleRandomTopic}
-              disabled={isGettingRandomTopic || isGettingResume}
+              disabled={isGeneratingRandomTopic}
             >
               <span className="flex items-center gap-2">
                 <Zap className="w-6 h-6 text-yellow-300 drop-shadow" />
-                {isGettingResume
-                  ? 'Getting Resume...'
-                  : isGettingRandomTopic
-                  ? 'Getting Random Topic...'
+                {isGeneratingRandomTopic
+                  ? 'Generating Random Topic...'
                   : 'Generate Random Topic'}
               </span>
               <span className="text-xs text-primary-content/80 font-normal mt-1">based on your resume</span>
@@ -293,17 +346,21 @@ const Start = () => {
           <button
             onClick={handleStartClick}
             className="w-full bg-gradient-to-r from-accent to-primary text-primary-content py-4 px-8 rounded-xl font-semibold text-lg hover:from-accent-focus hover:to-primary-focus transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-1"
-            disabled={isGeneratingQuestion || isStartingInterview}
+            disabled={isGeneratingQuestion || isStartingInterview || isGettingLeetCodeAnalysis || isGettingResume}
           >
-            {isGeneratingQuestion
-              ? 'Generating Questions...'
-              : isStartingInterview
-                ? 'Starting Interview...'
-                : 'Start Interview'}
+            {isGettingLeetCodeAnalysis
+              ? 'Getting LeetCode Analysis...'
+              : isGettingResume
+                ? 'Getting Resume...'
+                : isGeneratingQuestion
+                  ? 'Generating Questions...'
+                  : isStartingInterview
+                    ? 'Starting Interview...'
+                    : 'Start Interview'}
           </button>
         </div>
       </section>
-      <UpdateProfileModal open={showResumeModal} onClose={handleResumeModalClose} />
+      <UpdateProfileModal open={showResumeModal || showLeetModal} onClose={() => { setShowResumeModal(false); setShowLeetModal(false); }} />
     </div>
   );
 };

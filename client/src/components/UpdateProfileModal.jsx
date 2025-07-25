@@ -10,6 +10,7 @@ export default function UpdateProfileModal({ open, onClose }) {
     phone: user?.phone || "",
     profilePic: user?.profilePic || "",
     resume: user?.resume || "",
+    leetcodeUsername: user?.leetcodeUsername || "",
   });
   const [preview, setPreview] = useState(user?.profilePic || "");
   const [file, setFile] = useState(null);
@@ -65,11 +66,19 @@ export default function UpdateProfileModal({ open, onClose }) {
         reader.readAsDataURL(resumeFile);
       });
     }
+    // Extract LeetCode username if a URL is entered
+    let leetcodeUsername = data.leetcodeUsername.trim();
+    // Accept both username and profile URL
+    const urlMatch = leetcodeUsername.match(/leetcode\.com\/(u|profile)\/(\w[\w\-_]*)/i) || leetcodeUsername.match(/leetcode\.com\/(\w[\w\-_]*)/i);
+    if (urlMatch) {
+      leetcodeUsername = urlMatch[2] || urlMatch[1];
+    }
     await updateProfile({
       name: data.name,
       phone: data.phone,
       profilePic: profilePicToSend,
       resume: resumeToSend,
+      leetcodeUsername,
     });
     onClose();
   };
@@ -148,6 +157,19 @@ export default function UpdateProfileModal({ open, onClose }) {
               autoComplete="tel"
             />
             <Phone className="absolute left-3 top-1/2 -translate-y-1/2 text-base-content/60" />
+          </div>
+          {/* LeetCode username */}
+          <div className="relative">
+            <input
+              type="text"
+              name="leetcodeUsername"
+              placeholder="LeetCode Username (optional)"
+              className="input input-bordered w-full text-lg pl-10"
+              value={data.leetcodeUsername}
+              onChange={handleChange}
+              autoComplete="off"
+            />
+            <img src="https://leetcode.com/static/images/LeetCode_logo_rvs.png" alt="LeetCode" className="absolute left-3 top-1/2 -translate-y-1/2 w-6 h-6 object-contain opacity-80" />
           </div>
           {/* Resume upload */}
           <div className="relative flex flex-col gap-2 bg-base-200 rounded-xl p-4 border border-base-300 shadow mb-2">

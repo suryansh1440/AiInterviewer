@@ -81,6 +81,36 @@ export const readPdf = async (req, res) => {
   }
 };
 
+export const getLeetCodeAnalysis = async (req, res) => {
+  const { username } = req.body;
+  try {
+    const url = `https://leetcode-stats-api.herokuapp.com/${username}`;
+    const response = await axios.get(url);
+    const stats = response.data;
+    if (!stats || stats.status === 'error') {
+      return res.status(404).json({ text: 'No LeetCode stats found for this user.' });
+    }
+    // Create a text summary
+    const text = `LeetCode Profile Analysis for ${username}:
+
+Total Solved: ${stats.totalSolved} / ${stats.totalQuestions}
+Easy: ${stats.easySolved} / ${stats.totalEasy}
+Medium: ${stats.mediumSolved} / ${stats.totalMedium}
+Hard: ${stats.hardSolved} / ${stats.totalHard}
+Ranking: ${stats.ranking}
+Contribution Points: ${stats.contributionPoints}
+Reputation: ${stats.reputation}
+Acceptance Rate: ${stats.acceptanceRate}%
+
+Recent Submission Stats:
+${stats.recentSubmissionStats?.map(s => `- ${s.title} (${s.status})`).join('\n') || 'No recent submissions.'}`;
+    res.json({ text });
+  } catch (error) {
+    console.log("Exception encountered while fetching LeetCode stats", error);
+    res.status(500).json({ message: 'Failed to fetch LeetCode stats' });
+  }
+};
+
 export const getRandomTopic = async (req, res) => {
   try {
     const { resumeText } = req.body;

@@ -17,6 +17,9 @@ const Dashboard = lazy(() => import("../layout/Dashboard"));
 const InterviewPage = lazy(() => import("../pages/InterviewPage"));
 const About = lazy(() => import("../pages/About"));
 const Profile = lazy(() => import("../pages/profile"));
+const SocialLayout = lazy(() => import("../layout/SocialLayout"));
+const Message = lazy(() => import("../pages/Message"));
+const Posts = lazy(() => import("../pages/Posts"));
 
 const suspense = (Component) => (
   <Suspense fallback={
@@ -56,6 +59,20 @@ const router = createBrowserRouter([
       {
         path: "/contact",
         element: suspense(Contact),
+      },
+      {
+        path:"/social",
+        element:suspense(SocialLayout),
+        children:[
+          {
+            path:"post",
+            element:suspense(Posts),
+          },
+          {
+            path:"message",
+            element:suspense(Message),
+          }          
+        ]
       },
       {
         path: "/interview/:id",

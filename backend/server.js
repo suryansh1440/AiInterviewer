@@ -7,11 +7,14 @@ import authRouter from './router/auth.router.js';
 import aiRouter from './router/ai.router.js';
 import interviewRouter from './router/interview.router.js'
 import paymentRouter from './router/payment.router.js'
+import { app, server } from './lib/socket.js';
+import postRouter from './router/post.router.js';
+import messageRouter from './router/message.router.js';
 
 
 dotenv.config()
 
-const app = express();
+
 
 const PORT = process.env.PORT;
 app.use(cookieParser());
@@ -28,16 +31,15 @@ app.use("/api/auth",authRouter)
 app.use("/api/ai",aiRouter)
 app.use("/api/interview",interviewRouter)
 app.use("/api/payment",paymentRouter)
-
-
-
+app.use("/api/post",postRouter)
+app.use("/api/message",messageRouter)
 
 
 app.get("/",(req,res)=>{
     res.send("Hello World");
 })
 
-app.listen(PORT, () => {
+server.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
     connectDB();
 });
