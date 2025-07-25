@@ -1,96 +1,62 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useRef } from 'react';
 import { useAuthStore } from '../store/useAuthStore';
-import { PhoneOff } from 'lucide-react';
-import { vapi } from '../lib/vapi.sdk';
-import { useNavigate } from 'react-router-dom';
 import { useInterviewStore } from '../store/useInterviewStore';
-import toast from 'react-hot-toast';
-import { Loader } from 'lucide-react';
+import { PhoneOff, Loader } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 const Agent = () => {
-    const [isSpeaking, setIsSpeaking] = useState(false);
     const { user } = useAuthStore();
-    const [callStatus, setCallStatus] = useState("Inactive");
-    const [messages,setMessages] = useState([]);
-    const [fadeIn, setFadeIn] = useState(false);
     const navigate = useNavigate();
-    const {createFeedback,interviewData,isCreatingFeedback} = useInterviewStore();
+    const {
+        interviewData,
+        aiResponse,
+        isAIResponding,
+        sendTranscriptToAI,
+        listenForAIResponse,
+        stopListeningForAIResponse,
+        createFeedback,
+        isCreatingFeedback
+    } = useInterviewStore();
+    const [messages, setMessages] = useState([]); // {role: 'user'|'ai', content: string}
+    const [input, setInput] = useState('');
+    const inputRef = useRef();
 
-    const lastMessage = messages[messages.length - 1];
-
+    // Listen for AI responses
     useEffect(() => {
-        setFadeIn(false);
-        const timeout = setTimeout(() => setFadeIn(true), 10);
-        return () => clearTimeout(timeout);
-    }, [lastMessage]);
-
-    useEffect(() => {
-        const onCallStart = () => {
-            setCallStatus("Active");
-        };
-
-        const onCallEnd = () => {
-            setCallStatus("Finished");
-        };
-
-        const onMessage = (message) => {
-            if (message.type === 'transcript' && message.transcriptType === 'final') {
-                const newMessage = {
-                    role: message.role,
-                    content: message.transcript
-                };
-                setMessages(prev => [...prev, newMessage]);
-            }
-        };
-
-        const onSpeechStart = ()=>{
-            setIsSpeaking(true);
-        }
-
-        const onSpeechEnd = ()=>{
-            setIsSpeaking(false);
-        }
-
-        const onError=(error)=>{
-            console.log("error",error)
-        }
-
-
-        vapi.on('call-start',onCallStart);
-        vapi.on('call-end',onCallEnd);
-        vapi.on('message',onMessage);
-        vapi.on('speech-start',onSpeechStart);
-        vapi.on('speech-end',onSpeechEnd);
-        vapi.on('error',onError);
-
-        return () => {
-            if (typeof vapi.off === 'function') {
-                vapi.off('call-start',onCallStart);
-                vapi.off('call-end',onCallEnd);
-                vapi.off('message',onMessage);
-                vapi.off('speech-start',onSpeechStart);
-                vapi.off('speech-end',onSpeechEnd);
-                vapi.off('error',onError);
-            }
-        }
+        listenForAIResponse();
+        return () => stopListeningForAIResponse();
     }, []);
 
+    // Add AI response to messages
     useEffect(() => {
-        if(callStatus === "Finished"){
-            (async () => {
-                const interview = await createFeedback(interviewData._id,messages);
-                navigate("/dashboard/attempt");
-            })();
+        if (aiResponse) {
+            setMessages((prev) => [...prev, { role: 'ai', content: aiResponse }]);
         }
-    },[messages,callStatus,user._id]);
+    }, [aiResponse]);
 
+    // Scroll to bottom on new message
+    const messagesEndRef = useRef(null);
+    useEffect(() => {
+        if (messagesEndRef.current) {
+            messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
+        }
+    }, [messages]);
 
-    const handleDisconnect = async ()=>{
-        setCallStatus("Finished");
-            await vapi.stop();
-    }
+    // Handle user send
+    const handleSend = (e) => {
+        e.preventDefault();
+        const transcript = input.trim();
+        if (!transcript) return;
+        setMessages((prev) => [...prev, { role: 'user', content: transcript }]);
+        setInput('');
+        sendTranscriptToAI(transcript, {
+            questions: interviewData?.questions || [],
+            resume: interviewData?.resume || '',
+            leetcodeStats: interviewData?.leetcodeStats || ''
+        });
+    };
 
-    if(isCreatingFeedback) return (
+    if (isCreatingFeedback) return (
         <div className='flex items-center justify-center h-screen bg-base-200'>
             <div className='flex flex-col items-center gap-6 p-10 rounded-2xl shadow-xl bg-base-100 border border-primary/20'>
                 <Loader className='w-16 h-16 text-primary animate-spin' />
@@ -98,8 +64,7 @@ const Agent = () => {
                 <div className='text-base text-base-content/70'>Please wait while we analyze your interview and generate detailed feedback.</div>
             </div>
         </div>
-    )
-
+    );
 
     return (
         <>
@@ -107,9 +72,6 @@ const Agent = () => {
                 {/* Agent Card */}
                 <div className="card w-full max-w-xs md:max-w-none md:w-[30rem] min-h-[22rem] border-1 bg-gradient-to-br from-purple-900 from-10% via-black via-50% to-black to-100% shadow-xl p-4 md:p-12 flex flex-col items-center justify-center rounded-2xl overflow-hidden">
                     <div className="relative w-32 h-28 flex items-center justify-center mb-4">
-                        {isSpeaking && (
-                            <span className="absolute inline-flex h-25 w-25 rounded-full bg-primary/30 animate-ping z-0"></span>
-                        )}
                         <img
                             src="/avatar.png"
                             alt="Agent avatar"
@@ -118,7 +80,6 @@ const Agent = () => {
                     </div>
                     <h2 className="font-bold text-2xl text-white mb-2 text-center">AI Interviewer</h2>
                 </div>
-
                 {/* User Card */}
                 <div className="hidden md:flex card md:w-[30rem] min-h-[22rem] border-1 bg-gradient-to-bl from-gray-900 from-10% via-black via-50% to-black to-100% shadow-xl md:p-12 flex-col items-center justify-center rounded-2xl overflow-hidden">
                     <div className="relative w-28 h-28 flex items-center justify-center mb-4">
@@ -132,31 +93,38 @@ const Agent = () => {
                 </div>
             </div>
 
-            {/* messages  */}
-            {messages.length > 0 && (
-                <div className="w-full flex justify-center my-4">
-                    <div className="bg-gradient-to-bl from-gray-900 from-10% via-black via-50% to-black to-100% rounded-xl shadow-inner p-4 border border-base-300 max-w-2xl w-full flex justify-center">
-                        <p
-                            key={lastMessage?.content}
-                            className={`text-base font-medium text-center text-base-content break-words transition-opacity duration-500 ${fadeIn ? 'opacity-100' : 'opacity-0'}`}
-                        >
-                            {lastMessage?.content}
-                        </p>
-                    </div>
+            {/* Chat messages */}
+            <div className="w-full flex flex-col items-center my-4">
+                <div className="bg-gradient-to-bl from-gray-900 from-10% via-black via-50% to-black to-100% rounded-xl shadow-inner p-4 border border-base-300 max-w-2xl w-full flex flex-col gap-2 min-h-[200px] max-h-[400px] overflow-y-auto">
+                    {messages.map((msg, idx) => (
+                        <div key={idx} className={`text-base font-medium break-words ${msg.role === 'ai' ? 'text-primary' : 'text-base-content'} text-left`}>{msg.role === 'ai' ? 'AI: ' : 'You: '}{msg.content}</div>
+                    ))}
+                    {isAIResponding && (
+                        <div className="flex items-center gap-2 text-primary text-base font-medium"><Loader className="w-4 h-4 animate-spin" />AI is thinking...</div>
+                    )}
+                    <div ref={messagesEndRef} />
                 </div>
-            )}
-
-            {/* call buttons */}
-            <div className='w-full flex justify-center'>
-                {callStatus === "Active" && (
+                {/* Input box */}
+                <form onSubmit={handleSend} className="flex gap-2 w-full max-w-2xl mt-4">
+                    <input
+                        ref={inputRef}
+                        type="text"
+                        className="input input-bordered flex-1 text-base rounded-xl bg-base-100 focus:border-primary focus:ring-2 focus:ring-primary/20"
+                        placeholder="Type your answer or question..."
+                        value={input}
+                        onChange={e => setInput(e.target.value)}
+                        disabled={isAIResponding}
+                        maxLength={500}
+                        autoFocus
+                    />
                     <button
-                        onClick={handleDisconnect}
-                        className="btn btn-error flex items-center gap-2 px-8 py-3 rounded-full text-lg font-semibold shadow-md hover:scale-105 transition-transform duration-150"
+                        type="submit"
+                        className="btn btn-primary px-6 py-2 rounded-xl font-semibold text-base shadow-md hover:scale-105 transition-transform disabled:opacity-60"
+                        disabled={isAIResponding || !input.trim()}
                     >
-                        <PhoneOff className="w-5 h-5" />
-                        <span>End Interview</span>
+                        Send
                     </button>
-                )}
+                </form>
             </div>
         </>
     );
