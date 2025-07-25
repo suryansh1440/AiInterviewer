@@ -4,6 +4,7 @@ import toast from "react-hot-toast";
 import { vapi } from '../lib/vapi.sdk';
 import { interviewer } from '../constant';
 import { useAuthStore } from './useAuthStore';
+import { socket as interviewerSocket } from '../lib/socket';
 
 export const useInterviewStore = create((set, get) => ({
     interviews: [],
@@ -17,6 +18,8 @@ export const useInterviewStore = create((set, get) => ({
     isCreatingFeedback: false,
     showInterview: null,
     isGettingInterviews:false,
+    aiResponse: '',
+    isAIResponding: false,
 
 
     setShowInterview: (id) => set({ showInterview: id }),
@@ -138,6 +141,19 @@ export const useInterviewStore = create((set, get) => ({
         } finally {
             set({ isGettingInterviews: false });
         }
+    },
+
+    sendTranscriptToAI: (transcript, context) => {
+        set({ isAIResponding: true });
+        interviewerSocket.emit('user_message', { transcript, context });
+    },
+    listenForAIResponse: () => {
+        interviewerSocket.on('ai_message', (data) => {
+            set({ aiResponse: data.text, isAIResponding: false });
+        });
+    },
+    stopListeningForAIResponse: () => {
+        interviewerSocket.off('ai_message');
     },
 
 
