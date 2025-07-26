@@ -2,6 +2,7 @@ import React from "react";
 import { useModalStore } from "../store/useModalStore";
 import { Link } from "react-router-dom";
 import { useAuthStore } from "../store/useAuthStore";
+import Footer from "../components/Footer";
 
 const features = [
   {
@@ -171,6 +172,7 @@ const Home = () => {
           ))}
         </div>
       </section>
+      <Footer />
     </div>
   );
 };

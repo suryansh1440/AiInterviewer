@@ -6,6 +6,7 @@ import { useModalStore } from "../store/useModalStore";
 import { usePaymentStore } from "../store/usePaymentStore";
 import toast from "react-hot-toast";
 import { Loader } from "lucide-react";
+import Footer from "../components/Footer";
 
 
 const comparisonRows = [
@@ -292,6 +293,7 @@ const Pricing = () => {
           )}
         </div>
       </section>
+      <Footer />
     </div>
   );
 };

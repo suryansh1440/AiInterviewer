@@ -2,15 +2,16 @@ import React from "react";
 import { Link } from "react-router-dom";
 import { useAuthStore } from "../store/useAuthStore";
 import { useModalStore } from "../store/useModalStore";
+import Footer from "../components/Footer";
 
 
 const About = () => {
   const {user} = useAuthStore();
   const {setOpenModal} = useModalStore();
   return (
-    <div className="min-h-[120vh] bg-gradient-to-br from-base-200 to-base-100 flex items-center justify-center py-8">
-      <div className="pt-4 flex justify-center w-full">
-        <div className="w-full max-w-5xl bg-base-100 rounded-3xl shadow-2xl p-8 md:p-12 transition-shadow duration-200 hover:shadow-[0_0_40px_10px_var(--tw-shadow-color,theme(colors.primary/0.15))]">
+    <div className="min-h-[120vh] bg-gradient-to-br from-base-200 to-base-100 flex items-center justify-center pt-8">
+      <div className="pt-4 flex flex-col justify-center items-center w-full">
+        <div className="w-full max-w-5xl bg-base-100 pb-4 rounded-3xl shadow-2xl p-8 md:p-12 transition-shadow duration-200 hover:shadow-[0_0_40px_10px_var(--tw-shadow-color,theme(colors.primary/0.15))]">
           {/* Header */}
           <div className="mb-8 text-center">
             <h1 className="text-4xl font-extrabold text-base-content mb-2">About AI Interview</h1>
@@ -80,8 +81,9 @@ const About = () => {
             )}
           </div>
         </div>
+      <Footer />
       </div>
-      <div className="h-32" />
+     
     </div>
   );
 };

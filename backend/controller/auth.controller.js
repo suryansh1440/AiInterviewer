@@ -51,6 +51,7 @@ export const signup = async (req, res) => {
       lastLogin: newUser.lastLogin,
       interviewLeft: newUser.interviewLeft,
       interviewLeftExpire: newUser.interviewLeftExpire,
+      leetcodeUsername: newUser.leetcodeUsername,
       createdAt: newUser.createdAt,
       updatedAt: newUser.updatedAt,
     });
@@ -95,6 +96,7 @@ export const login = async (req, res) => {
       lastLogin: user.lastLogin,
       interviewLeft: user.interviewLeft,
       interviewLeftExpire: user.interviewLeftExpire,
+      leetcodeUsername: user.leetcodeUsername,
       createdAt: user.createdAt,
       updatedAt: user.updatedAt,
     });
@@ -117,7 +119,7 @@ export const logout = async (req, res) => {
 export const updateProfile = async (req, res) => {
   try {
     const userId = req.user._id;
-    let { name, phone, profilePic, resume } = req.body;
+    let { name, phone, profilePic, resume, leetcodeUsername } = req.body;
     const user = await User.findById(userId);
     if (!user) {
       return res.status(404).json({ message: "User not found" });
@@ -161,6 +163,7 @@ export const updateProfile = async (req, res) => {
     user.phone = phone || user.phone;
     user.profilePic = profilePicUrl;
     user.resume = resumeUrl;
+    user.leetcodeUsername = leetcodeUsername || user.leetcodeUsername;
     await user.save();
 
     return res.status(200).json({
@@ -179,6 +182,7 @@ export const updateProfile = async (req, res) => {
       lastLogin: user.lastLogin,
       interviewLeft: user.interviewLeft,
       interviewLeftExpire: user.interviewLeftExpire,
+      leetcodeUsername: user.leetcodeUsername,
       createdAt: user.createdAt,
       updatedAt: user.updatedAt,
       resume: user.resume,
@@ -334,6 +338,7 @@ export const googleLogin = async (req, res) => {
       lastLogin: user.lastLogin,
       interviewLeft: user.interviewLeft,
       interviewLeftExpire: user.interviewLeftExpire,
+      leetcodeUsername: user.leetcodeUsername,
       createdAt: user.createdAt,
       updatedAt: user.updatedAt,
       resume: user.resume,

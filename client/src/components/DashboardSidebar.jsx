@@ -9,7 +9,7 @@ const DashboardSidebar = () => {
   const navigate = useNavigate();
 
   return (
-    <aside className="hidden p-4 sm:flex flex-col w-64 bg-base-200 border-r">
+    <aside className="hidden p-4 sm:flex flex-col w-64 bg-base-200 py-8">
       {/* Sidebar content */}
       <div className="flex flex-col flex-grow">
         {/* Navigation */}

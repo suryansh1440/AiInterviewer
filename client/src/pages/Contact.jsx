@@ -1,8 +1,10 @@
 import React from 'react';
 import { Mail, MessageCircle } from 'lucide-react';
+import Footer from '../components/Footer';
 
 const Contact = () => {
   return (
+    <div>
     <section className="min-h-screen bg-base-200 py-16 px-4 flex flex-col items-center justify-center">
       {/* Hero Section */}
       <div className="max-w-2xl w-full text-center mb-10">
@@ -79,6 +81,8 @@ const Contact = () => {
         </div>
       </div>
     </section>
+    <Footer />
+    </div>
   );
 };
 

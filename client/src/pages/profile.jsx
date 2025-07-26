@@ -65,6 +65,24 @@ const Profile = () => {
               </span>
               <span className="bg-base-200 text-primary px-3 py-1 rounded-full text-base font-semibold">Last login: {formatDate(user?.lastLogin)}</span>
             </div>
+            {/* LeetCode Linked Status */}
+            <div className="flex items-center gap-2 mb-2">
+              {user?.leetcodeUsername ? (
+                <span className="flex items-center gap-2 bg-success/10 text-success px-3 py-1 rounded-full font-semibold text-sm">
+                  <svg className="w-4 h-4 text-success" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
+                  LeetCode Linked
+                  <span className="text-success/70">({user.leetcodeUsername})</span>
+                </span>
+              ) : (
+                <span className="flex items-center gap-2 bg-error/10 text-error px-3 py-1 rounded-full font-semibold text-sm">
+                  <svg className="w-4 h-4 text-error" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+                  LeetCode Not Linked
+                </span>
+              )}
+              <button className="btn btn-outline btn-primary btn-xs ml-2" onClick={() => setShowUpdateProfile(true)}>
+                {user?.leetcodeUsername ? 'Update' : 'Link'}
+              </button>
+            </div>
             <p className="text-base-content/70 text-base mb-1">{user?.email}</p>
             <p className="text-base-content/70 text-base mb-3">{user?.phone}</p>
             <div className="flex gap-3 w-full justify-center md:justify-start mb-3">
@@ -80,7 +98,7 @@ const Profile = () => {
                   <span>View Resume</span>
                 </a>
               )}
-              <button className="btn btn-outline btn-primary flex items-center gap-2 font-bold shadow-sm hover:bg-primary hover:text-primary-content transition px-6 py-2 text-base" onClick={() => setShowUpdateProfile(true)}>Edit Profile</button>
+              <button className="btn btn-outline btn-primary flex items-center gap-2 font-bold shadow-sm hover:bg-primary hover:text-primary-content transition px-6 py-2 text-base" onClick={() => setShowUpdateProfile(true)}>Update Profile</button>
             </div>
           </div>
           {/* Stats */}
@@ -193,7 +211,7 @@ const Profile = () => {
         </div>
         {/* Action Buttons */}
         <div className="flex flex-col md:flex-row gap-4 justify-end mt-6">
-          <button className="bg-base-200 text-base-content px-6 py-2 rounded hover:bg-base-300 transition font-bold text-base" onClick={() => setShowUpdateProfile(true)}>Edit Profile</button>
+          <button className="bg-base-200 text-base-content px-6 py-2 rounded hover:bg-base-300 transition font-bold text-base" onClick={() => setShowUpdateProfile(true)}>Update Profile</button>
           {user?.authProvider === 'local' && (
             <button className="bg-base-200 text-base-content px-6 py-2 rounded hover:bg-base-300 transition font-bold text-base" onClick={() => setShowChangePass(true)}>Change Password</button>
           )}
