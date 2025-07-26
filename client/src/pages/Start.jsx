@@ -6,6 +6,7 @@ import { useModalStore } from '../store/useModalStore';
 import toast from 'react-hot-toast';
 import UpdateProfileModal from '../components/UpdateProfileModal';
 import { useInterviewStore } from '../store/useInterviewStore';
+import axios from 'axios';
 
 const categories = [
   { id: 'tech', label: 'Tech & Programming', icon: Computer },
@@ -46,6 +47,9 @@ const Start = () => {
   const [showLeetModal, setShowLeetModal] = useState(false);
   const [leetToggle, setLeetToggle] = useState(!!user?.leetcodeUsername);
   const [isGeneratingRandomTopic,setIsGeneratingRandomTopic] = useState(false);
+  const [repoUrl, setRepoUrl] = useState('');
+  const [projectQuestions, setProjectQuestions] = useState([]);
+  const [projectLoading, setProjectLoading] = useState(false);
 
   useEffect(() => {
     setLeetToggle(!!user?.leetcodeUsername);
@@ -94,6 +98,18 @@ const Start = () => {
     if(call){
       navigate(`/interview/id=${interview._id}`);
     }
+  };
+
+  const handleAnalyzeRepo = async () => {
+    setProjectLoading(true);
+    setProjectQuestions([]);
+    try {
+      const res = await axios.post('/api/ai/project-questions', { repoUrl });
+      setProjectQuestions(res.data.questions);
+    } catch (err) {
+      alert('Failed to analyze repo or generate questions.');
+    }
+    setProjectLoading(false);
   };
 
   // Autofill topic/subtopic on category click
@@ -341,6 +357,38 @@ const Start = () => {
               <span className="text-xs text-primary-content/80 font-normal mt-1">based on your resume</span>
             </button>
           )}
+
+          {/* Project Repo Analysis */}
+          <div className="rounded-xl border border-info/30 bg-base-200 p-6 flex flex-col gap-2 shadow-sm mb-6">
+            <span className="font-bold text-lg flex items-center gap-2 text-info">
+              <svg className="w-6 h-6 text-info" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" /></svg>
+              Analyze Your Project Repo
+            </span>
+            <input
+              type="text"
+              placeholder="Paste your GitHub repo link (public)"
+              value={repoUrl}
+              onChange={e => setRepoUrl(e.target.value)}
+              className="input input-bordered w-full max-w-xl mt-2"
+            />
+            <button
+              onClick={handleAnalyzeRepo}
+              className="btn btn-info mt-2 w-fit"
+              disabled={projectLoading || !repoUrl}
+            >
+              {projectLoading ? 'Analyzing...' : 'Analyze Repo & Generate Questions'}
+            </button>
+            {projectQuestions.length > 0 && (
+              <div className="mt-4">
+                <h3 className="font-bold mb-2 text-info">AI Project Interview Questions:</h3>
+                <ul className="list-disc pl-6">
+                  {projectQuestions.map((q, i) => (
+                    <li key={i} className="mb-2 text-base-content/80">{q}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
 
           {/* ✅ Start Interview Button */}
           <button

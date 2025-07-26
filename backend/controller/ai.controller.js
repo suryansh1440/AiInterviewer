@@ -7,6 +7,9 @@ import { ServicePrincipalCredentials, PDFServices, MimeType, ExtractPDFParams, E
 import fs from "fs";
 import AdmZip from "adm-zip";
 import path from "path";
+import { spawn } from 'child_process';
+import { GoogleGenerativeAI } from '@google/generative-ai';
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
 export const readPdf = async (req, res) => {
   const { url } = req.body;
@@ -251,4 +254,36 @@ export const createFeedback = async (req,res)=>{
     console.log("Error in createFeedback",error);
     return res.status(500).json({message:"Internal Server Error"})
   }
+};
+
+export const generateProjectQuestions = async (req, res) => {
+  const { repoUrl, githubToken } = req.body;
+  if (!repoUrl) return res.status(400).json({ message: 'No repo URL provided' });
+
+  // 1. Call Python script to get repo digest
+  const py = spawn('python3', ['get_repo_digest.py', repoUrl, githubToken || '']);
+  let output = '';
+  py.stdout.on('data', (data) => { output += data.toString(); });
+  py.stderr.on('data', (data) => { console.error(data.toString()); });
+  py.on('close', async (code) => {
+    if (code !== 0) return res.status(500).json({ message: 'Failed to process repo' });
+
+    // 2. Compose prompt for Gemini
+    const prompt = `
+You are an AI interviewer. The candidate submitted a project with the following:
+
+${output}
+
+Based on this, generate 3 in-depth interview questions about their project, design choices, and problem-solving skills.
+Return only a JSON array of questions.
+    `;
+    try {
+      const result = await genAI.generateContent(prompt);
+      const cleanText = result.response.text().replace(/```json\n?|\n?```/g, '').trim();
+      const questions = JSON.parse(cleanText);
+      res.json({ questions });
+    } catch (err) {
+      res.status(500).json({ message: 'Failed to generate questions' });
+    }
+  });
 };
