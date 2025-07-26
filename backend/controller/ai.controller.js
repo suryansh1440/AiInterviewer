@@ -135,7 +135,7 @@ export const getRandomTopic = async (req, res) => {
 };
 
 export const generateQuestion = async (req,res)=>{
-  const {topic,subTopic,level,amount} = req.body;
+  const {topic,subTopic,level,amount,resume,leetcode} = req.body;
   const userId = req.user._id;
   try{
     if(!topic || !subTopic || !level || !amount) {
@@ -154,9 +154,8 @@ export const generateQuestion = async (req,res)=>{
       }
     }
 
-
-
-    const prompt = `Given the topic ${topic} and subtopic ${subTopic} and the difficulty level ${level}, generate ${amount} interview questions. Each question should be clear concise and suitable for an AI voice agent to read aloud Do not use any special characters in the questions only letters numbers and spaces Return only a valid JSON array of strings with no explanations or extra text Example output:\n[\n  "What is a data structure",\n  "Explain the concept of a linked list",\n  "How do you implement a stack in code"\n]\nNow generate the questions.`;    
+    // --- Improved Prompt ---
+    const prompt = `Given the following context, generate ${amount} personalized interview questions.\n\nContext:\n- Topic: ${topic}\n- Subtopic: ${subTopic}\n- Difficulty: ${level}\n- Resume: ${resume || 'N/A'}\n- LeetCode Stats: ${leetcode || 'N/A'}\n\nRequirements:\n- At least one question should be a behavioral or amplitude (soft skills) question.\n- The rest should be technical and personalized based on the resume and LeetCode stats.\n- Each question should be clear, concise, and suitable for an AI voice agent to read aloud.\n- Do not use any special characters in the questions, only letters, numbers, and spaces.\n- Return only a valid JSON array of strings with no explanations or extra text.\n\nExample output:\n[\n  "What is a data structure",\n  "Explain the concept of a linked list",\n  "How do you implement a stack in code",\n  "Describe a time you overcame a challenge at work"\n]\nNow generate the questions.`;
 
     const {text} = await generateText({
       model : google('gemini-2.0-flash-001'),

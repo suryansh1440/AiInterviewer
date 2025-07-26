@@ -41,7 +41,7 @@ const Start = () => {
   const [subTopic, setSubTopic] = useState('');
   const [includeResume, setIncludeResume] = useState(!!(user && user.resume && user.resume.endsWith('.pdf')));
   const [showResumeModal, setShowResumeModal] = useState(false);
-  const [numQuestions, setNumQuestions] = useState(2);
+  const [numQuestions, setNumQuestions] = useState(3);
   const [difficulty, setDifficulty] = useState('easy');
   const [showLeetModal, setShowLeetModal] = useState(false);
   const [leetToggle, setLeetToggle] = useState(!!user?.leetcodeUsername);
@@ -63,18 +63,7 @@ const Start = () => {
       return;
     }
 
-    const interviewData = {
-      topic,
-      subTopic,
-      level:difficulty,
-      amount:numQuestions
-    }
-    const interview = await generateQuestion(interviewData)
-    if(!interview){
-      return;
-    }
-    setInterviewData(interview)
-
+    
     let leet = 'no leetcode stats included';
     if(leetToggle && user?.leetcodeUsername){
       leet = await getLeetCodeAnalysis(user.leetcodeUsername);
@@ -88,7 +77,22 @@ const Start = () => {
       }
     }
 
+    const interviewData = {
+      topic,
+      subTopic,
+      level:difficulty,
+      amount:numQuestions,
+      resume,
+      leetcode:leet
+    }
+    const interview = await generateQuestion(interviewData)
+    if(!interview){
+      return;
+    }
+    setInterviewData(interview)
+
     // Ensure questions is always an array
+
     const questions = Array.isArray(interview.questions) ? interview.questions : [];
     const call = await handleCall(questions, leet, resume);
     if(call){
@@ -305,7 +309,7 @@ const Start = () => {
                 onChange={e => setNumQuestions(Number(e.target.value))}
                 className="px-3 py-1 border border-primary rounded-md text-base-content bg-base-100 text-base font-medium focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent/20 transition-all duration-150 w-20 shadow-sm"
               >
-                {[2,3,4,5].map(n => (
+                {[3,4,5].map(n => (
                   <option key={n} value={n}>{n}</option>
                 ))}
               </select>
