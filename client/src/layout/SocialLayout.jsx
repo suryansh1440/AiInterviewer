@@ -11,9 +11,9 @@ const SocialLayout = () => {
   const handleCloseCreate = () => setOpenCreateModal(false);
 
   return (
-    <div className="max-h-[90vh] items-center bg-base-200 flex flex-row gap-8 px-4 md:px-10">
+    <div className="w-full max-h-[90vh] flex flex-col md:flex-row items-center bg-base-200 gap-8 px-2 sm:px-4 md:px-10">
       <SocialSidebar onCreateClick={handleOpenCreate} />
-      <main className="flex-1 flex flex-col items-center mt-6 justify-start">
+      <main className="flex-1 w-full flex flex-col items-center mt-6 justify-start">
         <Outlet />
       </main>
       <CreatePostModal open={openCreateModal} onClose={handleCloseCreate}/>
