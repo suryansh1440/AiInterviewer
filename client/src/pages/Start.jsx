@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { Mic, Zap, Computer, Building, DollarSign, Settings, Heart, Scale, BarChart3, TrendingUp } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useAuthStore } from '../store/useAuthStore';
 import { useModalStore } from '../store/useModalStore';
 import toast from 'react-hot-toast';
 import UpdateProfileModal from '../components/UpdateProfileModal';
+import GithubProjectModal from '../components/GithubProjectModal';
 import { useInterviewStore } from '../store/useInterviewStore';
+import { useGithubProjectStore } from '../store/useGithubProjectStore';
 
 const categories = [
   { id: 'tech', label: 'Tech & Programming', icon: Computer },
@@ -34,22 +36,29 @@ const Start = () => {
   const { user } = useAuthStore();
   const { setOpenModal } = useModalStore();
   const navigate = useNavigate();
-  const {isGettingRandomTopic,isGettingResume,resumeData,randomTopic,getRandomTopic,readResume,setInterviewData,generateQuestion,isGeneratingQuestion,handleCall,isStartingInterview} = useInterviewStore()
+  const {isGettingResume,resumeData,randomTopic,getRandomTopic,readResume,setInterviewData,generateQuestion,isGeneratingQuestion,handleCall,isStartingInterview,getLeetCodeAnalysis,isGettingLeetCodeAnalysis} = useInterviewStore()
+  const {githubProjects} = useGithubProjectStore()
 
 
   const [topic, setTopic] = useState('');
   const [subTopic, setSubTopic] = useState('');
   const [includeResume, setIncludeResume] = useState(!!(user && user.resume && user.resume.endsWith('.pdf')));
   const [showResumeModal, setShowResumeModal] = useState(false);
-  const [numQuestions, setNumQuestions] = useState(2);
+  const [numQuestions, setNumQuestions] = useState(3);
   const [difficulty, setDifficulty] = useState('easy');
+  const [showLeetModal, setShowLeetModal] = useState(false);
+  const [leetToggle, setLeetToggle] = useState(!!user?.leetcodeUsername);
+  const [isGeneratingRandomTopic,setIsGeneratingRandomTopic] = useState(false);
+  const [githubToggle, setGithubToggle] = useState(false);
+  const [showGithubModal, setShowGithubModal] = useState(false);
 
-  // useEffect(() => {
-  //   if (user && user.interviewLeft === 0 && user.subscription !== 'pro') {
-  //     toast.error("No interview credits left. Please upgrade or buy more.");
-  //     navigate("/pricing");
-  //   }
-  // }, [user, navigate]);
+  useEffect(() => {
+    setLeetToggle(!!user?.leetcodeUsername);
+    const hasGithubProjects = !!githubProjects && githubProjects.length > 0;
+    setGithubToggle(hasGithubProjects);
+  }, [user?.leetcodeUsername, githubProjects]);
+
+
 
   const handleStartClick = async () => {
     if (!user) {
@@ -62,19 +71,53 @@ const Start = () => {
       return;
     }
 
+    
+    let leet = 'no leetcode stats included';
+    if(leetToggle && user?.leetcodeUsername){
+      leet = await getLeetCodeAnalysis(user.leetcodeUsername);
+    }
+    let resume = 'no resume included';
+    if(includeResume){
+      if(!resumeData){
+        resume = await readResume(user.resume)
+      }else{
+        resume = resumeData;
+      }
+    }
+
+    let github;
+    if(githubToggle && githubProjects && githubProjects.length > 0){
+      github = JSON.stringify(githubProjects.map(project => ({
+        url: project.url,
+        analysis: project.analysis,
+        tree: project.tree
+      })));
+    }else{
+      github = 'no github projects included';
+    }
+
+
+
     const interviewData = {
       topic,
       subTopic,
       level:difficulty,
-      amount:numQuestions
+      amount:numQuestions,
+      resume,
+      leetcode:leet,
+      github
     }
+    console.log(interviewData);
     const interview = await generateQuestion(interviewData)
+    if(!interview){
+      return;
+    }
     setInterviewData(interview)
-    console.log(interview)
 
-    // start vapi 
+    // Ensure questions is always an array
 
-    const call = await handleCall(interview.questions)
+    const questions = Array.isArray(interview.questions) ? interview.questions : [];
+    const call = await handleCall(questions, leet, resume, github,user?.name);
     if(call){
       navigate(`/interview/id=${interview._id}`);
     }
@@ -94,6 +137,7 @@ const Start = () => {
     if (!user.resume || user.resume === "") {
       return;
     }
+    setIsGeneratingRandomTopic(true);
     // If topics already exist, use them
     if (randomTopic && Array.isArray(randomTopic) && randomTopic.length > 0) {
       const randomIdx = Math.floor(Math.random() * randomTopic.length);
@@ -114,6 +158,7 @@ const Start = () => {
         setSubTopic(selected.subtopic || '');
       }
     }
+    setIsGeneratingRandomTopic(false);
   };
 
   // Handle resume toggle
@@ -138,6 +183,26 @@ const Start = () => {
     }
   };
 
+  // Add a function to unlink LeetCode
+  const handleLeetToggle = () => {
+    if (!leetToggle && !user?.leetcodeUsername) {
+      setShowLeetModal(true);
+    }else{
+      setLeetToggle((prev) => !prev);
+    }
+  };
+
+  const handleGithubToggle = () => {
+    // If no GitHub projects, open modal to add projects
+    if(!githubProjects || githubProjects.length === 0){
+      setShowGithubModal(true);
+      return;
+    }
+    
+    // If there are GitHub projects, toggle the state
+    setGithubToggle((prev) => !prev);
+  };
+
   return (
     <div className="min-h-screen bg-base-200 font-inter">
       <section className="max-w-4xl mx-auto px-6 py-16">
@@ -153,8 +218,22 @@ const Start = () => {
           <div>
             <h3 className="text-xl font-semibold text-base-content mb-6">Popular Categories</h3>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              {categories.map((category) => {
+              {/* Show only 4 categories on mobile, all on md+ */}
+              {categories.map((category, idx) => {
                 const IconComponent = category.icon;
+                // On mobile, only show first 4
+                if (idx > 3) {
+                  return (
+                    <div
+                      key={category.id}
+                      className="hidden md:block p-4 rounded-xl border-2 border-base-200 bg-base-200 text-primary text-left shadow hover:shadow-lg transition-all duration-200 cursor-pointer"
+                      onClick={() => handleCategoryClick(category.id)}
+                    >
+                      <IconComponent className="w-6 h-6 mb-2" />
+                      <span className="text-sm font-medium text-base-content">{category.label}</span>
+                    </div>
+                  );
+                }
                 return (
                   <div
                     key={category.id}
@@ -169,12 +248,13 @@ const Start = () => {
             </div>
           </div>
 
-          {/* Resume Option - improved and moved below categories */}
-          <div className="rounded-xl border border-primary/30 bg-base-200 p-6 flex flex-col md:flex-row items-center gap-4 shadow-sm">
-            <div className="flex-1 flex flex-col items-start gap-1">
+          {/* Resume and LeetCode Options - side by side on desktop, stacked on mobile */}
+          <div className="flex flex-col md:flex-row gap-6">
+            {/* Resume Box */}
+            <div className="flex-1 rounded-xl border border-primary/30 bg-base-200 p-6 flex flex-col items-start gap-2 shadow-sm">
               <span className="font-bold text-lg flex items-center gap-2 text-primary">
                 <svg className="w-6 h-6 text-primary" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M16 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" /><circle cx="9" cy="7" r="4" /><path strokeLinecap="round" strokeLinejoin="round" d="M23 21v-2a4 4 0 00-3-3.87" /></svg>
-                Resume for Interview
+                Resume Analysis
               </span>
               {user && user.resume && user.resume.endsWith('.pdf') ? (
                 <div className="flex items-center gap-2 mt-1">
@@ -184,18 +264,84 @@ const Start = () => {
               ) : (
                 <span className="text-base-content/70 text-sm mt-1">No resume uploaded. Upload to include in your interview.</span>
               )}
+              <div className="flex flex-col items-center gap-2 mt-2 w-full">
+                <input
+                  type="checkbox"
+                  className="toggle toggle-lg toggle-primary"
+                  checked={includeResume}
+                  onChange={handleResumeToggle}
+                  id="resume-toggle"
+                />
+                <label htmlFor="resume-toggle" className="text-xs text-base-content/70">{includeResume ? 'Included' : 'Not Included'}</label>
+                {includeResume && !(user && user.resume && user.resume.endsWith('.pdf')) && (
+                  <span className="text-error text-xs mt-1">Please upload your resume to enable this option.</span>
+                )}
+              </div>
             </div>
-            <div className="flex flex-col items-center gap-2">
+            {/* LeetCode Box */}
+            <div className="flex-1 rounded-xl border border-warning/30 bg-base-200 p-6 flex flex-col items-start gap-2 shadow-sm">
+              <span className="font-bold text-lg flex items-center gap-2 text-warning">
+                <img src="https://leetcode.com/static/images/LeetCode_logo_rvs.png" alt="LeetCode" className="w-6 h-6 object-contain" />
+                LeetCode Analysis
+              </span>
+              {user?.leetcodeUsername ? (
+                <div className="flex items-center gap-2 mt-1">
+                  <span className="badge badge-success text-xs font-semibold">{user.leetcodeUsername}</span>
+                  <span className="text-success/70">Linked</span>
+                </div>
+              ) : (
+                <span className="text-base-content/70 text-sm mt-1">Link your LeetCode profile to personalize your interview experience.</span>
+              )}
+              <div className="flex flex-col items-center gap-2 mt-2 w-full">
+                <input
+                  type="checkbox"
+                  className="toggle toggle-lg toggle-warning"
+                  checked={leetToggle}
+                  onChange={handleLeetToggle}
+                  id="leetcode-toggle"
+                />
+                <label htmlFor="leetcode-toggle" className="text-xs text-base-content/70 flex items-center gap-1">
+                  {user?.leetcodeUsername ? 'LeetCode Linked' : 'Analyze LeetCode'}
+                </label>
+              </div>
+            </div>
+          </div>
+
+          {/* GitHub Analysis */}
+          <div className="rounded-xl border border-info/30 bg-base-200 p-6 flex flex-col items-start gap-2 shadow-sm">
+            <span className="font-bold text-lg flex items-center gap-2 text-info">
+              <svg className="w-6 h-6 text-info" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" /></svg>
+              GitHub Project Analysis
+            </span>
+            {githubProjects && githubProjects.length > 0 ? (
+              <div className="flex items-center gap-2 mt-1">
+                <span className="badge badge-success text-xs font-semibold">{githubProjects.length} Project{githubProjects.length > 1 ? 's' : ''}</span>
+                <span className="text-success/70">Added</span>
+              </div>
+            ) : (
+              <span className="text-base-content/70 text-sm mt-1">Add your GitHub projects to personalize your interview experience.</span>
+            )}
+            <div className="flex flex-col items-center gap-2 mt-2 w-full">
               <input
                 type="checkbox"
-                className="toggle toggle-lg toggle-primary"
-                checked={includeResume}
-                onChange={handleResumeToggle}
-                id="resume-toggle"
+                className="toggle toggle-lg toggle-info"
+                checked={githubToggle}
+                onChange={handleGithubToggle}
+                id="github-toggle"
               />
-              <label htmlFor="resume-toggle" className="text-xs text-base-content/70">{includeResume ? 'Included' : 'Not Included'}</label>
-              {includeResume && !(user && user.resume && user.resume.endsWith('.pdf')) && (
-                <span className="text-error text-xs mt-1">Please upload your resume to enable this option.</span>
+              <label htmlFor="github-toggle" className="text-xs text-base-content/70 flex items-center gap-1">
+                {githubProjects && githubProjects.length > 0 ? 'GitHub Projects Added' : 'Add GitHub Projects'}
+              </label>
+              {githubProjects && githubProjects.length > 0 && (
+                <button
+                  onClick={() => setShowGithubModal(true)}
+                  className="btn btn-outline btn-info btn-sm mt-2"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                  </svg>
+                  Change Repos
+                </button>
               )}
             </div>
           </div>
@@ -236,7 +382,7 @@ const Start = () => {
                 onChange={e => setNumQuestions(Number(e.target.value))}
                 className="px-3 py-1 border border-primary rounded-md text-base-content bg-base-100 text-base font-medium focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent/20 transition-all duration-150 w-20 shadow-sm"
               >
-                {[2,3,4,5].map(n => (
+                {[3,4,5].map(n => (
                   <option key={n} value={n}>{n}</option>
                 ))}
               </select>
@@ -261,14 +407,12 @@ const Start = () => {
             <button
               className="w-full bg-gradient-to-r from-primary to-secondary text-primary-content py-4 px-6 rounded-xl font-bold text-lg hover:from-primary-focus hover:to-secondary-focus transition-all duration-200 flex flex-col items-center justify-center gap-1 shadow-lg border-2 border-primary/30 disabled:opacity-60 disabled:cursor-not-allowed"
               onClick={handleRandomTopic}
-              disabled={isGettingRandomTopic || isGettingResume}
+              disabled={isGeneratingRandomTopic}
             >
               <span className="flex items-center gap-2">
                 <Zap className="w-6 h-6 text-yellow-300 drop-shadow" />
-                {isGettingResume
-                  ? 'Getting Resume...'
-                  : isGettingRandomTopic
-                  ? 'Getting Random Topic...'
+                {isGeneratingRandomTopic
+                  ? 'Generating Random Topic...'
                   : 'Generate Random Topic'}
               </span>
               <span className="text-xs text-primary-content/80 font-normal mt-1">based on your resume</span>
@@ -279,17 +423,22 @@ const Start = () => {
           <button
             onClick={handleStartClick}
             className="w-full bg-gradient-to-r from-accent to-primary text-primary-content py-4 px-8 rounded-xl font-semibold text-lg hover:from-accent-focus hover:to-primary-focus transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-1"
-            disabled={isGeneratingQuestion || isStartingInterview}
+            disabled={isGeneratingQuestion || isStartingInterview || isGettingLeetCodeAnalysis || isGettingResume}
           >
-            {isGeneratingQuestion
-              ? 'Generating Questions...'
-              : isStartingInterview
-                ? 'Starting Interview...'
-                : 'Start Interview'}
+            {isGettingLeetCodeAnalysis
+              ? 'Getting LeetCode Analysis...'
+              : isGettingResume
+                ? 'Getting Resume...'
+                : isGeneratingQuestion
+                  ? 'Generating Questions...'
+                  : isStartingInterview
+                    ? 'Starting Interview...'
+                    : 'Start Interview'}
           </button>
         </div>
       </section>
-      <UpdateProfileModal open={showResumeModal} onClose={handleResumeModalClose} />
+      <UpdateProfileModal open={showResumeModal || showLeetModal} onClose={() => { setShowResumeModal(false); setShowLeetModal(false); }} />
+      <GithubProjectModal open={showGithubModal} onClose={() => setShowGithubModal(false)} />
     </div>
   );
 };

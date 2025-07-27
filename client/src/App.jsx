@@ -1,7 +1,6 @@
 import React, { useEffect, useRef } from 'react'
 import Navbar from './components/Navbar'
-import Footer from './components/Footer'
-import { Outlet, useLocation } from 'react-router-dom'
+import { Outlet} from 'react-router-dom'
 import { useThemeStore } from './store/useThemeStore'
 import Modal from './components/Modal'
 import { useModalStore } from './store/useModalStore'
@@ -14,7 +13,6 @@ import { Loader } from 'lucide-react'
 const App = () => {
   const { theme } = useThemeStore();
   const { isOpenModal } = useModalStore();
-  const location = useLocation();
   const {user,checkAuth,isCheckingAuth} = useAuthStore()
 
 
@@ -30,12 +28,11 @@ const App = () => {
   )
 
   return (
-    <div data-theme={theme} className="relative">
+    <div data-theme={theme} className="relative overflow-hidden">
       <Navbar />
       <div className='min-h-[90vh]'>
         <Outlet />
       </div>
-      {!location.pathname.startsWith('/dashboard') && !location.pathname.startsWith('/interview/id=')  && <Footer />}
       {isOpenModal && (
         <>
           <div className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm transition-opacity duration-300">

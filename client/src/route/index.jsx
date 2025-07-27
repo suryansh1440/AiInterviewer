@@ -15,8 +15,10 @@ const Contact = lazy(() => import("../pages/Contact"));
 const Attempt = lazy(() => import("../pages/Attempt"));
 const Dashboard = lazy(() => import("../layout/Dashboard"));
 const InterviewPage = lazy(() => import("../pages/InterviewPage"));
-const About = lazy(() => import("../pages/About"));
 const Profile = lazy(() => import("../pages/profile"));
+const SocialLayout = lazy(() => import("../layout/SocialLayout"));
+const Posts = lazy(() => import("../pages/Posts"));
+const Leaderboard = lazy(() => import("../pages/Leaderboard"));
 
 const suspense = (Component) => (
   <Suspense fallback={
@@ -38,10 +40,6 @@ const router = createBrowserRouter([
         element: suspense(Home),
       },
       {
-        path: "/about",
-        element: suspense(About),
-      },
-      {
         path: "/pricing",
         element: suspense(Pricing),
       },
@@ -56,6 +54,20 @@ const router = createBrowserRouter([
       {
         path: "/contact",
         element: suspense(Contact),
+      },
+      {
+        path:"/social",
+        element:suspense(SocialLayout),
+        children:[
+          {
+            path:"post",
+            element:suspense(Posts),
+          },
+          {
+            path:"leaderboard",
+            element:suspense(Leaderboard),
+          }          
+        ]
       },
       {
         path: "/interview/:id",
@@ -83,4 +95,4 @@ const router = createBrowserRouter([
   },
 ]);
 
-export default router; 
+export default router;

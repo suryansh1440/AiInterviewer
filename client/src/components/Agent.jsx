@@ -105,7 +105,7 @@ const Agent = () => {
         <>
             <div className="flex flex-col md:flex-row justify-center items-center gap-10 w-full py-10">
                 {/* Agent Card */}
-                <div className="card w-[30rem] min-h-[22rem] border-1 bg-gradient-to-br from-purple-900 from-10% via-black via-50% to-black to-100% shadow-xl p-12 flex flex-col items-center justify-center rounded-2xl overflow-hidden">
+                <div className="card w-full max-w-xs md:max-w-none md:w-[30rem] min-h-[22rem] border-1 bg-gradient-to-br from-purple-900 from-10% via-black via-50% to-black to-100% shadow-xl p-4 md:p-12 flex flex-col items-center justify-center rounded-2xl overflow-hidden">
                     <div className="relative w-32 h-28 flex items-center justify-center mb-4">
                         {isSpeaking && (
                             <span className="absolute inline-flex h-25 w-25 rounded-full bg-primary/30 animate-ping z-0"></span>
@@ -120,11 +120,12 @@ const Agent = () => {
                 </div>
 
                 {/* User Card */}
-                <div className="card w-[30rem] min-h-[22rem] border-1 bg-gradient-to-bl from-gray-900 from-10% via-black via-50% to-black to-100% shadow-xl p-12 flex flex-col items-center justify-center rounded-2xl overflow-hidden">
+                <div className="hidden md:flex card md:w-[30rem] min-h-[22rem] border-1 bg-gradient-to-bl from-gray-900 from-10% via-black via-50% to-black to-100% shadow-xl md:p-12 flex-col items-center justify-center rounded-2xl overflow-hidden">
                     <div className="relative w-28 h-28 flex items-center justify-center mb-4">
                         <img
                             src={user?.profilePic || "/avatar.png"}
                             alt="User avatar"
+                            onError={e => { e.currentTarget.onerror = null; e.currentTarget.src = "/avatar.png"; }}
                             className="w-28 h-28 rounded-full object-cover shadow-md relative z-10"
                         />
                     </div>

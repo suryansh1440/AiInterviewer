@@ -75,6 +75,10 @@ const userSchema = new mongoose.Schema(
       type: Date,
       default: null,
     },
+    leetcodeUsername: {
+      type: String,
+      default:"",
+    },
   },
   { timestamps: true, toJSON: { virtuals: true }, toObject: { virtuals: true } }
 );

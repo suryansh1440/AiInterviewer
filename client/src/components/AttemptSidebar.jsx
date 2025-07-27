@@ -1,5 +1,5 @@
 import React from 'react';
-import { Calendar, CheckCircle, XCircle } from 'lucide-react';
+import { Calendar, CheckCircle, XCircle, X } from 'lucide-react';
 import { useInterviewStore } from '../store/useInterviewStore';
 
 const statusColor = {
@@ -7,11 +7,26 @@ const statusColor = {
   not_completed: 'text-base-content/50',
 };
 
-const AttemptSidebar = () => {
+const AttemptSidebar = ({ mobile = false, onClose }) => {
   const { interviews, showInterview, setShowInterview } = useInterviewStore();
 
   return (
-    <aside className="w-72 max-h-[90vh] bg-base-200 border-r border-base-300 p-4 flex flex-col gap-4">
+    <aside
+      className={
+        mobile
+          ? 'fixed top-0 left-0 w-72 max-w-full h-full bg-base-200 border-r border-base-300 p-4 flex flex-col gap-4 overflow-y-auto z-50 shadow-xl animate-fade-in'
+          : 'hidden md:flex w-72 max-h-[90vh] bg-base-200 border-r border-base-300 p-4 flex-col gap-4 overflow-y-auto scrollbar-hide'
+      }
+    >
+      {mobile && (
+        <button
+          className="absolute top-4 right-4 p-2 rounded-full hover:bg-base-300"
+          onClick={onClose}
+          aria-label="Close sidebar"
+        >
+          <X className="w-6 h-6 text-primary" />
+        </button>
+      )}
       <h2 className="text-xl font-bold mb-2 mt-3 text-primary">Previous Interviews</h2>
       <ul className="flex flex-col gap-2">
         {interviews.map((interview) => {
@@ -21,7 +36,7 @@ const AttemptSidebar = () => {
             <li key={interview._id}>
               <button
                 className={`w-full flex flex-col items-start gap-1 rounded-lg px-4 py-3 transition-all duration-150 border border-transparent hover:border-primary/40 hover:bg-primary/10 focus:outline-none ${isSelected ? 'bg-secondary text-primary-content border-2 border-primary shadow' : 'bg-base-100 text-base-content'}`}
-                onClick={() => setShowInterview(interview._id)}
+                onClick={() => { setShowInterview(interview._id); if (mobile && onClose) onClose(); }}
                 title={interview.topic}
               >
                 <div className="flex items-center gap-2 w-full">

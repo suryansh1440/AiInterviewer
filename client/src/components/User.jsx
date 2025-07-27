@@ -12,6 +12,7 @@ export default function User({ user }) {
       <img
         src={user.profile}
         alt="Profile"
+        onError={e => { e.currentTarget.onerror = null; e.currentTarget.src = "/avatar.png"; }}
         className="col-span-1 w-[2.5rem] h-[2.5rem] rounded-full object-cover self-center justify-self-center"
       />
       <div className="col-span-1">{user.person}</div>

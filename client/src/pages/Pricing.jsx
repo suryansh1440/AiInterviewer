@@ -3,71 +3,24 @@ import { Link } from "react-router-dom";
 import { useAuthStore } from "../store/useAuthStore"; 
 import Modal from "../components/Modal";
 import { useModalStore } from "../store/useModalStore";
+import { usePaymentStore } from "../store/usePaymentStore";
+import toast from "react-hot-toast";
+import { Loader } from "lucide-react";
+import Footer from "../components/Footer";
 
-const pricingTiers = [
-  {
-    title: "Free",
-    price: "₹0",
-    priceNote: "",
-    desc: "Get started with 2 free interviews",
-    features: [
-      "2 AI-powered interviews",
-      "Basic feedback",
-      "Access to all domains",
-      "Email support",
-    ],
-    cta: "Start Free",
-    ctaLink: "#",
-    highlight: false,
-  },
-  {
-    title: "Starter",
-    price: "₹49",
-    priceNote: "",
-    desc: "5 interviews & advanced feedback",
-    features: [
-      "5 AI-powered interviews",
-      "Advanced AI feedback",
-      "Voice analysis",
-      "Access to all domains",
-      "Priority support",
-    ],
-    cta: "Get Starter",
-    ctaLink: "#",
-    highlight: true,
-    badge: "Best Value",
-  },
-  {
-    title: "Pro",
-    price: "₹149",
-    priceNote: "/month",
-    desc: "1 month unlimited interviews",
-    features: [
-      "Unlimited interviews (1 month)",
-      "Advanced AI feedback",
-      "Voice analysis",
-      "Progress tracking",
-      "Dedicated support",
-    ],
-    cta: "Go Pro",
-    ctaLink: "#",
-    highlight: false,
-  },
-];
 
 const comparisonRows = [
-  ["AI-Powered Interviews", "2", "5", "Unlimited (1 month)"],
+  ["AI-Powered Interviews", "1", "2", "Unlimited (1 month)"],
   ["Feedback Quality", "Basic", "Advanced", "Advanced"],
   ["Voice Analysis", "-", "✔", "✔"],
   ["Progress Tracking", "-", "-", "✔"],
-  ["Team Management", "-", "-", "-"],
   ["Support", "Email", "Priority", "Dedicated"],
 ];
 
 const faqs = [
   {
     q: "Can I try AI Interviewer for free?",
-    a: "Yes! You get 2 free interviews when you sign up. No credit card required.",
+    a: "Yes! You get 1 free interview when you sign up. No credit card required.",
   },
   {
     q: "What payment methods do you accept?",
@@ -91,13 +44,56 @@ const Pricing = () => {
   const [openFaq, setOpenFaq] = useState(null);
   const { user } = useAuthStore(); // Get user data from store
   const {setOpenModal} = useModalStore();
+  const {isFreeClaimed,claimFree,processPayment,isCheckoutLoading,getKey} = usePaymentStore();
 
-  const handleSubmitPricing = (title)=>{
+  
+  const handleCheckout = async (plan)=>{
     if(!user){
       setOpenModal();
     }
-    return;
+    if(user.subscription === 'pro'){
+      toast.error("You are already on the Pro plan");
+      return;
     }
+    if(plan === 'free'){
+      await claimFree();
+      return;
+    }
+    let amount = 0;
+    if(plan === 'starter'){ 
+      amount = 79;
+    }
+    if(plan === 'pro'){
+      amount = 499;
+    }
+    const {key} = await getKey();
+    const {order} = await processPayment({
+      amount,
+      plan,
+    });
+
+
+    const options = {
+      key,
+      amount:order.amount,
+      currency: 'INR',
+      name:'AI Interview',
+      description: 'payment for interview subscription',
+      order_id: order.id, // This is the order_id created in the backend
+      callback_url:import.meta.env.VITE_BACKEND_URL + '/api/payment/paymentVerification', // Your success URL
+      prefill: {
+        name: user?.name,
+        email: user?.email,
+        contact: user?.phone
+      },
+      theme: {
+        color: '#F37254'
+      },
+    };
+
+    const rzp = new Razorpay(options);
+    rzp.open();
+  }
 
   return (
     <div className="bg-base-200 min-h-screen">
@@ -114,61 +110,95 @@ const Pricing = () => {
 
       {/* Pricing Tiers */}
       <section className="pricing-tiers flex flex-col md:flex-row gap-8 justify-center items-stretch max-w-6xl mx-auto py-16 px-4">
-        {pricingTiers.map((tier, idx) => (
-            <div
-              key={tier.title}
-              className={`tier relative flex-1 flex flex-col items-center bg-base-100/60 backdrop-blur-lg rounded-3xl shadow-xl p-8 border border-base-200 transition-transform duration-300 hover:scale-105 ${
-                tier.highlight ? "z-10 shadow-2xl border-primary" : ""
-              }`}
-            >
-              {tier.badge && (
-                <div className="popular-badge absolute -top-5 left-1/2 -translate-x-1/2 bg-gradient-to-r from-primary to-secondary text-primary-content text-xs font-bold px-4 py-1 rounded-full shadow-lg uppercase tracking-wider">
-                  {tier.badge}
-                </div>
-              )}
-              <div className="tier-title text-2xl font-bold mb-2 text-primary">
-                {tier.title}
-              </div>
-              <div className="tier-price text-4xl font-extrabold mb-1 text-base-content">
-                {tier.price}
-                <span className="text-base font-medium text-base-content/70">
-                  {tier.priceNote}
-                </span>
-              </div>
-              <div className="tier-desc text-base-content/70 mb-4 text-center">
-                {tier.desc}
-              </div>
-              <ul className="mb-6 space-y-2 w-full">
-                {tier.features.map((f, i) => (
-                  <li
-                    key={i}
-                    className="flex items-center gap-2 text-base-content"
-                  >
-                    <span className="text-primary">✔</span> {f}
-                  </li>
-                ))}
-              </ul>
-            {tier.title === 'Free' && user?.freeInterview === 'claimed' ? (
-                <button
-                  disabled
-                className="w-full text-center px-6 py-3 rounded-lg font-semibold shadow transition-colors duration-200 bg-gray-300 text-gray-500 cursor-not-allowed"
-                >
-                Claimed
-                </button>
-              ) : (
+        {/* Free Tier */}
+        <div className="tier relative flex-1 flex flex-col items-center bg-base-100/60 backdrop-blur-lg rounded-3xl shadow-xl p-8 border border-base-200 transition-transform duration-300 hover:scale-105">
+          <div className="tier-title text-2xl font-bold mb-2 text-primary">Free</div>
+          <div className="tier-price text-4xl font-extrabold mb-1 text-base-content">₹0</div>
+          <div className="tier-desc text-base-content/70 mb-4 text-center">Get started with 1 free interviews</div>
+          <ul className="mb-6 space-y-2 w-full">
+            <li className="flex items-center gap-2 text-base-content"><span className="text-primary">✔</span> 1 AI-powered interviews</li>
+            <li className="flex items-center gap-2 text-base-content"><span className="text-primary">✔</span> Basic feedback</li>
+            <li className="flex items-center gap-2 text-base-content"><span className="text-primary">✔</span> Email support</li>
+            <li className="flex items-center gap-2 text-base-content"><span className="text-primary">✔</span> validity 1 month</li>
+          </ul>
+          {(user?.freeInterview === 'claimed' || isFreeClaimed) ? (
+            <div className="w-full flex flex-col items-center">
               <button
-                onClick={() => handleSubmitPricing(tier.title)}
-                className={`w-full text-center px-6 py-3 rounded-lg font-semibold shadow transition-colors duration-200 ${
-                  tier.highlight
-                    ? "bg-primary text-primary-content hover:bg-primary-focus"
-                    : "bg-base-100 text-primary border border-primary hover:bg-base-200"
-                }`}
-                >
-                {tier.cta}
+                disabled
+                className="w-full text-center px-6 py-3 rounded-lg font-semibold shadow transition-colors duration-200 bg-gradient-to-r from-green-400 to-green-600 text-white cursor-not-allowed border-2 border-green-500 opacity-90"
+              >
+                <span className="flex items-center justify-center gap-2">
+                  <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                  </svg>
+                  Claimed
+                </span>
               </button>
-              )}
             </div>
-        ))}
+          ) : (
+            <button
+              disabled={isCheckoutLoading}
+              onClick={() => handleCheckout('free')}
+              className="w-full text-center px-6 py-3 rounded-lg font-semibold shadow transition-colors duration-200 bg-base-100 text-primary border border-primary hover:bg-base-200"
+            >
+              <span className="flex items-center justify-center w-full">
+                {isCheckoutLoading ? <Loader className="size-4 animate-spin" /> : 'Start Free'}
+              </span>
+            </button>
+          )}
+        </div>
+        {/* Starter Tier */}
+        <div className={`tier relative flex-1 flex flex-col items-center bg-base-100/60 backdrop-blur-lg rounded-3xl shadow-xl p-8 border transition-transform duration-300 hover:scale-105 z-10 ${user?.subscription === 'starter' ? 'border-green-500 border-4' : 'border-base-200'}`}>
+          {/* Active badge if user has starter subscription */}
+          {user?.subscription === 'starter' && (
+            <div className="absolute -top-5 left-1/2 -translate-x-1/2 bg-gradient-to-r from-green-400 to-green-600 text-white text-xs font-bold px-4 py-1 rounded-full shadow-lg uppercase tracking-wider z-20">Active</div>
+          )}
+          <div className="tier-title text-2xl font-bold mb-2 text-primary">Starter</div>
+          <div className="tier-price text-4xl font-extrabold mb-1 text-base-content">₹79</div>
+          <div className="tier-desc text-base-content/70 mb-4 text-center">2 interviews & advanced feedback</div>
+          <ul className="mb-6 space-y-2 w-full">
+            <li className="flex items-center gap-2 text-base-content"><span className="text-primary">✔</span> 2 AI-powered interviews</li>
+            <li className="flex items-center gap-2 text-base-content"><span className="text-primary">✔</span> Advanced AI feedback</li>
+            <li className="flex items-center gap-2 text-base-content"><span className="text-primary">✔</span> Voice analysis</li>
+            <li className="flex items-center gap-2 text-base-content"><span className="text-primary">✔</span> Priority support</li>
+            <li className="flex items-center gap-2 text-base-content"><span className="text-primary">✔</span> Validity 1 month</li>
+          </ul>
+          <button
+            disabled={isCheckoutLoading}
+            onClick={() => handleCheckout('starter')}
+            className="w-full text-center px-6 py-3 rounded-lg font-semibold shadow transition-colors duration-200 bg-primary text-primary-content hover:bg-primary-focus"
+          >
+            <span className="flex items-center justify-center w-full">
+              {isCheckoutLoading ? <Loader className="size-4 animate-spin" /> : 'Get Starter'}
+            </span>
+          </button>
+        </div>
+        {/* Pro Tier */}
+        <div className={`tier relative flex-1 flex flex-col items-center bg-base-100/60 backdrop-blur-lg rounded-3xl shadow-xl p-8 border transition-transform duration-300 hover:scale-105 ${user?.subscription === 'pro' ? 'border-green-500 border-4' : 'border-base-200'}`}>
+          {/* Active badge if user has pro subscription */}
+          {user?.subscription === 'pro' && (
+            <div className="absolute -top-5 left-1/2 -translate-x-1/2 bg-gradient-to-r from-green-400 to-green-600 text-white text-xs font-bold px-4 py-1 rounded-full shadow-lg uppercase tracking-wider z-20">Active</div>
+          )}
+          <div className="tier-title text-2xl font-bold mb-2 text-primary">Pro</div>
+          <div className="tier-price text-4xl font-extrabold mb-1 text-base-content">₹499<span className="text-base font-medium text-base-content/70">/month</span></div>
+          <div className="tier-desc text-base-content/70 mb-4 text-center">1 month unlimited interviews</div>
+          <ul className="mb-6 space-y-2 w-full">
+            <li className="flex items-center gap-2 text-base-content"><span className="text-primary">✔</span> Unlimited interviews (1 month)</li>
+            <li className="flex items-center gap-2 text-base-content"><span className="text-primary">✔</span> Advanced AI feedback</li>
+            <li className="flex items-center gap-2 text-base-content"><span className="text-primary">✔</span> Voice analysis</li>
+            <li className="flex items-center gap-2 text-base-content"><span className="text-primary">✔</span> Progress tracking</li>
+            <li className="flex items-center gap-2 text-base-content"><span className="text-primary">✔</span> Dedicated support</li>
+          </ul>
+          <button
+            disabled={isCheckoutLoading}
+            onClick={() => handleCheckout('pro')}
+            className="w-full text-center px-6 py-3 rounded-lg font-semibold shadow transition-colors duration-200 bg-base-100 text-primary border border-primary hover:bg-base-200"
+          >
+            <span className="flex items-center justify-center w-full">
+              {isCheckoutLoading ? <Loader className="size-4 animate-spin" /> : 'Go Pro'}
+            </span>
+          </button>
+        </div>
       </section>
 
       {/* Comparison Table */}
@@ -244,7 +274,7 @@ const Pricing = () => {
         <div className="inline-block bg-gradient-to-r from-primary to-secondary text-primary-content px-10 py-6 rounded-2xl shadow-xl">
           <h3 className="text-2xl font-bold mb-2">Ready to get started?</h3>
           <p className="mb-4">
-            Sign up now and get your first 2 interviews free. No credit card required.
+            Sign up now and get your first interview free. No credit card required.
           </p>
           {user?.freeInterview === 'Claimed' ? (
               <button
@@ -263,6 +293,7 @@ const Pricing = () => {
           )}
         </div>
       </section>
+      <Footer />
     </div>
   );
 };

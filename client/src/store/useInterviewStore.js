@@ -3,6 +3,7 @@ import { axiosInstance } from "../lib/axios";
 import toast from "react-hot-toast";
 import { vapi } from '../lib/vapi.sdk';
 import { interviewer } from '../constant';
+import { useAuthStore } from './useAuthStore';
 
 export const useInterviewStore = create((set, get) => ({
     interviews: [],
@@ -16,7 +17,7 @@ export const useInterviewStore = create((set, get) => ({
     isCreatingFeedback: false,
     showInterview: null,
     isGettingInterviews:false,
-
+    isGettingLeetCodeAnalysis:false,
 
     setShowInterview: (id) => set({ showInterview: id }),
     
@@ -43,9 +44,20 @@ export const useInterviewStore = create((set, get) => ({
             return res.data.text;
         }catch(error){
             toast.error(error.response.data.message);
-            return null;
+            return "No resume included";
         }finally{
             set({isGettingResume:false})
+        }
+    },
+    getLeetCodeAnalysis: async (username) => {
+        set({isGettingLeetCodeAnalysis:true})
+        try{
+            const res = await axiosInstance.post("/ai/getLeetCodeAnalysis",{username});
+            return res.data.text;
+        }catch(error){
+            return "No LeetCode stats included";
+        }finally{
+            set({isGettingLeetCodeAnalysis:false})
         }
     },
 
@@ -63,24 +75,31 @@ export const useInterviewStore = create((set, get) => ({
         }
     },
 
-    handleCall: async (questions) => {
+    handleCall: async (questions, leetcode, resume, github,name) => {
         set({isStartingInterview:true})
         const { interviewData } = get();
         if (!interviewData) {
             throw new Error('No interview data set');
         }
         try {
+            // Ensure questions is always an array
+            const questionsArr = Array.isArray(questions) ? questions : [];
             let formattedQuestions = "";
-            if (questions) {
-                formattedQuestions = questions
+            if (questionsArr.length > 0) {
+                formattedQuestions = questionsArr
                   .map((question) => `- ${question}`)
                   .join("\n");
             }
+
             await vapi.start(
                 interviewer,
                 {
                     variableValues: {
                         questions: formattedQuestions,
+                        leetcode: leetcode,
+                        resume: resume,
+                        github: github,
+                        name: name
                     }
                 }
             );
@@ -109,8 +128,13 @@ export const useInterviewStore = create((set, get) => ({
                     ...state.interviews.filter(i => i._id !== interviewId)
                 ]
             }));
+            // Update user in useAuthStore if user data is returned
+            if (res.data.user) {
+                useAuthStore.getState().set({ user: res.data.user });
+            }
             return res.data.interview;
         } catch (error) {
+            console.log(error);
             toast.error(error.response?.data?.message || "Failed to create feedback");
             return null;
         } finally {
