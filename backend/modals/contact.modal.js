@@ -5,8 +5,6 @@ const contactSchema = new mongoose.Schema({
   name: {
     type: String,
     required: true,
-    trim: true,
-    validate: [validator.isAlpha, "Please provide a valid name"],
   },
   email: {
     type: String,

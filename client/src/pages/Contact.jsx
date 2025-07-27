@@ -1,8 +1,27 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Mail, MessageCircle } from 'lucide-react';
 import Footer from '../components/Footer';
+import { useContactStore } from '../store/useContactStore';
 
 const Contact = () => {
+  const { createContact, isCreatingContact } = useContactStore();
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    message: ''
+  });
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    const formData = new FormData(e.target);
+    const data = Object.fromEntries(formData);
+    createContact(data);
+    setFormData({
+      name: '',
+      email: '',
+      message: ''
+    });
+  }
   return (
     <div>
     <section className="min-h-screen bg-base-200 py-16 px-4 flex flex-col items-center justify-center">
@@ -23,7 +42,7 @@ const Contact = () => {
       <div className="max-w-xl w-full mx-auto bg-base-100 shadow-xl rounded-2xl p-8 border border-base-300">
         {/* Success Message Placeholder */}
         {/* <div className="alert alert-success mb-6">Thank you for reaching out! We'll get back to you soon.</div> */}
-        <form className="space-y-6">
+        <form className="space-y-6" onSubmit={handleSubmit}>
           <div>
             <label htmlFor="name" className="block mb-2 font-semibold text-base-content">Full Name</label>
             <input
@@ -33,6 +52,8 @@ const Contact = () => {
               required
               placeholder="Your full name"
               className="input input-bordered w-full"
+              value={formData.name}
+              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
             />
           </div>
 
@@ -45,6 +66,8 @@ const Contact = () => {
               required
               placeholder="Your email address"
               className="input input-bordered w-full"
+              value={formData.email}
+              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
             />
           </div>
 
@@ -57,14 +80,17 @@ const Contact = () => {
               required
               placeholder="Write your message here..."
               className="textarea textarea-bordered w-full min-h-[120px]"
+              value={formData.message}
+              onChange={(e) => setFormData({ ...formData, message: e.target.value })}
             ></textarea>
           </div>
 
           <button
             type="submit"
             className="btn btn-primary w-full text-lg font-semibold shadow-md"
+            disabled={isCreatingContact}
           >
-            Send Message
+            {isCreatingContact ? "Sending..." : "Send Message"}
           </button>
         </form>
 
