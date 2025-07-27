@@ -59,8 +59,8 @@ const GithubProjectModal = ({ open, onClose }) => {
       {/* Backdrop */}
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={handleClose}></div>
       
-      {/* Modal */}
-      <div className="relative bg-base-100 rounded-3xl shadow-2xl w-full max-w-2xl mx-4 overflow-hidden">
+             {/* Modal */}
+       <div className="relative bg-base-100 rounded-3xl shadow-2xl w-full max-w-2xl mx-4 overflow-hidden min-h-[500px]">
                  {/* Header */}
          <div className="bg-gradient-to-r from-primary/10 to-secondary/10 p-3 border-b border-base-300">
           <div className="flex items-center justify-between">
@@ -82,18 +82,18 @@ const GithubProjectModal = ({ open, onClose }) => {
           </div>
         </div>
 
-                 {/* Content */}
-         <div className="p-3 space-y-3">
+                                                                       {/* Content */}
+           <div className="p-4 space-y-4">
                      {/* Repository Section */}
-           <div className="space-y-2">
-             <div className="flex items-center gap-2 mb-1">
-               <h3 className="text-sm font-semibold text-base-content">Repositories</h3>
-               <span className="badge badge-primary badge-sm">{githubProjects.length}/2</span>
-             </div>
+                                               <div className="space-y-2">
+               <div className="flex items-center gap-2 mb-2">
+                 <h3 className="text-base font-semibold text-base-content">Repositories</h3>
+                 <span className="badge badge-primary badge-sm">{githubProjects.length}/2</span>
+               </div>
 
-                         {/* Repository 1 */}
-             <div className="bg-base-200/50 rounded-lg p-2 border border-base-300">
-              <div className="flex items-center gap-3">
+                                                   {/* Repository 1 */}
+              <div className="bg-base-200/50 rounded-lg p-3 border border-base-300">
+               <div className="flex items-center gap-3">
                 <div className="flex-1">
                   {getRepositoryByNumber(1) ? (
                     <div className="relative">
@@ -103,12 +103,12 @@ const GithubProjectModal = ({ open, onClose }) => {
                       </div>
                       <div className="relative">
                         <Github className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-success" />
-                        <input
-                          type="url"
-                          value={getRepositoryByNumber(1).url}
-                          disabled
-                          className="input input-bordered w-full pl-10 bg-success/10 border-success/30 text-success font-mono text-sm"
-                        />
+                                                 <input
+                           type="url"
+                           value={getRepositoryByNumber(1).url}
+                           disabled
+                           className="input input-bordered w-full pl-10 bg-success/10 border-success/30 text-success font-mono text-sm h-10"
+                         />
                       </div>
                     </div>
                   ) : (
@@ -119,14 +119,14 @@ const GithubProjectModal = ({ open, onClose }) => {
                       </div>
                       <div className="relative">
                         <Github className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-base-content/50" />
-                        <input
-                          type="url"
-                          placeholder="https://github.com/username/repository"
-                          value={repo1}
-                          onChange={(e) => setRepo1(e.target.value)}
-                          autoComplete="off"
-                          className="input input-bordered w-full pl-10 focus:border-primary"
-                        />
+                                                 <input
+                           type="url"
+                           placeholder="https://github.com/username/repository"
+                           value={repo1}
+                           onChange={(e) => setRepo1(e.target.value)}
+                           autoComplete="off"
+                           className="input input-bordered w-full pl-10 focus:border-primary h-10"
+                         />
                       </div>
                     </div>
                   )}
@@ -156,9 +156,9 @@ const GithubProjectModal = ({ open, onClose }) => {
               </div>
             </div>
 
-                         {/* Repository 2 */}
-             <div className="bg-base-200/50 rounded-lg p-2 border border-base-300">
-              <div className="flex items-center gap-3">
+                                                   {/* Repository 2 */}
+              <div className="bg-base-200/50 rounded-lg p-3 border border-base-300">
+               <div className="flex items-center gap-3">
                 <div className="flex-1">
                   {getRepositoryByNumber(2) ? (
                     <div className="relative">
@@ -168,12 +168,12 @@ const GithubProjectModal = ({ open, onClose }) => {
                       </div>
                       <div className="relative">
                         <Github className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-success" />
-                        <input
-                          type="url"
-                          value={getRepositoryByNumber(2).url}
-                          disabled
-                          className="input input-bordered w-full pl-10 bg-success/10 border-success/30 text-success font-mono text-sm"
-                        />
+                                                 <input
+                           type="url"
+                           value={getRepositoryByNumber(2).url}
+                           disabled
+                           className="input input-bordered w-full pl-10 bg-success/10 border-success/30 text-success font-mono text-sm h-10"
+                         />
                       </div>
                     </div>
                   ) : (
@@ -184,14 +184,14 @@ const GithubProjectModal = ({ open, onClose }) => {
                       </div>
                       <div className="relative">
                         <Github className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-base-content/50" />
-                        <input
-                          type="url"
-                          placeholder="https://github.com/username/repository"
-                          value={repo2}
-                          onChange={(e) => setRepo2(e.target.value)}
-                          autoComplete="off"
-                          className="input input-bordered w-full pl-10 focus:border-primary"
-                        />
+                                                 <input
+                           type="url"
+                           placeholder="https://github.com/username/repository"
+                           value={repo2}
+                           onChange={(e) => setRepo2(e.target.value)}
+                           autoComplete="off"
+                           className="input input-bordered w-full pl-10 focus:border-primary h-10"
+                         />
                       </div>
                     </div>
                   )}
@@ -223,22 +223,22 @@ const GithubProjectModal = ({ open, onClose }) => {
           </div>
 
                      {/* GitHub Token Section */}
-           <div className="bg-warning/5 border border-warning/20 rounded-lg p-2">
-             <div className="flex items-center gap-2 mb-1">
+                       <div className="bg-warning/5 border border-warning/20 rounded-lg p-3">
+             <div className="flex items-center gap-2 mb-2">
                <Key className="w-4 h-4 text-warning" />
-               <h3 className="text-sm font-semibold text-base-content">GitHub Token</h3>
+               <h3 className="text-base font-semibold text-base-content">GitHub Token</h3>
              </div>
              
-             <div className="space-y-1">
+             <div className="space-y-3">
               <div className="relative">
-                <input
-                  type="password"
-                  placeholder="Enter your GitHub token (optional)"
-                  value={token}
-                  onChange={(e) => setToken(e.target.value)}
-                  autoComplete="new-password"
-                  className="input input-bordered w-full focus:border-warning"
-                />
+                                 <input
+                   type="password"
+                   placeholder="Enter your GitHub token (optional)"
+                   value={token}
+                   onChange={(e) => setToken(e.target.value)}
+                   autoComplete="new-password"
+                   className="input input-bordered w-full focus:border-warning h-10"
+                 />
               </div>
               
               <div className="flex items-center gap-2">
@@ -259,7 +259,7 @@ const GithubProjectModal = ({ open, onClose }) => {
           
 
                      {/* Footer */}
-           <div className="flex items-center justify-between pt-2 border-t border-base-300">
+           <div className="flex items-center justify-between pt-4 border-t border-base-300">
             <div className="flex items-center gap-2 text-sm text-base-content/60">
               <AlertCircle className="w-4 h-4" />
               <span>Maximum 2 repositories allowed</span>
