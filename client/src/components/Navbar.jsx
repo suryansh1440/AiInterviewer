@@ -39,7 +39,11 @@ const Navbar = () => {
         <ul className="hidden sm:flex items-center gap-6 text-base-content font-medium">
           <li><Link to="/" className="hover:text-primary transition-colors duration-200">Home</Link></li>
           <li><Link to="/about" className="hover:text-primary transition-colors duration-200">About</Link></li>
-          {user && (<li><Link to="/start" className="hover:text-primary transition-colors duration-200">Interview</Link></li>)}
+          {user && (
+            <>
+              <li><Link to="/start" className="hover:text-primary transition-colors duration-200">Interview</Link></li>
+            </>
+          )}
           <li><Link to="/social/post" className="hover:text-primary transition-colors duration-200">Social</Link></li>
           <li><Link to="/pricing" className="hover:text-primary transition-colors duration-200">Pricing</Link></li>
           <li><Link to="/contact" className="hover:text-primary transition-colors duration-200">Contact</Link></li>
@@ -84,7 +88,11 @@ const Navbar = () => {
           </button>
           <li><Link to="/" className="flex items-center gap-2 w-full px-4 py-3 rounded-lg hover:bg-base-200 transition-colors duration-200" onClick={() => setMenuOpen(false)}><svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0h6" /></svg> Home</Link></li>
           <li><Link to="/about" className="flex items-center gap-2 w-full px-4 py-3 rounded-lg hover:bg-base-200 transition-colors duration-200" onClick={() => setMenuOpen(false)}><svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" /><path d="M12 16v-4M12 8h.01" /></svg> About</Link></li>
-          {user && (<li><Link to="/start" className="flex items-center gap-2 w-full px-4 py-3 rounded-lg hover:bg-base-200 transition-colors duration-200" onClick={() => setMenuOpen(false)}><svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 20h9" /><path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m0 0H3" /></svg> Interview</Link></li>)}
+          {user && (
+            <>
+              <li><Link to="/start" className="flex items-center gap-2 w-full px-4 py-3 rounded-lg hover:bg-base-200 transition-colors duration-200" onClick={() => setMenuOpen(false)}><svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 20h9" /><path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m0 0H3" /></svg> Interview</Link></li>
+            </>
+          )}
           <li><Link to="/social/post" className="flex items-center gap-2 w-full px-4 py-3 rounded-lg hover:bg-base-200 transition-colors duration-200" onClick={() => setMenuOpen(false)}><svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 20h9" /><path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m0 0H3" /></svg> Social</Link></li>
           <li><Link to="/pricing" className="flex items-center gap-2 w-full px-4 py-3 rounded-lg hover:bg-base-200 transition-colors duration-200" onClick={() => setMenuOpen(false)}><svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M12 8c-1.657 0-3 1.343-3 3s1.343 3 3 3 3-1.343 3-3-1.343-3-3-3z" /><path d="M19.4 15a1.65 1.65 0 01-1.4.8H6a1.65 1.65 0 01-1.4-.8L2 12V7a2 2 0 012-2h16a2 2 0 012 2v5l-2.6 3z" /></svg> Pricing</Link></li>
           <li><Link to="/contact" className="flex items-center gap-2 w-full px-4 py-3 rounded-lg hover:bg-base-200 transition-colors duration-200" onClick={() => setMenuOpen(false)}><svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M21 10.5a8.38 8.38 0 01-1.9.5 4.48 4.48 0 00-7.6 0 8.38 8.38 0 01-1.9-.5" /><path d="M3 19v-2a4 4 0 014-4h10a4 4 0 014 4v2" /></svg> Contact</Link></li>

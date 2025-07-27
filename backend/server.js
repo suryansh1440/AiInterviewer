@@ -35,6 +35,7 @@ app.use("/api/post",postRouter)
 app.use("/api/message",messageRouter)
 
 
+
 app.get("/",(req,res)=>{
     res.send("Hello World");
 })

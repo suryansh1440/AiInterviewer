@@ -70,7 +70,7 @@ const router = createBrowserRouter([
           },
           {
             path:"message",
-            element:suspense(Message),
+            element:<AuthUserPermission>{suspense(Message)}</AuthUserPermission>,
           }          
         ]
       },
@@ -100,4 +100,4 @@ const router = createBrowserRouter([
   },
 ]);
 
-export default router; 
+export default router;
