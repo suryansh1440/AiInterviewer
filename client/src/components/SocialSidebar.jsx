@@ -11,7 +11,7 @@ const SocialSidebar = ({ onCreateClick }) => {
   return (
     <>
       {/* Desktop/Tablet Sidebar */}
-      <aside className="hidden md:flex flex-col md:w-20 bg-base-100 rounded-2xl shadow-lg p-3 h-fit sticky top-24 items-center gap-4 border border-primary/10">
+      <aside className="hidden md:flex flex-col md:w-20 bg-base-100 rounded-2xl shadow-lg p-3 max-h-[90vh] sticky top-24 items-center gap-4 border border-primary/10">
         <Link to="/social/post" className="flex flex-col items-center gap-1 w-14 h-14 justify-center rounded-xl hover:bg-primary/10 transition-all group" title="post">
           <Film className="w-7 h-7 text-primary group-hover:scale-110 transition-transform" />
           <span className="text-[11px] font-semibold text-primary">Post</span>
