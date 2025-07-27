@@ -171,7 +171,7 @@ const AdminPanel = () => {
             {AllUsers.map(user => (
               <tr key={user._id} className="hover">
                 <td>
-                  <img src={user.profilePic|| "/avatar.png"} alt={user.name} className="w-10 h-10 rounded-full object-cover border border-base-300" />
+                  <img src={user.profilePic|| "/avatar.png"} alt={user.name} className="w-10 h-10 rounded-full object-cover border border-base-300" onError={e => { e.currentTarget.onerror = null; e.currentTarget.src = "/avatar.png"; }} />
                 </td>
                 <td>{user.name}</td>
                 <td>{user.email}</td>

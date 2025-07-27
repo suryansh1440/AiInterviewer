@@ -15,10 +15,8 @@ const Contact = lazy(() => import("../pages/Contact"));
 const Attempt = lazy(() => import("../pages/Attempt"));
 const Dashboard = lazy(() => import("../layout/Dashboard"));
 const InterviewPage = lazy(() => import("../pages/InterviewPage"));
-const About = lazy(() => import("../pages/About"));
 const Profile = lazy(() => import("../pages/profile"));
 const SocialLayout = lazy(() => import("../layout/SocialLayout"));
-const Message = lazy(() => import("../pages/Message"));
 const Posts = lazy(() => import("../pages/Posts"));
 
 const suspense = (Component) => (
@@ -39,10 +37,6 @@ const router = createBrowserRouter([
       {
         path: "/",
         element: suspense(Home),
-      },
-      {
-        path: "/about",
-        element: suspense(About),
       },
       {
         path: "/pricing",
@@ -69,8 +63,8 @@ const router = createBrowserRouter([
             element:suspense(Posts),
           },
           {
-            path:"message",
-            element:<AuthUserPermission>{suspense(Message)}</AuthUserPermission>,
+            path:"leaderboard",
+            element:suspense(Leaderboard),
           }          
         ]
       },

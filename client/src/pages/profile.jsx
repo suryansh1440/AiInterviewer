@@ -55,6 +55,7 @@ const Profile = () => {
           <img
             src={user?.profilePic || "/avatar.png"}
             alt="Profile"
+            onError={e => { e.currentTarget.onerror = null; e.currentTarget.src = "/avatar.png"; }}
             className="w-32 h-32 rounded-full border-4 border-primary shadow-md object-cover mb-3 md:mb-0"
           />
           <div className="flex-1 flex flex-col items-center md:items-start">
@@ -133,19 +134,6 @@ const Profile = () => {
         </div>
         {/* Recent Activity & Interview History */}
         <div className="flex flex-col md:flex-row gap-8 mb-10">
-          {/* Recent Activity */}
-          <div className="flex-1">
-            <h3 className="text-xl font-bold text-primary mb-3">Recent Activity</h3>
-            <ul className="flex flex-col gap-3">
-              {activity.map((item, i) => (
-                <li key={i} className="flex items-center gap-3">
-                  <span>{item.icon}</span>
-                  <span className="text-base-content font-semibold text-base">{item.text}</span>
-                  <span className="ml-auto text-sm text-base-content/50">{item.date}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
           {/* Interview History */}
           <div className="flex-1">
             <h3 className="text-xl font-bold text-primary mb-3">Recent Interviews</h3>

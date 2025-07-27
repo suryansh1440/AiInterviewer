@@ -304,10 +304,6 @@ export const googleLogin = async (req, res) => {
     } else {
       // Update profilePic and name if changed
       let updated = false;
-      if (user.profilePic !== payload.picture) {
-        user.profilePic = payload.picture;
-        updated = true;
-      }
       if (user.name !== payload.name) {
         user.name = payload.name;
         updated = true;
@@ -398,10 +394,6 @@ export const githubCallback = async (req, res) => {
       await user.save();
     } else {
       let updated = false;
-      if (user.profilePic !== userRes.data.avatar_url) {
-        user.profilePic = userRes.data.avatar_url;
-        updated = true;
-      }
       if (user.name !== (userRes.data.name || userRes.data.login)) {
         user.name = userRes.data.name || userRes.data.login;
         updated = true;

@@ -103,6 +103,7 @@ export default function UpdateProfileModal({ open, onClose }) {
               <img
                 src={preview || "/avatar.png"}
                 alt="Profile Preview"
+                onError={e => { e.currentTarget.onerror = null; e.currentTarget.src = "/avatar.png"; }}
                 className="w-20 h-20 rounded-full object-cover border-2 border-primary shadow"
               />
               <button

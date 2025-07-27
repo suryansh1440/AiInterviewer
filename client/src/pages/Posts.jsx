@@ -80,7 +80,7 @@ const Posts = () => {
             {/* Glassmorphism gradient overlay */}
             <div className="absolute inset-0 rounded-3xl pointer-events-none group-hover:bg-primary/5 transition-all duration-300" />
             <div className="flex items-center gap-3 mb-3 relative">
-              <img src={post.profilePic || "/avatar.png"} alt={post.name} className="w-10 h-10 rounded-full border-2 border-primary object-cover shadow" />
+              <img src={post.profilePic || "/avatar.png"} alt={post.name} className="w-10 h-10 rounded-full border-2 border-primary object-cover shadow" onError={e => { e.currentTarget.onerror = null; e.currentTarget.src = "/avatar.png"; }} />
               <div className="flex flex-col">
                 <span className="font-semibold text-base-content text-lg leading-tight">{post.name}</span>
                 <span className="text-xs text-base-content/60">{new Date(post.createdAt).toLocaleDateString()}</span>
@@ -116,7 +116,7 @@ const Posts = () => {
               </div>
             </div>
             {post.image && (
-              <img src={post.image} alt="Post visual" className="w-full max-h-72 object-cover rounded-2xl my-4 border border-base-300 shadow-md" />
+              <img src={post.image} alt="Post visual" className="w-full max-h-72 object-cover rounded-2xl my-4 border border-base-300 shadow-md"                     onError={e => { e.currentTarget.onerror = null; e.currentTarget.src = "/avatar.png"; }} />
             )}
             {/* Only show caption */}
             <p className="text-base-content mb-4 text-xl font-medium whitespace-pre-line leading-relaxed tracking-tight" style={{ fontFamily: 'Inter, sans-serif' }}>{post.caption}</p>
@@ -186,7 +186,7 @@ const Posts = () => {
                   {post.comments && post.comments.length > 0 ? (
                     [...post.comments].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).map((comment, idx) => (
                       <div key={idx} className="flex items-start gap-3 bg-base-100 rounded-xl p-3 shadow-sm">
-                        <img src={comment.profilePic || "/avatar.png"} alt={comment.name || "User"} className="w-8 h-8 rounded-full border border-primary object-cover" />
+                        <img src={comment.profilePic || "/avatar.png"} alt={comment.name || "User"} className="w-8 h-8 rounded-full border border-primary object-cover" onError={e => { e.currentTarget.onerror = null; e.currentTarget.src = "/avatar.png"; }} />
                         <div className="flex flex-col">
                           <span className="font-semibold text-base-content text-sm flex items-center gap-2">
                             {comment.name || "User"}

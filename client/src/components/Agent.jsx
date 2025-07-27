@@ -125,6 +125,7 @@ const Agent = () => {
                         <img
                             src={user?.profilePic || "/avatar.png"}
                             alt="User avatar"
+                            onError={e => { e.currentTarget.onerror = null; e.currentTarget.src = "/avatar.png"; }}
                             className="w-28 h-28 rounded-full object-cover shadow-md relative z-10"
                         />
                     </div>

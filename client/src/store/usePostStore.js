@@ -2,7 +2,7 @@ import { create } from "zustand";
 import { axiosInstance } from "../lib/axios";
 import { toast } from "react-hot-toast";
 import { useAuthStore } from "./useAuthStore";
-import { io } from "socket.io-client";
+
 
 export const usePostStore = create((set, get) => ({
     posts: [],
@@ -66,7 +66,9 @@ export const usePostStore = create((set, get) => ({
     addUpvote: async (postId) => {
         set({ isAddingUpvote: true });
         try {
-            await axiosInstance.post("/post/upvote", { postId });
+            const res = await axiosInstance.post("/post/upvote", { postId });
+            const updatedPost = res.data;
+            set({ posts: get().posts.map((post) => post._id === postId ? updatedPost : post) });
         } catch (error) {
 
         } finally {
@@ -76,7 +78,9 @@ export const usePostStore = create((set, get) => ({
     addComment: async (data) => {
         set({ isAddingComment: true });
         try {
-            await axiosInstance.post("/post/comment", data);
+            const res = await axiosInstance.post("/post/comment", data);
+            const updatedPost = res.data;
+            set({ posts: get().posts.map((post) => post._id === data.postId ? updatedPost : post) });
         } catch (error) {
             
             toast.error("Failed to add comment");
@@ -92,25 +96,11 @@ export const usePostStore = create((set, get) => ({
         socket.on("postCreated", (post) => {
             set({ postBuffer: [post, ...get().postBuffer] });
         });
-
-        socket.on("postDeleted", (postId) => {
-            set({ posts: get().posts.filter((post) => post._id !== postId) });
-        });
-
-        socket.on("upvoteAdded", (data) => {
-            set({ posts: get().posts.map((post) => post._id === data.postId ? { ...post, upvotes: [...post.upvotes, data.userId] } : post) });
-        });
-        socket.on("commentAdded", (data) => {
-            set({ posts: get().posts.map((post) => post._id === data.postId ? { ...post, comments: [data.comment, ...post.comments] } : post) });
-        });
     },
     unsubscribeFromPost: () => {
         const socket = useAuthStore.getState().socket;
         if (!socket) return;
         socket.off("postCreated");
-        socket.off("postDeleted");
-        socket.off("upvoteAdded");
-        socket.off("commentAdded");
     }
 
 

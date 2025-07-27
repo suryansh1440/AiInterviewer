@@ -22,12 +22,6 @@ const SocialSidebar = ({ onCreateClick }) => {
           <PlusCircle className="w-7 h-7 text-primary group-hover:scale-110 transition-transform" />
           <span className="text-[11px] font-semibold text-primary">Create</span>
         </button>
-        <button className="flex flex-col items-center gap-1 w-14 h-14 justify-center rounded-xl hover:bg-primary/10 transition-all group" title="Messages" onClick={()=>{
-          if(!user){ setOpenModal(); }else{ navigate('/social/message'); }
-        }}>
-          <MessageCircle className="w-7 h-7 text-primary group-hover:scale-110 transition-transform" />
-          <span className="text-[11px] font-semibold text-primary">Message</span>
-        </button>
         <button className="flex flex-col items-center gap-1 w-14 h-14 justify-center rounded-xl hover:bg-primary/10 transition-all group" title="Leaderboard">
           <Trophy className="w-7 h-7 text-primary group-hover:scale-110 transition-transform" />
           <span className="text-[11px] font-semibold text-primary">Leader</span>
@@ -44,12 +38,6 @@ const SocialSidebar = ({ onCreateClick }) => {
         }}>
           <PlusCircle className="w-6 h-6 text-primary group-hover:scale-110 transition-transform" />
           <span className="text-[10px] font-semibold text-primary">Create</span>
-        </button>
-        <button className="flex flex-col items-center gap-0.5 w-12 h-12 justify-center rounded-xl hover:bg-primary/10 transition-all group" title="Messages" onClick={()=>{
-          if(!user){ setOpenModal(); }else{ navigate('/social/message'); }
-        }}>
-          <MessageCircle className="w-6 h-6 text-primary group-hover:scale-110 transition-transform" />
-          <span className="text-[10px] font-semibold text-primary">Message</span>
         </button>
         <button className="flex flex-col items-center gap-0.5 w-12 h-12 justify-center rounded-xl hover:bg-primary/10 transition-all group" title="Leaderboard">
           <Trophy className="w-6 h-6 text-primary group-hover:scale-110 transition-transform" />

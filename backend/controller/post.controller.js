@@ -72,14 +72,6 @@ export const deletePost = async (req, res) => {
         }
         await Post.findByIdAndDelete(postId);
 
-        // Emit to all users except the creator, fallback to all if undefined
-        const userSocketId = getUserSocketId(userId);
-        if (userSocketId) {
-            io.except(userSocketId).emit("postDeleted", postId);
-        } else {
-            io.emit("postDeleted", postId);
-        }
-
         res.status(200).json({ message: "Post deleted successfully" });
     } catch (error) {
         console.log("error in deletePost", error);
@@ -100,11 +92,11 @@ export const addUpvote = async (req, res) => {
         }
         post.upvotes.push(userId);
         await post.save();
-
-        // Emit to all users, fallback to all if undefined
-        io.emit("upvoteAdded", { postId, userId });
-
-        res.status(200).json({ message: "Upvote added successfully" });
+        // Populate upvotes with user info if needed (optional)
+        const updatedPost = await Post.findById(postId)
+          .populate('upvotes', 'name profilePic')
+          .lean();
+        res.status(200).json(updatedPost);
     } catch (error) {
         console.log("error in addUpvote", error);
         res.status(500).json({ message: "Internal server error" });
@@ -129,10 +121,13 @@ export const addComment = async (req, res) => {
         }
         post.comments.push(comment);
         await post.save();
-
-        // Emit to all users, fallback to all if undefined
-        io.emit("commentAdded", { postId, comment });
-        res.status(200).json({ message: "Comment added successfully" });
+        // Return the updated post with comments
+        const updatedPost = await Post.findById(postId)
+          .populate('upvotes', 'name profilePic')
+          .lean();
+        res.status(200).json(updatedPost);
     } catch (error) {
+        console.log("error in addComment", error);
+        res.status(500).json({ message: "Internal server error" });
     }
 }

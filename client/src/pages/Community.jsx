@@ -192,7 +192,7 @@ const Community = () => {
                   </div>
                 </div>
                 {post.image && (
-                  <img src={post.image} alt="Post visual" className="w-full max-h-56 object-cover rounded-xl mb-2 border border-base-300" />
+                  <img src={post.image} alt="Post visual" className="w-full max-h-56 object-cover rounded-xl mb-2 border border-base-300" onError={e => { e.currentTarget.onerror = null; e.currentTarget.src = "/avatar.png"; }} />
                 )}
                 <h2 className="text-xl font-bold text-base-content mb-1">{post.title}</h2>
                 <p className="text-base-content/70 mb-2">{post.excerpt}</p>
@@ -215,7 +215,7 @@ const Community = () => {
                     ) : (
                       post.commentList.map(comment => (
                         <div key={comment.id} className="flex items-center gap-3">
-                          <img src={comment.avatar} alt={comment.author} className="w-7 h-7 rounded-full border border-primary" />
+                          <img src={comment.avatar} alt={comment.author} className="w-7 h-7 rounded-full border border-primary" onError={e => { e.currentTarget.onerror = null; e.currentTarget.src = "/avatar.png"; }} />
                           <span className="font-semibold text-base-content">{comment.author}</span>
                           <span className="text-base-content/70">{comment.text}</span>
                         </div>

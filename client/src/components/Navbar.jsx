@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuthStore } from "../store/useAuthStore";
 import { Crown, Menu, XCircle } from "lucide-react";
@@ -11,6 +11,21 @@ const Navbar = () => {
   const navigate = useNavigate();
 
   const isPro = user && user.subscription === 'pro';
+
+  // Close menu on scroll
+  useEffect(() => {
+    const handleScroll = () => {
+      if (menuOpen) {
+        setMenuOpen(false);
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+    };
+  }, [menuOpen]);
 
   return (
     <nav className="w-full shadow-md px-4 md:px-8 py-3 sticky top-0 z-30 backdrop-blur bg-base-100/70">
@@ -38,7 +53,6 @@ const Navbar = () => {
         {/* Nav links for sm and up */}
         <ul className="hidden sm:flex items-center gap-6 text-base-content font-medium">
           <li><Link to="/" className="hover:text-primary transition-colors duration-200">Home</Link></li>
-          <li><Link to="/about" className="hover:text-primary transition-colors duration-200">About</Link></li>
           {user && (
             <>
               <li><Link to="/start" className="hover:text-primary transition-colors duration-200">Interview</Link></li>
@@ -55,7 +69,12 @@ const Navbar = () => {
                   id="accountBtn"
                   className="flex items-center gap-2 px-4 py-2 rounded-md hover:bg-base-200 transition-colors duration-200 border border-base-200 focus:outline-none focus:ring-2 focus:ring-primary/30"
                 >
-                  <img src={user.profilePic || "/avatar.png"} alt={user.name} className="w-7 h-7 rounded-full border-2 border-primary shadow-sm object-cover" />
+                  <img 
+                    src={user.profilePic || "/avatar.png"}
+                    alt={user.name}
+                    className="w-7 h-7 rounded-full border-2 border-primary shadow-sm object-cover"
+                    onError={e => { e.currentTarget.onerror = null; e.currentTarget.src = "/avatar.png"; }}
+                  />
                   <span className="font-semibold">{user.name}</span>
                 </button>
               </Link>
@@ -87,7 +106,6 @@ const Navbar = () => {
             <XCircle className="w-6 h-6 text-primary" />
           </button>
           <li><Link to="/" className="flex items-center gap-2 w-full px-4 py-3 rounded-lg hover:bg-base-200 transition-colors duration-200" onClick={() => setMenuOpen(false)}><svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0h6" /></svg> Home</Link></li>
-          <li><Link to="/about" className="flex items-center gap-2 w-full px-4 py-3 rounded-lg hover:bg-base-200 transition-colors duration-200" onClick={() => setMenuOpen(false)}><svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" /><path d="M12 16v-4M12 8h.01" /></svg> About</Link></li>
           {user && (
             <>
               <li><Link to="/start" className="flex items-center gap-2 w-full px-4 py-3 rounded-lg hover:bg-base-200 transition-colors duration-200" onClick={() => setMenuOpen(false)}><svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 20h9" /><path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m0 0H3" /></svg> Interview</Link></li>
@@ -100,7 +118,7 @@ const Navbar = () => {
           {/* Dashboard sidebar links for mobile only */}
           {user && (
             <>
-              <li><Link to="/dashboard/profile" className="flex items-center gap-2 w-full px-4 py-3 rounded-lg hover:bg-base-200 transition-colors duration-200" onClick={() => setMenuOpen(false)}><img src={user.profilePic || "/avatar.png"} alt={user.name} className="w-6 h-6 rounded-full border-2 border-primary shadow-sm object-cover" /><span className="font-semibold">{user.name}</span></Link></li>
+              <li><Link to="/dashboard/profile" className="flex items-center gap-2 w-full px-4 py-3 rounded-lg hover:bg-base-200 transition-colors duration-200" onClick={() => setMenuOpen(false)}><img src={user.profilePic || "/avatar.png"} alt={user.name}  className="w-6 h-6 rounded-full border-2 border-primary shadow-sm object-cover" onError={e => { e.currentTarget.onerror = null; e.currentTarget.src = "/avatar.png"; }} /><span className="font-semibold">{user.name}</span></Link></li>
               <li><Link to="/dashboard/attempt" className="flex items-center gap-2 w-full px-4 py-3 rounded-lg hover:bg-base-200 transition-colors duration-200" onClick={() => setMenuOpen(false)}><svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M3 3v18h18" /></svg> Attempts</Link></li>
               {user.role === 'ADMIN' && (
                 <li><Link to="/dashboard/adminPanel" className="flex items-center gap-2 w-full px-4 py-3 rounded-lg hover:bg-base-200 transition-colors duration-200" onClick={() => setMenuOpen(false)}><svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><rect width="18" height="18" x="3" y="3" rx="2" /><path d="M3 9h18M9 21V9" /></svg> Admin Panel</Link></li>
