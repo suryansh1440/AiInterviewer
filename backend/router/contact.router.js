@@ -1,9 +1,9 @@
 import express from "express";
-import getUserContacts from "../controller/contact.controller.js";
-import { protectRoute } from "../middleware/auth.middleware.js";
+import { createContact} from "../controller/contact.controller.js";
 
 const contactRouter = express.Router();
 
-contactRouter.route("/").post(protectRoute, getUserContacts);
+// User: submit contact form
+contactRouter.post("/", createContact);
 
 export default contactRouter;

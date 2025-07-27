@@ -1,20 +1,19 @@
-import Contacts from "../modals/contact.js";
+import Contacts from "../modals/contact.modal.js";
 
-const getUserContacts = async (req, res, next) => {
+// Create a new contact message
+export const createContact = async (req, res) => {
   try {
-    const contact = await Contacts.create(req.body);
-    res.status(201).json({
-      status: "success",
-      data: {
-        contact,
-      },
-    });
+    const { name, email, message } = req.body;
+    if (!name || !email || !message) {
+      return res.status(400).json({ message: "Name, email, and message are required." });
+    }
+    const contact = await Contacts.create({ name, email, message });
+    res.status(201).json({ message: "Message sent successfully", contact });
   } catch (err) {
-    res.status(400).json({
-      status: "error",
-      message: err.message,
-    });
+    if (err.name === 'ValidationError') {
+      return res.status(400).json({ message: err.message });
+    }
+    console.log("error in contact controller", err);
+    res.status(500).json({ message: "Internal Server Error" });
   }
 };
-
-export default getUserContacts;

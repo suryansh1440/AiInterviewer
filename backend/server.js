@@ -35,7 +35,7 @@ app.use("/api/interview",interviewRouter)
 app.use("/api/payment",paymentRouter)
 app.use("/api/post",postRouter)
 app.use("/api/message",messageRouter)
-app.use("api/contact", contactRouter);
+app.use("/api/contact", contactRouter);
 
 
 
