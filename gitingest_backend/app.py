@@ -8,18 +8,24 @@ app = Flask(__name__)
 def ingest_repository():
     data = request.get_json()
     repo_url = data.get('repo_url')
-    # github_token = data.get('github_token', os.environ.get('GITHUB_TOKEN'))
+    github_token = data.get('github_token')  # Optional token parameter
 
     if not repo_url:
         return jsonify({'error': 'repo_url is required'}), 400
 
     print(f"Attempting to ingest repo: {repo_url}")
-    # print(f"Using GitHub token (first 5 chars): {github_token[:5] if github_token else 'None'}...")
+    if github_token:
+        print(f"Using provided GitHub token (first 5 chars): {github_token[:5]}...")
+    else:
+        print("No GitHub token provided, using public access")
 
     try:
-        summary, tree, content = ingest(repo_url
-                                        # , token=github_token if github_token else 'ghp_xxxxxxxxxxxxxxxxxxxx'
-                                        )
+        # Call ingest with token if provided, otherwise without token
+        if github_token:
+            summary, tree, content = ingest(repo_url, token=github_token)
+        else:
+            summary, tree, content = ingest(repo_url)
+            
         return jsonify({
             'summary': summary,
             'tree': tree,
