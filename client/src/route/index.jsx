@@ -18,6 +18,7 @@ const InterviewPage = lazy(() => import("../pages/InterviewPage"));
 const Profile = lazy(() => import("../pages/profile"));
 const SocialLayout = lazy(() => import("../layout/SocialLayout"));
 const Posts = lazy(() => import("../pages/Posts"));
+const Leaderboard = lazy(() => import("../pages/Leaderboard"));
 
 const suspense = (Component) => (
   <Suspense fallback={
