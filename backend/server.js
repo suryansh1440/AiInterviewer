@@ -10,6 +10,7 @@ import paymentRouter from './router/payment.router.js'
 import { app, server } from './lib/socket.js';
 import postRouter from './router/post.router.js';
 import messageRouter from './router/message.router.js';
+import contactRouter from "./router/contact.router.js";
 
 
 dotenv.config()
@@ -18,6 +19,7 @@ dotenv.config()
 
 const PORT = process.env.PORT;
 app.use(cookieParser());
+
 app.use(cors({
     origin: process.env.FRONTEND_URL,
     credentials:true
@@ -33,6 +35,7 @@ app.use("/api/interview",interviewRouter)
 app.use("/api/payment",paymentRouter)
 app.use("/api/post",postRouter)
 app.use("/api/message",messageRouter)
+app.use("api/contact", contactRouter);
 
 
 
@@ -43,4 +46,5 @@ app.get("/",(req,res)=>{
 server.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
     connectDB();
+
 });

@@ -17,12 +17,13 @@ const userSchema = new mongoose.Schema(
     password: {
       type: String,
       minlength: 6,
-      select:false,
+      select: false,
+      required: true,
     },
     authProvider: {
       type: String,
-      enum: ['local', 'google','github'],
-      default: 'local',
+      enum: ["local", "google", "github"],
+      default: "local",
     },
     profilePic: {
       type: String,
@@ -51,7 +52,7 @@ const userSchema = new mongoose.Schema(
     subscription: {
       type: String,
       enum: {
-        values: ["none","starter", "pro"],
+        values: ["none", "starter", "pro"],
         message: "Please provide valid subscription type",
       },
       default: "none",
