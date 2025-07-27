@@ -75,7 +75,7 @@ export const useInterviewStore = create((set, get) => ({
         }
     },
 
-    handleCall: async (questions, leetcode, resume) => {
+    handleCall: async (questions, leetcode, resume, github,name) => {
         set({isStartingInterview:true})
         const { interviewData } = get();
         if (!interviewData) {
@@ -90,14 +90,16 @@ export const useInterviewStore = create((set, get) => ({
                   .map((question) => `- ${question}`)
                   .join("\n");
             }
-            console.log(formattedQuestions,leetcode,resume);
+
             await vapi.start(
                 interviewer,
                 {
                     variableValues: {
                         questions: formattedQuestions,
                         leetcode: leetcode,
-                        resume: resume
+                        resume: resume,
+                        github: github,
+                        name: name
                     }
                 }
             );
@@ -128,7 +130,7 @@ export const useInterviewStore = create((set, get) => ({
             }));
             // Update user in useAuthStore if user data is returned
             if (res.data.user) {
-                useAuthStore.getState().setUser(res.data.user);
+                useAuthStore.getState().set({ user: res.data.user });
             }
             return res.data.interview;
         } catch (error) {
