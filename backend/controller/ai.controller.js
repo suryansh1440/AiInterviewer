@@ -192,19 +192,67 @@ export const createFeedback = async (req,res)=>{
   const {interviewId,transcript,} = req.body;
   const userId = req.user._id;
   try{
+    // console.log('createFeedback called with:', { interviewId, transcriptType: typeof transcript, transcriptLength: Array.isArray(transcript) ? transcript.length : 'N/A' });
+    
     if(!interviewId || !transcript){
       return res.status(400).json({message:"Transcript not found"})
     }
 
-    const formattedTranscript = transcript.map((sentence)=>(
-      `-${sentence.role}: ${sentence.content}\n`
-    )).join('');
+    // Handle both array format (from socket) and string format (legacy)
+    let formattedTranscript;
+    if (Array.isArray(transcript)) {
+      // New format from socket - array of objects with role and content
+      formattedTranscript = transcript.map((sentence)=>(
+        `-${sentence.role}: ${sentence.content}\n`
+      )).join('');
+    } else if (typeof transcript === 'string') {
+      // Legacy format - already a string
+      formattedTranscript = transcript;
+    } else {
+      return res.status(400).json({message:"Invalid transcript format"})
+    }
 
-    const prompt = `You are an expert technical interviewer and assessment coach. You will be given the transcript of a candidate's interview. Assess the candidate in the following categories: Communication Skills, Technical Knowledge, Problem Solving, Cultural Fit, and Confidence and Clarity. For each category, provide a score from 0 to 20 and a short comment. Also, provide a totalScore (0-100), a list of strengths, a list of areas for improvement, and a finalAssessment (1-2 sentences). Return only a valid JSON object in the following format:\n\n{
-  totalScore: number,\n  categoryScores: [\n    { name: "Communication Skills", score: number, comment: string },\n    { name: "Technical Knowledge", score: number, comment: string },\n    { name: "Problem Solving", score: number, comment: string },\n    { name: "Cultural Fit", score: number, comment: string },\n    { name: "Confidence and Clarity", score: number, comment: string }\n  ],\n  strengths: string[],\n  areasForImprovement: string[],\n  finalAssessment: string\n}\n\nTranscript:\n${formattedTranscript}`;
+    const prompt = `You are an expert technical interviewer and assessment coach. You will be given the transcript of a candidate's interview. Assess the candidate in the following categories: Communication Skills, Technical Knowledge, Problem Solving, Cultural Fit, and Confidence and Clarity. For each category, provide a score from 0 to 20 and a short comment. Also, provide a totalScore (0-100), a list of strengths, a list of areas for improvement, and a finalAssessment (1-2 sentences). Return only a valid JSON object in the following format:
 
-    const system = `You are an expert technical interviewer and assessment coach. Your job is to analyze the provided interview transcript and return a JSON object with the following structure:\n\n{
-  totalScore: number,\n  categoryScores: [\n    { name: "Communication Skills", score: number, comment: string },\n    { name: "Technical Knowledge", score: number, comment: string },\n    { name: "Problem Solving", score: number, comment: string },\n    { name: "Cultural Fit", score: number, comment: string },\n    { name: "Confidence and Clarity", score: number, comment: string }\n  ],\n  strengths: string[],\n  areasForImprovement: string[],\n  finalAssessment: string\n}\n\nDo not include any explanations or extra text. Only return the JSON object. All scores should be integers between 0 and 20. Comments should be concise and actionable.\n`;
+{
+  totalScore: number,
+  categoryScores: [
+    { name: "Communication Skills", score: number, comment: string },
+    { name: "Technical Knowledge", score: number, comment: string },
+    { name: "Problem Solving", score: number, comment: string },
+    { name: "Cultural Fit", score: number, comment: string },
+    { name: "Confidence and Clarity", score: number, comment: string }
+  ],
+  strengths: string[],
+  areasForImprovement: string[],
+  finalAssessment: string
+}
+
+IMPORTANT: Only give scores and comments for questions the candidate actually responded to in the transcript. If a question was not answered, do not give a score for it and do not penalize the candidate for unanswered questions. The totalScore and categoryScores should only reflect the questions that were actually answered by the candidate. The finalAssessment should be based only on the responses provided, not on missing answers.
+
+Transcript:
+${formattedTranscript}`;
+
+    const system = `You are an expert technical interviewer and assessment coach. Your job is to analyze the provided interview transcript and return a JSON object with the following structure:
+
+{
+  totalScore: number,
+  categoryScores: [
+    { name: "Communication Skills", score: number, comment: string },
+    { name: "Technical Knowledge", score: number, comment: string },
+    { name: "Problem Solving", score: number, comment: string },
+    { name: "Cultural Fit", score: number, comment: string },
+    { name: "Confidence and Clarity", score: number, comment: string }
+  ],
+  strengths: string[],
+  areasForImprovement: string[],
+  finalAssessment: string
+}
+
+IMPORTANT: Only give scores and comments for questions the candidate actually responded to in the transcript. If a question was not answered, do not give a score for it and do not penalize the candidate for unanswered questions. The totalScore and categoryScores should only reflect the questions that were actually answered by the candidate. The finalAssessment should be based only on the responses provided, not on missing answers.
+
+Do not include any explanations or extra text. Only return the JSON object. All scores should be integers between 0 and 20. Comments should be concise and actionable.
+`;
 
     const { text } = await generateText({
       model: google('gemini-2.0-flash-001'),
@@ -213,7 +261,16 @@ export const createFeedback = async (req,res)=>{
     });
 
     const cleanText = text.replace(/```json\n?|\n?```/g, '').trim();
-    const feedback = JSON.parse(cleanText);
+    // console.log('AI generated feedback text:', cleanText);
+    
+    let feedback;
+    try {
+      feedback = JSON.parse(cleanText);
+    } catch (parseError) {
+      console.error('Failed to parse AI feedback JSON:', parseError);
+      console.error('Raw text:', cleanText);
+      return res.status(500).json({message:"Failed to parse AI feedback"});
+    }
 
     // Update the interview document with the feedback and set status to completed
     const updatedInterview = await Interview.findByIdAndUpdate(
@@ -221,6 +278,11 @@ export const createFeedback = async (req,res)=>{
       { feedback, status: 'completed' },
       { new: true }
     );
+
+    if (!updatedInterview) {
+      console.error('Failed to update interview with ID:', interviewId);
+      return res.status(404).json({message:"Interview not found"});
+    }
 
     // Update user's stats.averageScore based on feedback
     const user = await User.findById(userId);
