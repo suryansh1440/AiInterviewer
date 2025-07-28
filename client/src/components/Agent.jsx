@@ -16,7 +16,7 @@ const Agent = () => {
         createFeedback,
         interviewData,
         isCreatingFeedback,
-        sendUserResponse,
+        sendUserMessage,
         endInterview,
         disconnectInterview,
         resetInterviewState
@@ -42,7 +42,7 @@ const Agent = () => {
         // Set up speech recognition event handlers
         speechManager.onSpeechResult((transcript) => {
             console.log('Speech recognized:', transcript);
-            sendUserResponse(transcript);
+            sendUserMessage(transcript);
         });
 
         speechManager.onSpeechError((error) => {
@@ -80,6 +80,7 @@ const Agent = () => {
 
         // Cleanup on unmount
         return () => {
+            console.log('Agent component unmounting, cleaning up...');
             speechManager.stopListening();
             speechManager.stopSpeaking();
             resetInterviewState();
@@ -101,9 +102,9 @@ const Agent = () => {
     // Auto-end interview if isInterviewEnd is true in the last message
     useEffect(() => {
         if (lastMessage && lastMessage.isInterviewEnd) {
+            console.log('Interview end detected, scheduling disconnect...');
             const timer = setTimeout(() => {
                 handleDisconnect();
-
             }, 20000); // 20 seconds
             return () => clearTimeout(timer);
         }
@@ -111,6 +112,8 @@ const Agent = () => {
 
     const handleDisconnect = async () => {
         try {
+            console.log('Handling interview disconnect...');
+            
             // Stop all speech activities first
             speechManager.stopListening();
             speechManager.stopSpeaking();

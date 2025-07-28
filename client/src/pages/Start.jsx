@@ -36,7 +36,7 @@ const Start = () => {
   const { user } = useAuthStore();
   const { setOpenModal } = useModalStore();
   const navigate = useNavigate();
-  const {isGettingResume,resumeData,randomTopic,getRandomTopic,readResume,setInterviewData,generateQuestion,isGeneratingQuestion,handleCall,isStartingInterview,getLeetCodeAnalysis,isGettingLeetCodeAnalysis} = useInterviewStore()
+  const {isGettingResume,resumeData,randomTopic,getRandomTopic,readResume,setInterviewData,generateQuestion,isGeneratingQuestion,isStartingInterview,getLeetCodeAnalysis,isGettingLeetCodeAnalysis,startCustomInterview} = useInterviewStore()
   const {githubProjects} = useGithubProjectStore()
 
 
@@ -117,7 +117,7 @@ const Start = () => {
     // Ensure questions is always an array
 
     const questions = Array.isArray(interview.questions) ? interview.questions : [];
-    const call = await handleCall(questions, leet, resume, github,user?.name);
+    const call = await startCustomInterview(questions, leet, resume, github, user?.name);
     if(call){
       navigate(`/interview/id=${interview._id}`);
     }

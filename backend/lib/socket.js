@@ -20,6 +20,99 @@ const interviewSessions = {}
 const SESSION_TIMEOUT = 30 * 60 * 1000; // 30 minutes
 const sessionTimeouts = {};
 
+
+io.on("connection", (socket) => {
+    const userId = socket.handshake.query.userId;
+    if (userId) userSocketMap[userId] = socket.id;
+
+    console.log(`User connected: ${userId}, Socket: ${socket.id}, Active sessions: ${Object.keys(interviewSessions).length}`);
+
+    // Handle interview session start
+    socket.on("start-interview", async (data) => {
+        try {
+            console.log(`Starting interview for user: ${userId}, Socket: ${socket.id}`);
+            
+            // Clean up any existing session for this socket
+            if (interviewSessions[socket.id]) {
+                console.log(`Cleaning up existing session for socket: ${socket.id}`);
+                cleanupSession(socket.id);
+            }
+            
+            // Validate required fields
+            if (!data.interviewData.questions || !Array.isArray(data.interviewData.questions)) {
+                console.error("Invalid interview data: questions array is required");
+                socket.emit("interview-error", { message: "Invalid interview data: questions array is required" });
+                return;
+            }
+
+            // Create AI interviewer instance
+            const interviewer = createAIInterviewer(data.interviewData);
+            interviewSessions[socket.id] = interviewer;
+            setSessionTimeout(socket.id); // Set timeout for the session
+
+            console.log(`Interview started for user: ${userId}, Socket: ${socket.id}, Active sessions: ${Object.keys(interviewSessions).length}`);
+
+            // Start the interview
+            const firstMessage = interviewer.startInterview();
+
+            if (firstMessage) {
+                socket.emit("send-interview-response", firstMessage);
+            } else {
+                console.error("Failed to start interview: no first message generated");
+                socket.emit("interview-error", { message: "Failed to start interview" });
+            }
+        } catch (error) {
+            console.error("Error starting interview:", error);
+            socket.emit("interview-error", { message: "Failed to start interview" });
+        }
+    });
+
+    // Handle user speech-to-text response
+    socket.on("send-user-message", async (data) => {
+        try {
+            const interviewer = interviewSessions[socket.id];
+            if (!interviewer) {
+                socket.emit("interview-error", { message: "No active interview session" });
+                return;
+            }
+
+            // Process user response and get AI response
+            const aiResponse = await interviewer.processUserResponse(data.message);
+
+            // Send AI response back to client
+            socket.emit("send-interview-response", aiResponse);
+
+            // If interview is finished, send completion signal
+            if (!interviewer.isActive()) {
+                socket.emit("interview-complete", {
+                    conversationHistory: interviewer.getConversationHistory()
+                });
+                cleanupSession(socket.id); // Clean up session on completion
+            }
+        } catch (error) {
+            console.error("Error processing user response:", error);
+            socket.emit("interview-error", { message: "Failed to process response" });
+        }
+    });
+
+    // Handle interview end
+    socket.on("end-interview", () => {
+        const interviewer = interviewSessions[socket.id];
+        if (interviewer) {
+            const conversationHistory = interviewer.getConversationHistory();
+            socket.emit("interview-complete", { conversationHistory });
+            cleanupSession(socket.id); // Clean up session on end
+        }
+    });
+
+    socket.on("disconnect", () => {
+        console.log(`User disconnected: ${userId}, Socket: ${socket.id}`);
+        delete userSocketMap[userId];
+        cleanupSession(socket.id); // Clean up session on disconnect
+        console.log(`Active sessions after disconnect: ${Object.keys(interviewSessions).length}`);
+    });
+});
+
 const cleanupSession = (socketId) => {
     if (interviewSessions[socketId]) {
         delete interviewSessions[socketId];
@@ -287,7 +380,7 @@ If you think the interview is complete, set isInterviewEnd to true.`;
 
         // Generate AI response, passing userDidNotRespond flag
         const aiResponse = await generateAIResponse(cleanedUserMessage, conversationHistory, userDidNotRespond);
-        
+
         // Add AI response to history (ensure correct format)
         conversationHistory.push({
             type: 'interviewer',
@@ -312,87 +405,7 @@ If you think the interview is complete, set isInterviewEnd to true.`;
     };
 };
 
-io.on("connection", (socket) => {
-    const userId = socket.handshake.query.userId;
-    if (userId) userSocketMap[userId] = socket.id
 
-    // Log connection for monitoring
-    console.log(`User connected: ${userId}, Socket: ${socket.id}, Active sessions: ${Object.keys(interviewSessions).length}`);
 
-    // Handle interview session start
-    socket.on("start-interview", async (interviewData) => {
-        try {
-            // Validate required fields
-            if (!interviewData.questions || !Array.isArray(interviewData.questions)) {
-                console.error("Invalid interview data: questions array is required");
-                socket.emit("interview-error", { message: "Invalid interview data: questions array is required" });
-                return;
-            }
-            
-            // Create AI interviewer instance
-            const interviewer = createAIInterviewer(interviewData);
-            interviewSessions[socket.id] = interviewer;
-            setSessionTimeout(socket.id); // Set timeout for the session
-
-            console.log(`Interview started for user: ${userId}, Active sessions: ${Object.keys(interviewSessions).length}`);
-
-            // Start the interview
-            const firstMessage = interviewer.startInterview();
-            
-            if (firstMessage) {
-                socket.emit("interview-message", firstMessage);
-            } else {
-                console.error("Failed to start interview: no first message generated");
-                socket.emit("interview-error", { message: "Failed to start interview" });
-            }
-        } catch (error) {
-            console.error("Error starting interview:", error);
-            socket.emit("interview-error", { message: "Failed to start interview" });
-        }
-    });
-
-    // Handle user speech-to-text response
-    socket.on("user-response", async (userMessage) => {
-        try {
-            const interviewer = interviewSessions[socket.id];
-            if (!interviewer) {
-                socket.emit("interview-error", { message: "No active interview session" });
-                return;
-            }
-
-            // Process user response and get AI response
-            const aiResponse = await interviewer.processUserResponse(userMessage);
-            
-            // Send AI response back to client
-            socket.emit("interview-message", aiResponse);
-
-            // If interview is finished, send completion signal
-            if (!interviewer.isActive()) {
-                socket.emit("interview-complete", {
-                    conversationHistory: interviewer.getConversationHistory()
-                });
-                cleanupSession(socket.id); // Clean up session on completion
-            }
-        } catch (error) {
-            console.error("Error processing user response:", error);
-            socket.emit("interview-error", { message: "Failed to process response" });
-        }
-    });
-
-    // Handle interview end
-    socket.on("end-interview", () => {
-        const interviewer = interviewSessions[socket.id];
-        if (interviewer) {
-            const conversationHistory = interviewer.getConversationHistory();
-            socket.emit("interview-complete", { conversationHistory });
-            cleanupSession(socket.id); // Clean up session on end
-        }
-    });
-
-    socket.on("disconnect", () => {
-        delete userSocketMap[userId];
-        cleanupSession(socket.id); // Clean up session on disconnect
-    })
-})
 
 export { io, app, server };
