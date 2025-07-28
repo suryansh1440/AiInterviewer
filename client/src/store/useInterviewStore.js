@@ -20,8 +20,6 @@ export const useInterviewStore = create((set, get) => ({
     
     // Custom interview state
     isInterviewActive: false,
-    isListening: false,
-    isSpeaking: false,
     messages: [],
     currentInterviewSession: null,
 
@@ -87,16 +85,29 @@ export const useInterviewStore = create((set, get) => ({
     // Custom interview methods
     startCustomInterview: async (questions, leetcode, resume, github, name) => {
         set({isStartingInterview: true});
-        const { interviewData } = get();
         const { user } = useAuthStore.getState();
+        const { interviewData } = get();
         
         if (!interviewData) {
-            throw new Error('No interview data set');
+            toast.error('No interview data available');
+            set({isStartingInterview: false});
+            return false;
+        }
+        
+        if (!user) {
+            toast.error('User not authenticated');
+            set({isStartingInterview: false});
+            return false;
         }
         
         try {
             // Ensure questions is always an array
             const questionsArr = Array.isArray(questions) ? questions : [];
+            
+            // Get topic, subtopic, and level from interviewData or use defaults
+            const topic = interviewData.topic || interviewData.interview?.topic || 'Technical Interview';
+            const subTopic = interviewData.subTopic || interviewData.interview?.subTopic || 'General Questions';
+            const level = interviewData.level || interviewData.interview?.level || 'medium';
             
             const interviewSessionData = {
                 questions: questionsArr,
@@ -104,9 +115,9 @@ export const useInterviewStore = create((set, get) => ({
                 resume: resume || 'N/A',
                 github: github || 'N/A',
                 name: name || user?.name || 'Candidate',
-                topic: interviewData.topic,
-                subTopic: interviewData.subTopic,
-                level: interviewData.level
+                topic: topic,
+                subTopic: subTopic,
+                level: level
             };
 
             // Connect to socket
@@ -118,20 +129,23 @@ export const useInterviewStore = create((set, get) => ({
                     messages: [...state.messages, {
                         role: data.role,
                         content: data.content
-                    }],
-                    isSpeaking: true
+                    }]
                 }));
             });
 
             interviewSocket.onError((error) => {
                 console.error('Interview error:', error);
                 toast.error(error.message || 'Interview error occurred');
+                set({ 
+                    isInterviewActive: false,
+                    isStartingInterview: false
+                });
             });
 
             interviewSocket.onComplete((data) => {
                 set({ isInterviewActive: false });
-                // Create feedback with conversation history
-                get().createFeedback(interviewData._id, data.conversationHistory);
+                // Interview completed - feedback will be created manually when user ends interview
+                console.log('Interview completed with conversation history:', data.conversationHistory);
             });
 
             interviewSocket.onConnect(() => {
@@ -148,9 +162,8 @@ export const useInterviewStore = create((set, get) => ({
         } catch (error) {
             console.log('Custom interview start error', error);
             toast.error(error.message || "Something went wrong");
-            return false;
-        } finally {
             set({isStartingInterview: false});
+            return false;
         }
     },
 
@@ -183,9 +196,7 @@ export const useInterviewStore = create((set, get) => ({
         if (isInterviewActive) {
             interviewSocket.endInterview();
             set({ 
-                isInterviewActive: false,
-                isListening: false,
-                isSpeaking: false
+                isInterviewActive: false
             });
         }
     },
@@ -194,8 +205,6 @@ export const useInterviewStore = create((set, get) => ({
         interviewSocket.disconnect();
         set({ 
             isInterviewActive: false,
-            isListening: false,
-            isSpeaking: false,
             messages: []
         });
     },
@@ -217,12 +226,12 @@ export const useInterviewStore = create((set, get) => ({
             }));
             // Update user in useAuthStore if user data is returned
             if (res.data.user) {
-                useAuthStore.getState().set({ user: res.data.user });
+                useAuthStore.getState().user=res.data.user;
             }
             return res.data.interview;
         } catch (error) {
             console.log(error);
-            toast.error(error.response?.data?.message || "Failed to create feedback");
+            toast.error(error?.response?.data?.message || "Failed to create feedback");
             return null;
         } finally {
             set({ isCreatingFeedback: false });

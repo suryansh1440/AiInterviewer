@@ -16,24 +16,26 @@ class InterviewSocket {
             this.socket.disconnect();
         }
 
-        this.socket = io(process.env.REACT_APP_BACKEND_URL || 'http://localhost:5000', {
+        // Get backend URL from environment or use default
+        const backendUrl = import.meta.env?.VITE_BACKEND_URL || 
+                          process.env?.REACT_APP_BACKEND_URL || 
+                          'http://localhost:5000';
+
+        this.socket = io(backendUrl, {
             query: { userId }
         });
 
         this.socket.on('connect', () => {
-            console.log('Connected to interview server');
             this.isConnected = true;
             if (this.onConnectCallback) this.onConnectCallback();
         });
 
         this.socket.on('disconnect', () => {
-            console.log('Disconnected from interview server');
             this.isConnected = false;
             if (this.onDisconnectCallback) this.onDisconnectCallback();
         });
 
         this.socket.on('interview-message', (data) => {
-            console.log('Received interview message:', data);
             if (this.onMessageCallback) this.onMessageCallback(data);
         });
 
@@ -43,7 +45,6 @@ class InterviewSocket {
         });
 
         this.socket.on('interview-complete', (data) => {
-            console.log('Interview completed:', data);
             if (this.onCompleteCallback) this.onCompleteCallback(data);
         });
     }
@@ -52,7 +53,6 @@ class InterviewSocket {
         if (!this.socket || !this.isConnected) {
             throw new Error('Socket not connected');
         }
-        console.log('Starting interview with data:', interviewData);
         this.socket.emit('start-interview', interviewData);
     }
 
@@ -60,7 +60,7 @@ class InterviewSocket {
         if (!this.socket || !this.isConnected) {
             throw new Error('Socket not connected');
         }
-        console.log('Sending user response:', userMessage);
+        
         this.socket.emit('user-response', userMessage);
     }
 
@@ -68,7 +68,6 @@ class InterviewSocket {
         if (!this.socket || !this.isConnected) {
             throw new Error('Socket not connected');
         }
-        console.log('Ending interview');
         this.socket.emit('end-interview');
     }
 

@@ -12,8 +12,6 @@ const Agent = () => {
     const navigate = useNavigate();
     const {
         isInterviewActive,
-        isListening,
-        isSpeaking,
         messages,
         createFeedback,
         interviewData,
@@ -25,6 +23,8 @@ const Agent = () => {
 
     const [fadeIn, setFadeIn] = useState(false);
     const [isSpeechSupported, setIsSpeechSupported] = useState(false);
+    const [isListening, setIsListening] = useState(false);
+    const [isSpeaking, setIsSpeaking] = useState(false);
 
     const lastMessage = messages[messages.length - 1];
 
@@ -49,16 +49,30 @@ const Agent = () => {
             toast.error('Speech recognition error. Please try again.');
         });
 
+        speechManager.onSpeechStart(() => {
+            console.log('Speech recognition started');
+            setIsListening(true);
+        });
+
+        speechManager.onSpeechEnd(() => {
+            console.log('Speech recognition ended');
+            setIsListening(false);
+        });
+
         speechManager.onTTSStart(() => {
             console.log('TTS started');
+            setIsSpeaking(true);
         });
 
         speechManager.onTTSEnd(() => {
             console.log('TTS ended');
+            setIsSpeaking(false);
             // Start listening for user response after AI finishes speaking
-            if (isInterviewActive && !isListening) {
+            if (isInterviewActive) {
                 setTimeout(() => {
-                    speechManager.startListening();
+                    if (speechManager.isSupported()) {
+                        speechManager.startListening();
+                    }
                 }, 500);
             }
         });
@@ -69,7 +83,7 @@ const Agent = () => {
             speechManager.stopSpeaking();
             disconnectInterview();
         };
-    }, [isInterviewActive, isListening]);
+    }, [isInterviewActive]);
 
     // Handle AI messages with text-to-speech
     useEffect(() => {
@@ -85,9 +99,32 @@ const Agent = () => {
 
     const handleDisconnect = async () => {
         try {
-            endInterview();
+            // Stop all speech activities first
             speechManager.stopListening();
             speechManager.stopSpeaking();
+            
+            // Update local state to reflect microphone is off
+            setIsListening(false);
+            setIsSpeaking(false);
+            
+            // Get the interview ID and conversation history
+            const { interviewData, messages } = useInterviewStore.getState();
+            const interviewId = interviewData?._id || interviewData?.interview?._id;
+            
+            if (interviewId && messages.length > 0) {
+                // Convert messages to conversation history format
+                const conversationHistory = messages.map(msg => ({
+                    role: msg.role,
+                    content: msg.content
+                }));
+                
+                // Create feedback with conversation history
+                await createFeedback(interviewId, conversationHistory);
+            }
+            
+            // End the interview and disconnect
+            endInterview();
+            disconnectInterview();
             navigate("/dashboard/attempt");
         } catch (error) {
             console.error('Error ending interview:', error);
