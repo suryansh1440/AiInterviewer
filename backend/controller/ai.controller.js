@@ -212,6 +212,48 @@ export const createFeedback = async (req,res)=>{
       return res.status(400).json({message:"Invalid transcript format"})
     }
 
+    // Check if user actually provided meaningful responses
+    const userResponses = Array.isArray(transcript) 
+      ? transcript.filter(msg => msg.role === 'candidate' && msg.content.trim().length > 0 && msg.content.trim() !== '[NO RESPONSE]')
+      : [];
+    
+    const hasUserResponses = userResponses.length > 0;
+    
+    if (!hasUserResponses) {
+      // User didn't provide any responses, return default feedback
+      const defaultFeedback = {
+        totalScore: 0,
+        categoryScores: [
+          { name: "Communication Skills", score: 0, comment: "No responses provided to assess communication skills" },
+          { name: "Technical Knowledge", score: 0, comment: "No responses provided to assess technical knowledge" },
+          { name: "Problem Solving", score: 0, comment: "No responses provided to assess problem solving" },
+          { name: "Cultural Fit", score: 0, comment: "No responses provided to assess cultural fit" },
+          { name: "Confidence and Clarity", score: 0, comment: "No responses provided to assess confidence and clarity" }
+        ],
+        strengths: ["No assessment possible - no responses provided"],
+        areasForImprovement: ["Please provide responses in future interviews to receive proper feedback"],
+        finalAssessment: "No assessment possible as no responses were provided during the interview."
+      };
+
+      // Update the interview document with the default feedback
+      const updatedInterview = await Interview.findByIdAndUpdate(
+        interviewId,
+        { feedback: defaultFeedback, status: 'completed' },
+        { new: true }
+      );
+
+      if (!updatedInterview) {
+        console.error('Failed to update interview with ID:', interviewId);
+        return res.status(404).json({message:"Interview not found"});
+      }
+
+      res.status(200).json({
+        interview: updatedInterview,
+        user: null // No user stats update since no score
+      });
+      return;
+    }
+
     const prompt = `You are an expert technical interviewer and assessment coach. You will be given the transcript of a candidate's interview. Assess the candidate in the following categories: Communication Skills, Technical Knowledge, Problem Solving, Cultural Fit, and Confidence and Clarity. For each category, provide a score from 0 to 20 and a short comment. Also, provide a totalScore (0-100), a list of strengths, a list of areas for improvement, and a finalAssessment (1-2 sentences). Return only a valid JSON object in the following format:
 
 {
@@ -228,7 +270,17 @@ export const createFeedback = async (req,res)=>{
   finalAssessment: string
 }
 
-IMPORTANT: Only give scores and comments for questions the candidate actually responded to in the transcript. If a question was not answered, do not give a score for it and do not penalize the candidate for unanswered questions. The totalScore and categoryScores should only reflect the questions that were actually answered by the candidate. The finalAssessment should be based only on the responses provided, not on missing answers.
+CRITICAL SCORING RULES:
+1. ONLY score categories where the candidate provided meaningful responses to questions.
+2. If the candidate did not answer a question or provided no meaningful response, give a score of 0 for that category.
+3. Do NOT penalize the candidate for unanswered questions - simply don't score them.
+4. The totalScore should be calculated ONLY from the categories where the candidate provided responses.
+5. If the candidate provided very few or no meaningful responses, the totalScore should be 0.
+6. The finalAssessment should be based only on the responses provided, not on missing answers.
+7. If the candidate didn't answer most questions, mention this in the finalAssessment.
+8. A meaningful response is one that actually answers the question asked, not just acknowledging the question.
+9. If the transcript shows "[NO RESPONSE]" or empty responses, do not score those interactions.
+10. Only give positive scores when the candidate demonstrates actual knowledge or skills in their responses.
 
 Transcript:
 ${formattedTranscript}`;
@@ -249,7 +301,17 @@ ${formattedTranscript}`;
   finalAssessment: string
 }
 
-IMPORTANT: Only give scores and comments for questions the candidate actually responded to in the transcript. If a question was not answered, do not give a score for it and do not penalize the candidate for unanswered questions. The totalScore and categoryScores should only reflect the questions that were actually answered by the candidate. The finalAssessment should be based only on the responses provided, not on missing answers.
+CRITICAL SCORING RULES:
+1. ONLY score categories where the candidate provided meaningful responses to questions.
+2. If the candidate did not answer a question or provided no meaningful response, give a score of 0 for that category.
+3. Do NOT penalize the candidate for unanswered questions - simply don't score them.
+4. The totalScore should be calculated ONLY from the categories where the candidate provided responses.
+5. If the candidate provided very few or no meaningful responses, the totalScore should be 0.
+6. The finalAssessment should be based only on the responses provided, not on missing answers.
+7. If the candidate didn't answer most questions, mention this in the finalAssessment.
+8. A meaningful response is one that actually answers the question asked, not just acknowledging the question.
+9. If the transcript shows "[NO RESPONSE]" or empty responses, do not score those interactions.
+10. Only give positive scores when the candidate demonstrates actual knowledge or skills in their responses.
 
 Do not include any explanations or extra text. Only return the JSON object. All scores should be integers between 0 and 20. Comments should be concise and actionable.
 `;
@@ -272,6 +334,20 @@ Do not include any explanations or extra text. Only return the JSON object. All 
       return res.status(500).json({message:"Failed to parse AI feedback"});
     }
 
+    // Validate feedback structure and ensure scores are reasonable
+    if (!feedback.totalScore || feedback.totalScore < 0 || feedback.totalScore > 100) {
+      feedback.totalScore = 0;
+    }
+
+    // Ensure category scores are valid
+    if (feedback.categoryScores && Array.isArray(feedback.categoryScores)) {
+      feedback.categoryScores.forEach(category => {
+        if (category.score < 0 || category.score > 20) {
+          category.score = 0;
+        }
+      });
+    }
+
     // Update the interview document with the feedback and set status to completed
     const updatedInterview = await Interview.findByIdAndUpdate(
       interviewId,
@@ -284,9 +360,9 @@ Do not include any explanations or extra text. Only return the JSON object. All 
       return res.status(404).json({message:"Interview not found"});
     }
 
-    // Update user's stats.averageScore based on feedback
+    // Update user's stats.averageScore based on feedback only if they provided responses
     const user = await User.findById(userId);
-    if (user && feedback && typeof feedback.totalScore === 'number') {
+    if (user && feedback && typeof feedback.totalScore === 'number' && feedback.totalScore > 0) {
       // Calculate new averageScore
       const prevTotal = user.stats.averageScore && user.stats.totalInterviews > 1
         ? parseFloat(user.stats.averageScore) * (user.stats.totalInterviews - 1)
@@ -331,7 +407,7 @@ export const analyzeGitHubRepo = async (req, res) => {
     }
 
     let { summary, tree, files } = analysisResult;
-    files = files.slice(0, 900000);
+    files = files.slice(0, 800000);
 
     // Extract repo name from URL for the prompt
     const repoUrlParts = repoUrl.split('/');

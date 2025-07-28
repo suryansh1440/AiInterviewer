@@ -118,7 +118,7 @@ class SpeechManager {
                             this._pendingFinalTranscript = null;
                             this.stopListening(); // End listening after sending
                         }
-                    }, 3000); // 3 second grace period
+                    }, 3000); // 2 second grace period
                 }
                 
                 // Log interim results for debugging
