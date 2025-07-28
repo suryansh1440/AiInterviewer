@@ -1,8 +1,7 @@
 import { create } from "zustand";
 import { axiosInstance } from "../lib/axios";
 import toast from "react-hot-toast";
-import { vapi } from '../lib/vapi.sdk';
-import { interviewer } from '../constant';
+import { interviewSocket } from '../lib/socket.js';
 import { useAuthStore } from './useAuthStore';
 
 export const useInterviewStore = create((set, get) => ({
@@ -18,12 +17,20 @@ export const useInterviewStore = create((set, get) => ({
     showInterview: null,
     isGettingInterviews:false,
     isGettingLeetCodeAnalysis:false,
+    
+    // Custom interview state
+    isInterviewActive: false,
+    isListening: false,
+    isSpeaking: false,
+    messages: [],
+    currentInterviewSession: null,
 
     setShowInterview: (id) => set({ showInterview: id }),
     
     setInterviewData: (data)=>{
         set({interviewData:data})
     },
+    
     getRandomTopic: async(text)=>{
         set({isGettingRandomTopic:true})
         try{
@@ -36,6 +43,7 @@ export const useInterviewStore = create((set, get) => ({
             set({isGettingRandomTopic:false})
         }
     },
+    
     readResume: async (url) => {
         set({isGettingResume:true})
         try{
@@ -49,6 +57,7 @@ export const useInterviewStore = create((set, get) => ({
             set({isGettingResume:false})
         }
     },
+    
     getLeetCodeAnalysis: async (username) => {
         set({isGettingLeetCodeAnalysis:true})
         try{
@@ -75,42 +84,120 @@ export const useInterviewStore = create((set, get) => ({
         }
     },
 
-    handleCall: async (questions, leetcode, resume, github,name) => {
-        set({isStartingInterview:true})
+    // Custom interview methods
+    startCustomInterview: async (questions, leetcode, resume, github, name) => {
+        set({isStartingInterview: true});
         const { interviewData } = get();
+        const { user } = useAuthStore.getState();
+        
         if (!interviewData) {
             throw new Error('No interview data set');
         }
+        
         try {
             // Ensure questions is always an array
             const questionsArr = Array.isArray(questions) ? questions : [];
-            let formattedQuestions = "";
-            if (questionsArr.length > 0) {
-                formattedQuestions = questionsArr
-                  .map((question) => `- ${question}`)
-                  .join("\n");
-            }
+            
+            const interviewSessionData = {
+                questions: questionsArr,
+                leetcode: leetcode || 'N/A',
+                resume: resume || 'N/A',
+                github: github || 'N/A',
+                name: name || user?.name || 'Candidate',
+                topic: interviewData.topic,
+                subTopic: interviewData.subTopic,
+                level: interviewData.level
+            };
 
-            await vapi.start(
-                interviewer,
-                {
-                    variableValues: {
-                        questions: formattedQuestions,
-                        leetcode: leetcode,
-                        resume: resume,
-                        github: github,
-                        name: name
-                    }
-                }
-            );
+            // Connect to socket
+            interviewSocket.connect(user._id);
+            
+            // Set up event handlers
+            interviewSocket.onMessage((data) => {
+                set((state) => ({
+                    messages: [...state.messages, {
+                        role: data.role,
+                        content: data.content
+                    }],
+                    isSpeaking: true
+                }));
+            });
+
+            interviewSocket.onError((error) => {
+                console.error('Interview error:', error);
+                toast.error(error.message || 'Interview error occurred');
+            });
+
+            interviewSocket.onComplete((data) => {
+                set({ isInterviewActive: false });
+                // Create feedback with conversation history
+                get().createFeedback(interviewData._id, data.conversationHistory);
+            });
+
+            interviewSocket.onConnect(() => {
+                // Start the interview
+                interviewSocket.startInterview(interviewSessionData);
+                set({ 
+                    isInterviewActive: true,
+                    isStartingInterview: false,
+                    messages: []
+                });
+            });
+
             return true;
         } catch (error) {
-            console.log('Vapi start error', error);
-            toast.error(error.response?.data?.message || "Something went wrong");
+            console.log('Custom interview start error', error);
+            toast.error(error.message || "Something went wrong");
             return false;
-        }finally{
-            set({isStartingInterview:false})
+        } finally {
+            set({isStartingInterview: false});
         }
+    },
+
+    // Legacy Vapi method (kept for compatibility)
+    handleCall: async (questions, leetcode, resume, github, name) => {
+        return get().startCustomInterview(questions, leetcode, resume, github, name);
+    },
+
+    sendUserResponse: (userMessage) => {
+        const { isInterviewActive } = get();
+        if (!isInterviewActive) {
+            toast.error('No active interview session');
+            return;
+        }
+
+        // Add user message to state
+        set((state) => ({
+            messages: [...state.messages, {
+                role: 'candidate',
+                content: userMessage
+            }]
+        }));
+
+        // Send to server
+        interviewSocket.sendUserResponse(userMessage);
+    },
+
+    endInterview: () => {
+        const { isInterviewActive } = get();
+        if (isInterviewActive) {
+            interviewSocket.endInterview();
+            set({ 
+                isInterviewActive: false,
+                isListening: false,
+                isSpeaking: false
+            });
+        }
+    },
+
+    disconnectInterview: () => {
+        interviewSocket.disconnect();
+        set({ 
+            isInterviewActive: false,
+            isListening: false,
+            isSpeaking: false,
+            messages: []
+        });
     },
 
     createFeedback: async (interviewId, transcript) => {
@@ -158,6 +245,5 @@ export const useInterviewStore = create((set, get) => ({
             set({ isGettingInterviews: false });
         }
     },
-
 
 }));

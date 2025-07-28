@@ -1,20 +1,30 @@
 import React, { useEffect, useState } from 'react'
 import { useAuthStore } from '../store/useAuthStore';
-import { PhoneOff } from 'lucide-react';
-import { vapi } from '../lib/vapi.sdk';
+import { PhoneOff, Mic, MicOff, Volume2, VolumeX } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useInterviewStore } from '../store/useInterviewStore';
+import { speechManager } from '../lib/speech.js';
 import toast from 'react-hot-toast';
 import { Loader } from 'lucide-react';
 
 const Agent = () => {
-    const [isSpeaking, setIsSpeaking] = useState(false);
     const { user } = useAuthStore();
-    const [callStatus, setCallStatus] = useState("Inactive");
-    const [messages,setMessages] = useState([]);
-    const [fadeIn, setFadeIn] = useState(false);
     const navigate = useNavigate();
-    const {createFeedback,interviewData,isCreatingFeedback} = useInterviewStore();
+    const {
+        isInterviewActive,
+        isListening,
+        isSpeaking,
+        messages,
+        createFeedback,
+        interviewData,
+        isCreatingFeedback,
+        sendUserResponse,
+        endInterview,
+        disconnectInterview
+    } = useInterviewStore();
+
+    const [fadeIn, setFadeIn] = useState(false);
+    const [isSpeechSupported, setIsSpeechSupported] = useState(false);
 
     const lastMessage = messages[messages.length - 1];
 
@@ -25,70 +35,73 @@ const Agent = () => {
     }, [lastMessage]);
 
     useEffect(() => {
-        const onCallStart = () => {
-            setCallStatus("Active");
-        };
+        // Check if speech recognition is supported
+        setIsSpeechSupported(speechManager.isSupported());
 
-        const onCallEnd = () => {
-            setCallStatus("Finished");
-        };
+        // Set up speech recognition event handlers
+        speechManager.onSpeechResult((transcript) => {
+            console.log('Speech recognized:', transcript);
+            sendUserResponse(transcript);
+        });
 
-        const onMessage = (message) => {
-            if (message.type === 'transcript' && message.transcriptType === 'final') {
-                const newMessage = {
-                    role: message.role,
-                    content: message.transcript
-                };
-                setMessages(prev => [...prev, newMessage]);
+        speechManager.onSpeechError((error) => {
+            console.error('Speech recognition error:', error);
+            toast.error('Speech recognition error. Please try again.');
+        });
+
+        speechManager.onTTSStart(() => {
+            console.log('TTS started');
+        });
+
+        speechManager.onTTSEnd(() => {
+            console.log('TTS ended');
+            // Start listening for user response after AI finishes speaking
+            if (isInterviewActive && !isListening) {
+                setTimeout(() => {
+                    speechManager.startListening();
+                }, 500);
             }
-        };
+        });
 
-        const onSpeechStart = ()=>{
-            setIsSpeaking(true);
-        }
-
-        const onSpeechEnd = ()=>{
-            setIsSpeaking(false);
-        }
-
-        const onError=(error)=>{
-            console.log("error",error)
-        }
-
-
-        vapi.on('call-start',onCallStart);
-        vapi.on('call-end',onCallEnd);
-        vapi.on('message',onMessage);
-        vapi.on('speech-start',onSpeechStart);
-        vapi.on('speech-end',onSpeechEnd);
-        vapi.on('error',onError);
-
+        // Cleanup on unmount
         return () => {
-            if (typeof vapi.off === 'function') {
-                vapi.off('call-start',onCallStart);
-                vapi.off('call-end',onCallEnd);
-                vapi.off('message',onMessage);
-                vapi.off('speech-start',onSpeechStart);
-                vapi.off('speech-end',onSpeechEnd);
-                vapi.off('error',onError);
-            }
-        }
-    }, []);
+            speechManager.stopListening();
+            speechManager.stopSpeaking();
+            disconnectInterview();
+        };
+    }, [isInterviewActive, isListening]);
 
+    // Handle AI messages with text-to-speech
     useEffect(() => {
-        if(callStatus === "Finished"){
-            (async () => {
-                const interview = await createFeedback(interviewData._id,messages);
-                navigate("/dashboard/attempt");
-            })();
+        if (lastMessage && lastMessage.role === 'interviewer' && isInterviewActive) {
+            // Speak the AI message
+            speechManager.speak(lastMessage.content, {
+                rate: 0.9,
+                pitch: 1,
+                volume: 1
+            });
         }
-    },[messages,callStatus,user._id]);
+    }, [lastMessage, isInterviewActive]);
 
+    const handleDisconnect = async () => {
+        try {
+            endInterview();
+            speechManager.stopListening();
+            speechManager.stopSpeaking();
+            navigate("/dashboard/attempt");
+        } catch (error) {
+            console.error('Error ending interview:', error);
+            toast.error('Error ending interview');
+        }
+    };
 
-    const handleDisconnect = async ()=>{
-        setCallStatus("Finished");
-            await vapi.stop();
-    }
+    const toggleListening = () => {
+        if (isListening) {
+            speechManager.stopListening();
+        } else {
+            speechManager.startListening();
+        }
+    };
 
     if(isCreatingFeedback) return (
         <div className='flex items-center justify-center h-screen bg-base-200'>
@@ -98,8 +111,19 @@ const Agent = () => {
                 <div className='text-base text-base-content/70'>Please wait while we analyze your interview and generate detailed feedback.</div>
             </div>
         </div>
-    )
+    );
 
+    if (!isInterviewActive) {
+        return (
+            <div className='flex items-center justify-center h-screen bg-base-200'>
+                <div className='flex flex-col items-center gap-6 p-10 rounded-2xl shadow-xl bg-base-100 border border-primary/20'>
+                    <Loader className='w-16 h-16 text-primary animate-spin' />
+                    <div className='text-xl font-bold text-primary'>Starting Interview...</div>
+                    <div className='text-base text-base-content/70'>Please wait while we connect to the interview server.</div>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <>
@@ -117,11 +141,20 @@ const Agent = () => {
                         />
                     </div>
                     <h2 className="font-bold text-2xl text-white mb-2 text-center">AI Interviewer</h2>
+                    {isSpeaking && (
+                        <div className="flex items-center gap-2 text-primary">
+                            <Volume2 className="w-4 h-4" />
+                            <span className="text-sm">Speaking...</span>
+                        </div>
+                    )}
                 </div>
 
                 {/* User Card */}
                 <div className="hidden md:flex card md:w-[30rem] min-h-[22rem] border-1 bg-gradient-to-bl from-gray-900 from-10% via-black via-50% to-black to-100% shadow-xl md:p-12 flex-col items-center justify-center rounded-2xl overflow-hidden">
                     <div className="relative w-28 h-28 flex items-center justify-center mb-4">
+                        {isListening && (
+                            <span className="absolute inline-flex h-25 w-25 rounded-full bg-accent/30 animate-ping z-0"></span>
+                        )}
                         <img
                             src={user?.profilePic || "/avatar.png"}
                             alt="User avatar"
@@ -130,6 +163,12 @@ const Agent = () => {
                         />
                     </div>
                     <h2 className="font-bold text-2xl text-white mb-2 text-center">{user?.name || 'User'}</h2>
+                    {isListening && (
+                        <div className="flex items-center gap-2 text-accent">
+                            <Mic className="w-4 h-4" />
+                            <span className="text-sm">Listening...</span>
+                        </div>
+                    )}
                 </div>
             </div>
 
@@ -148,17 +187,53 @@ const Agent = () => {
             )}
 
             {/* call buttons */}
-            <div className='w-full flex justify-center'>
-                {callStatus === "Active" && (
-                    <button
-                        onClick={handleDisconnect}
-                        className="btn btn-error flex items-center gap-2 px-8 py-3 rounded-full text-lg font-semibold shadow-md hover:scale-105 transition-transform duration-150"
-                    >
-                        <PhoneOff className="w-5 h-5" />
-                        <span>End Interview</span>
-                    </button>
+            <div className='w-full flex justify-center gap-4'>
+                {isInterviewActive && (
+                    <>
+                        {isSpeechSupported && (
+                            <button
+                                onClick={toggleListening}
+                                className={`btn flex items-center gap-2 px-8 py-3 rounded-full text-lg font-semibold shadow-md hover:scale-105 transition-transform duration-150 ${
+                                    isListening ? 'btn-accent' : 'btn-primary'
+                                }`}
+                                disabled={isSpeaking}
+                            >
+                                {isListening ? (
+                                    <>
+                                        <MicOff className="w-5 h-5" />
+                                        <span>Stop Listening</span>
+                                    </>
+                                ) : (
+                                    <>
+                                        <Mic className="w-5 h-5" />
+                                        <span>Start Listening</span>
+                                    </>
+                                )}
+                            </button>
+                        )}
+                        
+                        <button
+                            onClick={handleDisconnect}
+                            className="btn btn-error flex items-center gap-2 px-8 py-3 rounded-full text-lg font-semibold shadow-md hover:scale-105 transition-transform duration-150"
+                        >
+                            <PhoneOff className="w-5 h-5" />
+                            <span>End Interview</span>
+                        </button>
+                    </>
                 )}
             </div>
+
+            {/* Speech support warning */}
+            {!isSpeechSupported && (
+                <div className="w-full flex justify-center mt-4">
+                    <div className="bg-warning/20 border border-warning/30 rounded-lg p-4 max-w-md">
+                        <p className="text-warning text-center text-sm">
+                            Speech recognition is not supported in your browser. 
+                            Please use Chrome, Edge, or Safari for the best experience.
+                        </p>
+                    </div>
+                </div>
+            )}
         </>
     );
 }
