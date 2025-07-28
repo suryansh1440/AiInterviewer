@@ -397,7 +397,7 @@ class SpeechManager {
         if (this.synthesis) {
             // Cancel any ongoing speech
             this.synthesis.cancel();
-
+            
             // Stop listening before starting TTS
             this.stopListening();
             

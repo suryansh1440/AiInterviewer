@@ -13,72 +13,16 @@ export const readPdf = async (req, res) => {
   const { url } = req.body;
   if (!url) return res.status(400).json({ message: 'No PDF URL provided' });
 
-  let readStream;
-  const tempFilePath = path.join("./", `temp_${Date.now()}.pdf`);
-  const outputFilePath = path.join("./", `ExtractTextInfoFromPDF_${Date.now()}.zip`);
   try {
-    // Download PDF as buffer and save to temp file
-    const response = await axios.get(url, { responseType: 'arraybuffer' });
-    fs.writeFileSync(tempFilePath, response.data);
-
-    // Initial setup, create credentials instance
-    const credentials = new ServicePrincipalCredentials({
-      clientId: process.env.PDF_SERVICES_CLIENT_ID,
-      clientSecret: process.env.PDF_SERVICES_CLIENT_SECRET
+    // Call the gitingest_backend PDF extraction API
+    const response = await axios.post('http://localhost:5001/extract-pdf-text', {
+      pdf_url: url
     });
-
-    // Creates a PDF Services instance
-    const pdfServices = new PDFServices({ credentials });
-
-    // Creates an asset(s) from source file(s) and upload
-    readStream = fs.createReadStream(tempFilePath);
-    const inputAsset = await pdfServices.upload({
-      readStream,
-      mimeType: MimeType.PDF
-    });
-
-    // Create parameters for the job
-    const params = new ExtractPDFParams({
-      elementsToExtract: [ExtractElementType.TEXT]
-    });
-
-    // Creates a new job instance
-    const job = new ExtractPDFJob({ inputAsset, params });
-
-    // Submit the job and get the job result
-    const pollingURL = await pdfServices.submit({ job });
-    const pdfServicesResponse = await pdfServices.getJobResult({
-      pollingURL,
-      resultType: ExtractPDFResult
-    });
-
-    // Get content from the resulting asset(s)
-    const resultAsset = pdfServicesResponse.result.resource;
-    const streamAsset = await pdfServices.getContent({ asset: resultAsset });
-
-    // Creates a write stream and copy stream asset's content to it
-    const writeStream = fs.createWriteStream(outputFilePath);
-    await new Promise((resolve, reject) => {
-      streamAsset.readStream.pipe(writeStream);
-      writeStream.on('finish', resolve);
-      writeStream.on('error', reject);
-    });
-
-    // Unzip and extract text
-    const zip = new AdmZip(outputFilePath);
-    const jsondata = zip.readAsText('structuredData.json');
-    const data = JSON.parse(jsondata);
-    const allText = data.elements.map(element => element.Text).filter(Boolean).join('\n');
-
-    res.json({ text: allText });
+    const text = response.data.text;
+    res.json({ text });
   } catch (err) {
-    console.log("Exception encountered while executing operation", err);
+    console.log("Exception encountered while extracting PDF text", err);
     res.status(500).json({ message: 'Failed to process PDF' });
-  } finally {
-    readStream?.destroy();
-    // Clean up temp files
-    if (fs.existsSync(tempFilePath)) fs.unlinkSync(tempFilePath);
-    if (fs.existsSync(outputFilePath)) fs.unlinkSync(outputFilePath);
   }
 };
 

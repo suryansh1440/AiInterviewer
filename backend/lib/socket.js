@@ -1,4 +1,4 @@
-import {Server} from "socket.io"
+import { Server } from "socket.io"
 import http from "http"
 import express from "express"
 import { generateText } from "ai"
@@ -7,9 +7,9 @@ import { google } from "@ai-sdk/google"
 const app = express()
 const server = http.createServer(app);
 
-const io = new Server(server,{
-    cors:{
-        origin:[process.env.FRONTEND_URL]
+const io = new Server(server, {
+    cors: {
+        origin: [process.env.FRONTEND_URL]
     }
 })
 
@@ -35,14 +35,14 @@ const setSessionTimeout = (socketId) => {
     if (sessionTimeouts[socketId]) {
         clearTimeout(sessionTimeouts[socketId]);
     }
-    
+
     // Set new timeout
     sessionTimeouts[socketId] = setTimeout(() => {
         cleanupSession(socketId);
     }, SESSION_TIMEOUT);
 };
 
-export function getUserSocketId(userId){
+export function getUserSocketId(userId) {
     return userSocketMap[userId];
 }
 
@@ -66,10 +66,10 @@ const createAIInterviewer = (interviewData) => {
     // Clean up speech input to handle STT errors
     const cleanSpeechInput = (userMessage) => {
         if (!userMessage) return '';
-        
+
         // Convert to lowercase and trim
         let cleaned = userMessage.toLowerCase().trim();
-        
+
         // Common STT corrections
         const corrections = {
             'um': '',
@@ -95,16 +95,16 @@ const createAIInterviewer = (interviewData) => {
             'nope': 'no',
             'nah': 'no'
         };
-        
+
         // Apply corrections
         Object.entries(corrections).forEach(([word, replacement]) => {
             const regex = new RegExp(`\\b${word}\\b`, 'gi');
             cleaned = cleaned.replace(regex, replacement);
         });
-        
+
         // Remove extra spaces
         cleaned = cleaned.replace(/\s+/g, ' ').trim();
-        
+
         return cleaned;
     };
 
@@ -197,17 +197,33 @@ Current User Message: ${userMessage}
 
 Only respond with your next interviewer message. Do not repeat or summarize the conversation history. Do not include previous candidate or interviewer messages in your response.
 
-Respond as the interviewer. Remember to acknowledge the candidate's answer, echo their main idea, and provide brief, valuable feedback before moving to the next question or closing the interview. Be concise, precise, and human. Always personalize your feedback and questions based on the candidate's resume, projects, and LeetCode stats if available.`;
+Respond as the interviewer. Remember to acknowledge the candidate's answer, echo their main idea, and provide brief, valuable feedback before moving to the next question or closing the interview. Be concise, precise, and human. Always personalize your feedback and questions based on the candidate's resume, projects, and LeetCode stats if available.
+Also send the message in this format:
+{
+    "role": "interviewer",
+    "content": "Your message here",
+    "isInterviewEnd": true/false
+}
+
+If you think the interview is complete, set isInterviewEnd to true.`;
 
             const { text } = await generateText({
                 model: google('gemini-2.0-flash-001'),
                 prompt: context
             });
 
-            return text.trim();
+            const cleanedText = text.replace(/```json/g, '').replace(/```/g, '');
+
+            const response = JSON.parse(cleanedText);
+
+            return response;
         } catch (error) {
             console.error('Error generating AI response:', error);
-            return "I apologize, but I'm having trouble processing that. Could you please repeat your response?";
+            return {
+                role: 'interviewer',
+                content: "I apologize, but I'm having trouble processing that. Could you please repeat your response?",
+                isInterviewEnd: false
+            };
         }
     };
 
@@ -216,14 +232,17 @@ Respond as the interviewer. Remember to acknowledge the candidate's answer, echo
             console.error('No questions available for interview');
             return null;
         }
-        
+
         const firstQuestion = getNextQuestion();
         if (firstQuestion) {
-            conversationHistory.push({
+            const msg = {
+                type: 'interviewer',
                 role: 'interviewer',
-                content: `Hello ${name}! Thank you for taking the time to speak with me today. I'm excited to learn more about you and your experience. Let's begin with our first question: ${firstQuestion}`
-            });
-            return conversationHistory[conversationHistory.length - 1];
+                content: `Hello ${name}! Thank you for taking the time to speak with me today. I'm excited to learn more about you and your experience. Let's begin with our first question: ${firstQuestion}`,
+                isInterviewEnd: false
+            };
+            conversationHistory.push(msg);
+            return msg;
         }
         return null;
     };
@@ -240,19 +259,28 @@ Respond as the interviewer. Remember to acknowledge the candidate's answer, echo
 
         if (!isInterviewActive) {
             if (userDidNotRespond) {
-                return {
+                const endMsg = {
+                    type: 'interviewer',
                     role: 'interviewer',
-                    content: "The interview is now complete. Please click 'End Interview' to finish and receive your feedback."
+                    content: "The interview is now complete. Please click 'End Interview' to finish and receive your feedback.",
+                    isInterviewEnd: true
                 };
+                conversationHistory.push(endMsg);
+                return endMsg;
             }
-            return {
+            const endMsg = {
+                type: 'interviewer',
                 role: 'interviewer',
-                content: "Thank you for your responses. The interview has concluded."
+                content: "Thank you for your responses. The interview has concluded.",
+                isInterviewEnd: true
             };
+            conversationHistory.push(endMsg);
+            return endMsg;
         }
 
         // Add user message to history
         conversationHistory.push({
+            type: 'interviewer',
             role: 'candidate',
             content: cleanedUserMessage
         });
@@ -260,26 +288,20 @@ Respond as the interviewer. Remember to acknowledge the candidate's answer, echo
         // Generate AI response, passing userDidNotRespond flag
         const aiResponse = await generateAIResponse(cleanedUserMessage, conversationHistory, userDidNotRespond);
         
-        // Add AI response to history
+        // Add AI response to history (ensure correct format)
         conversationHistory.push({
+            type: 'interviewer',
             role: 'interviewer',
-            content: aiResponse
+            content: aiResponse.content,
+            isInterviewEnd: aiResponse.isInterviewEnd
         });
 
-        // Do NOT auto-advance question index here; let the AI decide what to ask next
-        // Interview is complete if all questions have been addressed (AI can decide)
-        if (currentQuestionIndex >= questions.length && 
-            conversationHistory.length >= questions.length * 2) {
-            isInterviewActive = false;
-            const finalMessage = {
-                role: 'interviewer',
-                content: "Thank you for your responses. The interview has concluded. You've done well!"
-            };
-            conversationHistory.push(finalMessage);
-            return finalMessage;
-        }
 
-        return conversationHistory[conversationHistory.length - 1];
+        const aiResponseWithType = {
+            ...aiResponse,
+            type: 'interviewer'
+        };
+        return aiResponseWithType;
     };
 
     return {
@@ -290,9 +312,9 @@ Respond as the interviewer. Remember to acknowledge the candidate's answer, echo
     };
 };
 
-io.on("connection",(socket)=>{
+io.on("connection", (socket) => {
     const userId = socket.handshake.query.userId;
-    if(userId) userSocketMap[userId] = socket.id
+    if (userId) userSocketMap[userId] = socket.id
 
     // Log connection for monitoring
     console.log(`User connected: ${userId}, Socket: ${socket.id}, Active sessions: ${Object.keys(interviewSessions).length}`);
@@ -318,11 +340,7 @@ io.on("connection",(socket)=>{
             const firstMessage = interviewer.startInterview();
             
             if (firstMessage) {
-                socket.emit("interview-message", {
-                    type: "interviewer",
-                    content: firstMessage.content,
-                    role: "interviewer"
-                });
+                socket.emit("interview-message", firstMessage);
             } else {
                 console.error("Failed to start interview: no first message generated");
                 socket.emit("interview-error", { message: "Failed to start interview" });
@@ -346,11 +364,7 @@ io.on("connection",(socket)=>{
             const aiResponse = await interviewer.processUserResponse(userMessage);
             
             // Send AI response back to client
-            socket.emit("interview-message", {
-                type: "interviewer",
-                content: aiResponse.content,
-                role: "interviewer"
-            });
+            socket.emit("interview-message", aiResponse);
 
             // If interview is finished, send completion signal
             if (!interviewer.isActive()) {
@@ -375,10 +389,10 @@ io.on("connection",(socket)=>{
         }
     });
 
-    socket.on("disconnect",()=>{
+    socket.on("disconnect", () => {
         delete userSocketMap[userId];
         cleanupSession(socket.id); // Clean up session on disconnect
     })
 })
 
-export {io,app,server};
+export { io, app, server };

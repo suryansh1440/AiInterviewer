@@ -123,12 +123,24 @@ export const useInterviewStore = create((set, get) => ({
             // Connect to socket
             interviewSocket.connect(user._id);
             
+            // Set up disconnect handler
+            interviewSocket.onDisconnect(() => {
+                console.log('Socket disconnected');
+                set({ isInterviewActive: false });
+            });
+            
             // Set up event handlers
             interviewSocket.onMessage((data) => {
+                // Log the full AI interviewer response object
+                if (data.role === 'interviewer') {
+                    console.log('AI Interviewer Response:', data);
+                }
                 set((state) => ({
                     messages: [...state.messages, {
                         role: data.role,
-                        content: data.content
+                        content: data.content,
+                        isInterviewEnd: data.isInterviewEnd,
+                        type: data.type
                     }]
                 }));
             });
@@ -146,6 +158,8 @@ export const useInterviewStore = create((set, get) => ({
                 set({ isInterviewActive: false });
                 // Interview completed - feedback will be created manually when user ends interview
                 console.log('Interview completed with conversation history:', data.conversationHistory);
+                // Disconnect socket after completion
+                interviewSocket.disconnect();
             });
 
             interviewSocket.onConnect(() => {
@@ -195,17 +209,41 @@ export const useInterviewStore = create((set, get) => ({
         const { isInterviewActive } = get();
         if (isInterviewActive) {
             interviewSocket.endInterview();
+            // Reset all interview-related state
             set({ 
-                isInterviewActive: false
+                isInterviewActive: false,
+                messages: [],
+                interviewData: null,
+                isStartingInterview: false,
             });
+            // Ensure socket is disconnected after ending interview
+            setTimeout(() => {
+                interviewSocket.disconnect();
+            }, 1000); // Small delay to ensure end-interview event is sent
         }
     },
 
     disconnectInterview: () => {
         interviewSocket.disconnect();
+        // Reset all interview-related state
         set({ 
             isInterviewActive: false,
-            messages: []
+            messages: [],
+            interviewData: null,
+            isStartingInterview: false,
+        });
+    },
+
+    // Complete reset of interview state
+    resetInterviewState: () => {
+        interviewSocket.forceCleanup();
+        set({
+            isInterviewActive: false,
+            messages: [],
+            interviewData: null,
+            isStartingInterview: false,
+            isCreatingFeedback: false,
+            showInterview: null
         });
     },
 

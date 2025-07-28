@@ -68,11 +68,21 @@ class InterviewSocket {
         if (!this.socket || !this.isConnected) {
             throw new Error('Socket not connected');
         }
+        console.log('Sending end-interview signal to backend');
         this.socket.emit('end-interview');
+    }
+
+    forceCleanup() {
+        if (this.socket && this.isConnected) {
+            console.log('Force cleaning up interview session');
+            this.socket.emit('end-interview');
+        }
+        this.disconnect();
     }
 
     disconnect() {
         if (this.socket) {
+            console.log('Disconnecting socket');
             this.socket.disconnect();
             this.socket = null;
             this.isConnected = false;

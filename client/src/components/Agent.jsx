@@ -18,7 +18,8 @@ const Agent = () => {
         isCreatingFeedback,
         sendUserResponse,
         endInterview,
-        disconnectInterview
+        disconnectInterview,
+        resetInterviewState
     } = useInterviewStore();
 
     const [fadeIn, setFadeIn] = useState(false);
@@ -81,7 +82,7 @@ const Agent = () => {
         return () => {
             speechManager.stopListening();
             speechManager.stopSpeaking();
-            disconnectInterview();
+            resetInterviewState();
         };
     }, [isInterviewActive]);
 
@@ -96,6 +97,17 @@ const Agent = () => {
             });
         }
     }, [lastMessage, isInterviewActive]);
+
+    // Auto-end interview if isInterviewEnd is true in the last message
+    useEffect(() => {
+        if (lastMessage && lastMessage.isInterviewEnd) {
+            const timer = setTimeout(() => {
+                handleDisconnect();
+
+            }, 20000); // 20 seconds
+            return () => clearTimeout(timer);
+        }
+    }, [lastMessage]);
 
     const handleDisconnect = async () => {
         try {
@@ -122,9 +134,9 @@ const Agent = () => {
                 await createFeedback(interviewId, conversationHistory);
             }
             
-            // End the interview and disconnect
+            // Reset all interview state and disconnect
+            resetInterviewState();
             endInterview();
-            disconnectInterview();
             navigate("/dashboard/attempt");
         } catch (error) {
             console.error('Error ending interview:', error);

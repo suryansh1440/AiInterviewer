@@ -1,6 +1,9 @@
 from flask import Flask, request, jsonify
 from gitingest import ingest
 import os
+import requests
+from io import BytesIO
+from pdfminer.high_level import extract_text
 
 app = Flask(__name__)
 
@@ -34,6 +37,27 @@ def ingest_repository():
     except Exception as e:
         import traceback
         print(f"Error during gitingest: {e}")
+        traceback.print_exc()
+        return jsonify({'error': str(e)}), 500
+
+# New endpoint for PDF text extraction
+@app.route('/extract-pdf-text', methods=['POST'])
+def extract_pdf_text():
+    data = request.get_json()
+    pdf_url = data.get('pdf_url')
+    if not pdf_url:
+        return jsonify({'error': 'pdf_url is required'}), 400
+    try:
+        # Download the PDF
+        response = requests.get(pdf_url)
+        response.raise_for_status()
+        pdf_bytes = BytesIO(response.content)
+        # Extract text
+        text = extract_text(pdf_bytes)
+        return jsonify({'text': text})
+    except Exception as e:
+        import traceback
+        print(f"Error extracting PDF text: {e}")
         traceback.print_exc()
         return jsonify({'error': str(e)}), 500
 
