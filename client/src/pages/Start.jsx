@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Mic, Zap, Computer, Building, DollarSign, Settings, Heart, Scale, BarChart3, TrendingUp } from 'lucide-react';
+import { Mic, Zap, Computer, Building, DollarSign, Settings, Heart, Scale, BarChart3, TrendingUp, FileText, Code, GitBranch } from 'lucide-react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuthStore } from '../store/useAuthStore';
 import { useModalStore } from '../store/useModalStore';
@@ -8,6 +8,113 @@ import UpdateProfileModal from '../components/UpdateProfileModal';
 import GithubProjectModal from '../components/GithubProjectModal';
 import { useInterviewStore } from '../store/useInterviewStore';
 import { useGithubProjectStore } from '../store/useGithubProjectStore';
+import { motion } from 'framer-motion';
+
+// Animation Variants
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1,
+    },
+  },
+};
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: { opacity: 1, y: 0 },
+};
+
+const cardVariants = {
+  hidden: { opacity: 0, y: 30, scale: 0.9 },
+  visible: { 
+    opacity: 1, 
+    y: 0, 
+    scale: 1,
+    transition: {
+      type: "spring",
+      bounce: 0.4,
+      duration: 0.8,
+    }
+  },
+  hover: {
+    y: -5,
+    scale: 1.02,
+    transition: {
+      type: "spring",
+      bounce: 0.3,
+      duration: 0.3,
+    }
+  }
+};
+
+const categoryVariants = {
+  hidden: { opacity: 0, scale: 0.8 },
+  visible: { 
+    opacity: 1, 
+    scale: 1,
+    transition: {
+      type: "spring",
+      bounce: 0.4,
+      duration: 0.6,
+    }
+  },
+  hover: {
+    scale: 1.05,
+    y: -3,
+    transition: {
+      type: "spring",
+      bounce: 0.3,
+      duration: 0.2,
+    }
+  }
+};
+
+const inputVariants = {
+  hidden: { opacity: 0, x: -20 },
+  visible: { 
+    opacity: 1, 
+    x: 0,
+    transition: {
+      duration: 0.5
+    }
+  },
+  focus: {
+    scale: 1.02,
+    transition: {
+      duration: 0.2
+    }
+  }
+};
+
+const buttonVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: { 
+    opacity: 1, 
+    y: 0,
+    transition: {
+      type: "spring",
+      bounce: 0.4,
+      duration: 0.6,
+    }
+  },
+  hover: {
+    scale: 1.05,
+    y: -2,
+    transition: {
+      type: "spring",
+      bounce: 0.3,
+      duration: 0.2,
+    }
+  },
+  tap: {
+    scale: 0.95,
+    transition: {
+      duration: 0.1
+    }
+  }
+};
 
 const categories = [
   { id: 'tech', label: 'Tech & Programming', icon: Computer },
@@ -204,55 +311,94 @@ const Start = () => {
 
   return (
     <div className="min-h-screen bg-base-200 font-inter">
-      <section className="max-w-4xl mx-auto px-6 py-16">
-        <div className="text-center mb-12">
-          <h2 className="text-4xl font-bold text-base-content mb-4">Choose Your Topic</h2>
-          <p className="text-base-content/70 text-lg">
+      <motion.section 
+        className="max-w-4xl mx-auto px-6 py-16"
+        variants={containerVariants}
+        initial="hidden"
+        animate="visible"
+      >
+        <motion.div 
+          className="text-center mb-12"
+          variants={itemVariants}
+        >
+          <motion.h2 
+            className="text-4xl font-bold text-base-content mb-4"
+            variants={itemVariants}
+          >
+            Choose Your Topic
+          </motion.h2>
+          <motion.p 
+            className="text-base-content/70 text-lg"
+            variants={itemVariants}
+          >
             Select trending categories or specify your own topic for AI-generated interview questions
-          </p>
-        </div>
+          </motion.p>
+        </motion.div>
 
-        <div className="bg-base-100 rounded-2xl shadow-xl p-8 space-y-8">
+        <motion.div 
+          className="bg-base-100 rounded-2xl shadow-xl p-8 space-y-8"
+          variants={cardVariants}
+          initial="hidden"
+          animate="visible"
+        >
           {/* Popular Categories */}
-          <div>
+          <motion.div variants={itemVariants}>
             <h3 className="text-xl font-semibold text-base-content mb-6">Popular Categories</h3>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <motion.div 
+              className="grid grid-cols-2 md:grid-cols-4 gap-4"
+              variants={containerVariants}
+              initial="hidden"
+              animate="visible"
+            >
               {/* Show only 4 categories on mobile, all on md+ */}
               {categories.map((category, idx) => {
                 const IconComponent = category.icon;
                 // On mobile, only show first 4
                 if (idx > 3) {
                   return (
-                    <div
+                    <motion.div
                       key={category.id}
                       className="hidden md:block p-4 rounded-xl border-2 border-base-200 bg-base-200 text-primary text-left shadow hover:shadow-lg transition-all duration-200 cursor-pointer"
                       onClick={() => handleCategoryClick(category.id)}
+                      variants={categoryVariants}
+                      whileHover="hover"
+                      whileTap={{ scale: 0.95 }}
                     >
                       <IconComponent className="w-6 h-6 mb-2" />
                       <span className="text-sm font-medium text-base-content">{category.label}</span>
-                    </div>
+                    </motion.div>
                   );
                 }
                 return (
-                  <div
+                  <motion.div
                     key={category.id}
                     className="p-4 rounded-xl border-2 border-base-200 bg-base-200 text-primary text-left shadow hover:shadow-lg transition-all duration-200 cursor-pointer"
                     onClick={() => handleCategoryClick(category.id)}
+                    variants={categoryVariants}
+                    whileHover="hover"
+                    whileTap={{ scale: 0.95 }}
                   >
                     <IconComponent className="w-6 h-6 mb-2" />
                     <span className="text-sm font-medium text-base-content">{category.label}</span>
-                  </div>
+                  </motion.div>
                 );
               })}
-            </div>
-          </div>
+            </motion.div>
+          </motion.div>
 
           {/* Resume and LeetCode Options - side by side on desktop, stacked on mobile */}
-          <div className="flex flex-col md:flex-row gap-6">
+          <motion.div 
+            className="flex flex-col md:flex-row gap-6"
+            variants={itemVariants}
+          >
             {/* Resume Box */}
-            <div className="flex-1 rounded-xl border border-primary/30 bg-base-200 p-6 flex flex-col items-start gap-2 shadow-sm">
+            <motion.div 
+              className="flex-1 rounded-xl border border-primary/30 bg-base-200 p-6 flex flex-col items-start gap-2 shadow-sm"
+              variants={cardVariants}
+              whileHover="hover"
+            >
               <span className="font-bold text-lg flex items-center gap-2 text-primary">
-                <svg className="w-6 h-6 text-primary" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M16 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" /><circle cx="9" cy="7" r="4" /><path strokeLinecap="round" strokeLinejoin="round" d="M23 21v-2a4 4 0 00-3-3.87" /></svg>
+                <FileText className="w-6 h-6 text-primary" />
                 Resume Analysis
               </span>
               {user && user.resume && user.resume.endsWith('.pdf') ? (
@@ -276,11 +422,16 @@ const Start = () => {
                   <span className="text-error text-xs mt-1">Please upload your resume to enable this option.</span>
                 )}
               </div>
-            </div>
+            </motion.div>
+            
             {/* LeetCode Box */}
-            <div className="flex-1 rounded-xl border border-warning/30 bg-base-200 p-6 flex flex-col items-start gap-2 shadow-sm">
+            <motion.div 
+              className="flex-1 rounded-xl border border-warning/30 bg-base-200 p-6 flex flex-col items-start gap-2 shadow-sm"
+              variants={cardVariants}
+              whileHover="hover"
+            >
               <span className="font-bold text-lg flex items-center gap-2 text-warning">
-                <img src="https://leetcode.com/static/images/LeetCode_logo_rvs.png" alt="LeetCode" className="w-6 h-6 object-contain" />
+                <Code className="w-6 h-6 text-warning" />
                 LeetCode Analysis
               </span>
               {user?.leetcodeUsername ? (
@@ -303,13 +454,17 @@ const Start = () => {
                   {user?.leetcodeUsername ? 'LeetCode Linked' : 'Analyze LeetCode'}
                 </label>
               </div>
-            </div>
-          </div>
+            </motion.div>
+          </motion.div>
 
           {/* GitHub Analysis */}
-          <div className="rounded-xl border border-info/30 bg-base-200 p-6 flex flex-col items-start gap-2 shadow-sm">
+          <motion.div 
+            className="rounded-xl border border-info/30 bg-base-200 p-6 flex flex-col items-start gap-2 shadow-sm"
+            variants={cardVariants}
+            whileHover="hover"
+          >
             <span className="font-bold text-lg flex items-center gap-2 text-info">
-              <svg className="w-6 h-6 text-info" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" /></svg>
+              <GitBranch className="w-6 h-6 text-info" />
               GitHub Project Analysis
             </span>
             {githubProjects && githubProjects.length > 0 ? (
@@ -332,23 +487,29 @@ const Start = () => {
                 {githubProjects && githubProjects.length > 0 ? 'GitHub Projects Added' : 'Add GitHub Projects'}
               </label>
               {githubProjects && githubProjects.length > 0 && (
-                <button
+                <motion.button
                   onClick={() => setShowGithubModal(true)}
                   className="btn btn-outline btn-info btn-sm mt-2"
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
                 >
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                   </svg>
                   Change Repos
-                </button>
+                </motion.button>
               )}
             </div>
-          </div>
+          </motion.div>
 
           {/* Custom Topic Input */}
-          <div>
+          <motion.div variants={itemVariants}>
             <h3 className="text-xl font-semibold text-base-content mb-4">Specify Your Topic</h3>
-            <div className="relative">
+            <motion.div 
+              className="relative"
+              variants={inputVariants}
+              whileFocus="focus"
+            >
               <input
                 type="text"
                 placeholder="Type your topic..."
@@ -356,23 +517,28 @@ const Start = () => {
                 value={topic}
                 onChange={e => setTopic(e.target.value)}
               />
-            </div>
-          </div>
+            </motion.div>
+          </motion.div>
 
           {/* Subtopic Input */}
-          <div>
+          <motion.div variants={itemVariants}>
             <h3 className="text-xl font-semibold text-base-content mb-4">Add Subtopic (Optional)</h3>
-            <input
+            <motion.input
               type="text"
               placeholder="e.g., Computer Networks, DBMS, Algorithms..."
               className="w-full px-4 py-4 border border-base-300 rounded-xl focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 text-base-content bg-base-100"
               value={subTopic}
               onChange={e => setSubTopic(e.target.value)}
+              variants={inputVariants}
+              whileFocus="focus"
             />
-          </div>
+          </motion.div>
 
           {/* Number of Questions and Difficulty Selectors (side by side, compact) */}
-          <div className="flex flex-row gap-4 items-center justify-center bg-base-200 rounded-lg shadow p-3 my-2">
+          <motion.div 
+            className="flex flex-row gap-4 items-center justify-center bg-base-200 rounded-lg shadow p-3 my-2"
+            variants={itemVariants}
+          >
             <div className="flex flex-col items-center">
               <label htmlFor="numQuestions" className="text-sm font-semibold text-base-content mb-1">No. of Questions</label>
               <select
@@ -399,14 +565,17 @@ const Start = () => {
                 <option value="hard">Hard</option>
               </select>
             </div>
-          </div>
+          </motion.div>
 
           {/* Random Topic Section */}
           {includeResume && (
-            <button
+            <motion.button
               className="w-full bg-gradient-to-r from-primary to-secondary text-primary-content py-4 px-6 rounded-xl font-bold text-lg hover:from-primary-focus hover:to-secondary-focus transition-all duration-200 flex flex-col items-center justify-center gap-1 shadow-lg border-2 border-primary/30 disabled:opacity-60 disabled:cursor-not-allowed"
               onClick={handleRandomTopic}
               disabled={isGeneratingRandomTopic}
+              variants={buttonVariants}
+              whileHover="hover"
+              whileTap="tap"
             >
               <span className="flex items-center gap-2">
                 <Zap className="w-6 h-6 text-yellow-300 drop-shadow" />
@@ -415,14 +584,17 @@ const Start = () => {
                   : 'Generate Random Topic'}
               </span>
               <span className="text-xs text-primary-content/80 font-normal mt-1">based on your resume</span>
-            </button>
+            </motion.button>
           )}
 
           {/* ✅ Start Interview Button */}
-          <button
+          <motion.button
             onClick={handleStartClick}
             className="w-full bg-gradient-to-r from-accent to-primary text-primary-content py-4 px-8 rounded-xl font-semibold text-lg hover:from-accent-focus hover:to-primary-focus transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-1"
             disabled={isGeneratingQuestion || isStartingInterview || isGettingLeetCodeAnalysis || isGettingResume}
+            variants={buttonVariants}
+            whileHover="hover"
+            whileTap="tap"
           >
             {isGettingLeetCodeAnalysis
               ? 'Getting LeetCode Analysis...'
@@ -433,9 +605,9 @@ const Start = () => {
                   : isStartingInterview
                     ? 'Starting Interview...'
                     : 'Start Interview'}
-          </button>
-        </div>
-      </section>
+          </motion.button>
+        </motion.div>
+      </motion.section>
       <UpdateProfileModal open={showResumeModal || showLeetModal} onClose={() => { setShowResumeModal(false); setShowLeetModal(false); }} />
       <GithubProjectModal open={showGithubModal} onClose={() => setShowGithubModal(false)} />
     </div>

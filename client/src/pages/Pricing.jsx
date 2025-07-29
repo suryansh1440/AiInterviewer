@@ -5,9 +5,82 @@ import Modal from "../components/Modal";
 import { useModalStore } from "../store/useModalStore";
 import { usePaymentStore } from "../store/usePaymentStore";
 import toast from "react-hot-toast";
-import { Loader } from "lucide-react";
+import { Loader, Check, Star, Zap, Crown } from "lucide-react";
 import Footer from "../components/Footer";
+import { motion } from "framer-motion";
 
+// Animation Variants
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1,
+    },
+  },
+};
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: { opacity: 1, y: 0 },
+};
+
+const cardVariants = {
+  hidden: { opacity: 0, y: 50, scale: 0.9 },
+  visible: { 
+    opacity: 1, 
+    y: 0, 
+    scale: 1,
+    transition: {
+      type: "spring",
+      bounce: 0.4,
+      duration: 0.8,
+    }
+  },
+  hover: {
+    y: -10,
+    scale: 1.02,
+    transition: {
+      type: "spring",
+      bounce: 0.3,
+      duration: 0.3,
+    }
+  }
+};
+
+const heroVariants = {
+  hidden: { opacity: 0, y: -30 },
+  visible: { 
+    opacity: 1, 
+    y: 0,
+    transition: {
+      duration: 0.8,
+      ease: "easeOut"
+    }
+  }
+};
+
+const tableRowVariants = {
+  hidden: { opacity: 0, x: -20 },
+  visible: { 
+    opacity: 1, 
+    x: 0,
+    transition: {
+      duration: 0.5
+    }
+  }
+};
+
+const faqVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: { 
+    opacity: 1, 
+    y: 0,
+    transition: {
+      duration: 0.6
+    }
+  }
+};
 
 const comparisonRows = [
   ["AI-Powered Interviews", "1", "2", "Unlimited (1 month)"],
@@ -98,126 +171,209 @@ const Pricing = () => {
   return (
     <div className="bg-base-200 min-h-screen">
       {/* Hero */}
-      <section className="pricing-hero text-center py-16 px-4 bg-gradient-to-r from-primary to-secondary text-primary-content shadow-lg">
-        <h1 className="text-4xl md:text-5xl font-extrabold mb-4 drop-shadow-lg">
+      <motion.section 
+        className="pricing-hero text-center py-16 px-4 bg-gradient-to-r from-primary to-secondary text-primary-content shadow-lg"
+        variants={heroVariants}
+        initial="hidden"
+        animate="visible"
+      >
+        <motion.h1 
+          className="text-4xl md:text-5xl font-extrabold mb-4 drop-shadow-lg"
+          variants={itemVariants}
+        >
           Simple, Transparent Pricing
-        </h1>
-        <p className="text-lg md:text-xl max-w-2xl mx-auto opacity-90">
+        </motion.h1>
+        <motion.p 
+          className="text-lg md:text-xl max-w-2xl mx-auto opacity-90"
+          variants={itemVariants}
+        >
           Start for free. Upgrade anytime for unlimited, AI-powered interview
           practice and feedback.
-        </p>
-      </section>
+        </motion.p>
+      </motion.section>
 
       {/* Pricing Tiers */}
-      <section className="pricing-tiers flex flex-col md:flex-row gap-8 justify-center items-stretch max-w-6xl mx-auto py-16 px-4">
+      <motion.section 
+        className="pricing-tiers flex flex-col md:flex-row gap-8 justify-center items-stretch max-w-6xl mx-auto py-16 px-4"
+        variants={containerVariants}
+        initial="hidden"
+        animate="visible"
+      >
         {/* Free Tier */}
-        <div className="tier relative flex-1 flex flex-col items-center bg-base-100/60 backdrop-blur-lg rounded-3xl shadow-xl p-8 border border-base-200 transition-transform duration-300 hover:scale-105">
-          <div className="tier-title text-2xl font-bold mb-2 text-primary">Free</div>
+        <motion.div 
+          className="tier relative flex-1 flex flex-col items-center bg-base-100/60 backdrop-blur-lg rounded-3xl shadow-xl p-8 border border-base-200"
+          variants={cardVariants}
+          whileHover="hover"
+        >
+          <div className="tier-title text-2xl font-bold mb-2 text-primary flex items-center gap-2">
+            <Star className="w-6 h-6" />
+            Free
+          </div>
           <div className="tier-price text-4xl font-extrabold mb-1 text-base-content">₹0</div>
           <div className="tier-desc text-base-content/70 mb-4 text-center">Get started with 1 free interviews</div>
           <ul className="mb-6 space-y-2 w-full">
-            <li className="flex items-center gap-2 text-base-content"><span className="text-primary">✔</span> 1 AI-powered interviews</li>
-            <li className="flex items-center gap-2 text-base-content"><span className="text-primary">✔</span> Basic feedback</li>
-            <li className="flex items-center gap-2 text-base-content"><span className="text-primary">✔</span> Email support</li>
-            <li className="flex items-center gap-2 text-base-content"><span className="text-primary">✔</span> validity 1 month</li>
+            <li className="flex items-center gap-2 text-base-content"><Check className="w-4 h-4 text-primary" /> 1 AI-powered interviews</li>
+            <li className="flex items-center gap-2 text-base-content"><Check className="w-4 h-4 text-primary" /> Basic feedback</li>
+            <li className="flex items-center gap-2 text-base-content"><Check className="w-4 h-4 text-primary" /> Email support</li>
+            <li className="flex items-center gap-2 text-base-content"><Check className="w-4 h-4 text-primary" /> validity 1 month</li>
           </ul>
           {(user?.freeInterview === 'claimed' || isFreeClaimed) ? (
             <div className="w-full flex flex-col items-center">
-              <button
+              <motion.button
                 disabled
                 className="w-full text-center px-6 py-3 rounded-lg font-semibold shadow transition-colors duration-200 bg-gradient-to-r from-green-400 to-green-600 text-white cursor-not-allowed border-2 border-green-500 opacity-90"
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
               >
                 <span className="flex items-center justify-center gap-2">
-                  <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                  </svg>
+                  <Check className="w-5 h-5 text-white" />
                   Claimed
                 </span>
-              </button>
+              </motion.button>
             </div>
           ) : (
-            <button
+            <motion.button
               disabled={isCheckoutLoading}
               onClick={() => handleCheckout('free')}
               className="w-full text-center px-6 py-3 rounded-lg font-semibold shadow transition-colors duration-200 bg-base-100 text-primary border border-primary hover:bg-base-200"
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
             >
               <span className="flex items-center justify-center w-full">
                 {isCheckoutLoading ? <Loader className="size-4 animate-spin" /> : 'Start Free'}
               </span>
-            </button>
+            </motion.button>
           )}
-        </div>
+        </motion.div>
+        
         {/* Starter Tier */}
-        <div className={`tier relative flex-1 flex flex-col items-center bg-base-100/60 backdrop-blur-lg rounded-3xl shadow-xl p-8 border transition-transform duration-300 hover:scale-105 z-10 ${user?.subscription === 'starter' ? 'border-green-500 border-4' : 'border-base-200'}`}>
+        <motion.div 
+          className={`tier relative flex-1 flex flex-col items-center bg-base-100/60 backdrop-blur-lg rounded-3xl shadow-xl p-8 border z-10 ${user?.subscription === 'starter' ? 'border-green-500 border-4' : 'border-base-200'}`}
+          variants={cardVariants}
+          whileHover="hover"
+        >
           {/* Active badge if user has starter subscription */}
           {user?.subscription === 'starter' && (
-            <div className="absolute -top-5 left-1/2 -translate-x-1/2 bg-gradient-to-r from-green-400 to-green-600 text-white text-xs font-bold px-4 py-1 rounded-full shadow-lg uppercase tracking-wider z-20">Active</div>
+            <motion.div 
+              className="absolute -top-5 left-1/2 -translate-x-1/2 bg-gradient-to-r from-green-400 to-green-600 text-white text-xs font-bold px-4 py-1 rounded-full shadow-lg uppercase tracking-wider z-20"
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{ type: "spring", bounce: 0.6 }}
+            >
+              Active
+            </motion.div>
           )}
-          <div className="tier-title text-2xl font-bold mb-2 text-primary">Starter</div>
+          <div className="tier-title text-2xl font-bold mb-2 text-primary flex items-center gap-2">
+            <Zap className="w-6 h-6" />
+            Starter
+          </div>
           <div className="tier-price text-4xl font-extrabold mb-1 text-base-content">₹30</div>
           <div className="tier-desc text-base-content/70 mb-4 text-center">2 interviews & advanced feedback</div>
           <ul className="mb-6 space-y-2 w-full">
-            <li className="flex items-center gap-2 text-base-content"><span className="text-primary">✔</span> 2 AI-powered interviews</li>
-            <li className="flex items-center gap-2 text-base-content"><span className="text-primary">✔</span> Advanced AI feedback</li>
-            <li className="flex items-center gap-2 text-base-content"><span className="text-primary">✔</span> Voice analysis</li>
-            <li className="flex items-center gap-2 text-base-content"><span className="text-primary">✔</span> Priority support</li>
-            <li className="flex items-center gap-2 text-base-content"><span className="text-primary">✔</span> Validity 1 month</li>
+            <li className="flex items-center gap-2 text-base-content"><Check className="w-4 h-4 text-primary" /> 2 AI-powered interviews</li>
+            <li className="flex items-center gap-2 text-base-content"><Check className="w-4 h-4 text-primary" /> Advanced AI feedback</li>
+            <li className="flex items-center gap-2 text-base-content"><Check className="w-4 h-4 text-primary" /> Voice analysis</li>
+            <li className="flex items-center gap-2 text-base-content"><Check className="w-4 h-4 text-primary" /> Priority support</li>
+            <li className="flex items-center gap-2 text-base-content"><Check className="w-4 h-4 text-primary" /> Validity 1 month</li>
           </ul>
-          <button
+          <motion.button
             disabled={isCheckoutLoading}
             onClick={() => handleCheckout('starter')}
             className="w-full text-center px-6 py-3 rounded-lg font-semibold shadow transition-colors duration-200 bg-primary text-primary-content hover:bg-primary-focus"
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
           >
             <span className="flex items-center justify-center w-full">
               {isCheckoutLoading ? <Loader className="size-4 animate-spin" /> : 'Get Starter'}
             </span>
-          </button>
-        </div>
+          </motion.button>
+        </motion.div>
+        
         {/* Pro Tier */}
-        <div className={`tier relative flex-1 flex flex-col items-center bg-base-100/60 backdrop-blur-lg rounded-3xl shadow-xl p-8 border transition-transform duration-300 hover:scale-105 ${user?.subscription === 'pro' ? 'border-green-500 border-4' : 'border-base-200'}`}>
+        <motion.div 
+          className={`tier relative flex-1 flex flex-col items-center bg-base-100/60 backdrop-blur-lg rounded-3xl shadow-xl p-8 border ${user?.subscription === 'pro' ? 'border-green-500 border-4' : 'border-base-200'}`}
+          variants={cardVariants}
+          whileHover="hover"
+        >
           {/* Active badge if user has pro subscription */}
           {user?.subscription === 'pro' && (
-            <div className="absolute -top-5 left-1/2 -translate-x-1/2 bg-gradient-to-r from-green-400 to-green-600 text-white text-xs font-bold px-4 py-1 rounded-full shadow-lg uppercase tracking-wider z-20">Active</div>
+            <motion.div 
+              className="absolute -top-5 left-1/2 -translate-x-1/2 bg-gradient-to-r from-green-400 to-green-600 text-white text-xs font-bold px-4 py-1 rounded-full shadow-lg uppercase tracking-wider z-20"
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{ type: "spring", bounce: 0.6 }}
+            >
+              Active
+            </motion.div>
           )}
-          <div className="tier-title text-2xl font-bold mb-2 text-primary">Pro</div>
+          <div className="tier-title text-2xl font-bold mb-2 text-primary flex items-center gap-2">
+            <Crown className="w-6 h-6" />
+            Pro
+          </div>
           <div className="tier-price text-4xl font-extrabold mb-1 text-base-content">₹300<span className="text-base font-medium text-base-content/70">/month</span></div>
           <div className="tier-desc text-base-content/70 mb-4 text-center">1 month unlimited interviews</div>
           <ul className="mb-6 space-y-2 w-full">
-            <li className="flex items-center gap-2 text-base-content"><span className="text-primary">✔</span> Unlimited interviews (1 month)</li>
-            <li className="flex items-center gap-2 text-base-content"><span className="text-primary">✔</span> Advanced AI feedback</li>
-            <li className="flex items-center gap-2 text-base-content"><span className="text-primary">✔</span> Voice analysis</li>
-            <li className="flex items-center gap-2 text-base-content"><span className="text-primary">✔</span> Progress tracking</li>
-            <li className="flex items-center gap-2 text-base-content"><span className="text-primary">✔</span> Dedicated support</li>
+            <li className="flex items-center gap-2 text-base-content"><Check className="w-4 h-4 text-primary" /> Unlimited interviews (1 month)</li>
+            <li className="flex items-center gap-2 text-base-content"><Check className="w-4 h-4 text-primary" /> Advanced AI feedback</li>
+            <li className="flex items-center gap-2 text-base-content"><Check className="w-4 h-4 text-primary" /> Voice analysis</li>
+            <li className="flex items-center gap-2 text-base-content"><Check className="w-4 h-4 text-primary" /> Progress tracking</li>
+            <li className="flex items-center gap-2 text-base-content"><Check className="w-4 h-4 text-primary" /> Dedicated support</li>
           </ul>
-          <button
+          <motion.button
             disabled={isCheckoutLoading}
             onClick={() => handleCheckout('pro')}
             className="w-full text-center px-6 py-3 rounded-lg font-semibold shadow transition-colors duration-200 bg-base-100 text-primary border border-primary hover:bg-base-200"
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
           >
             <span className="flex items-center justify-center w-full">
               {isCheckoutLoading ? <Loader className="size-4 animate-spin" /> : 'Go Pro'}
             </span>
-          </button>
-        </div>
-      </section>
+          </motion.button>
+        </motion.div>
+      </motion.section>
 
       {/* Comparison Table */}
-      <section className="comparison-table max-w-4xl mx-auto my-16 px-2">
-        <div className="overflow-x-auto rounded-2xl shadow-lg bg-base-100/80">
+      <motion.section 
+        className="comparison-table max-w-4xl mx-auto my-16 px-2"
+        initial={{ opacity: 0, y: 50 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, amount: 0.3 }}
+        transition={{ duration: 0.8 }}
+      >
+        <motion.div 
+          className="overflow-x-auto rounded-2xl shadow-lg bg-base-100/80"
+          initial={{ opacity: 0, scale: 0.95 }}
+          whileInView={{ opacity: 1, scale: 1 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6, delay: 0.2 }}
+        >
           <table className="min-w-full text-center text-base-content">
             <thead>
-              <tr className="bg-base-200">
+              <motion.tr 
+                className="bg-base-200"
+                initial={{ opacity: 0, y: -20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5 }}
+              >
                 <th className="py-3 px-4 text-lg font-bold">Features</th>
                 <th className="py-3 px-4 text-lg font-bold">Free</th>
                 <th className="py-3 px-4 text-lg font-bold">Starter</th>
                 <th className="py-3 px-4 text-lg font-bold">Pro</th>
-              </tr>
+              </motion.tr>
             </thead>
             <tbody>
               {comparisonRows.map((row, i) => (
-                <tr
+                <motion.tr
                   key={i}
                   className="border-t border-base-200 hover:bg-base-200 transition-colors"
+                  variants={tableRowVariants}
+                  initial="hidden"
+                  whileInView="visible"
+                  viewport={{ once: true }}
+                  custom={i}
+                  transition={{ delay: i * 0.1 }}
                 >
                   <td className="py-3 px-4 font-semibold text-left md:text-center">
                     {row[0]}
@@ -225,74 +381,142 @@ const Pricing = () => {
                   <td className="py-3 px-4">{row[1]}</td>
                   <td className="py-3 px-4">{row[2]}</td>
                   <td className="py-3 px-4">{row[3]}</td>
-                </tr>
+                </motion.tr>
               ))}
             </tbody>
           </table>
-        </div>
-      </section>
+        </motion.div>
+      </motion.section>
 
       {/* FAQ Section */}
-      <section className="faq-section max-w-3xl mx-auto py-16 px-4">
-        <h2 className="text-2xl md:text-3xl font-bold text-center text-base-content mb-10">
+      <motion.section 
+        className="faq-section max-w-3xl mx-auto py-16 px-4"
+        initial={{ opacity: 0, y: 50 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, amount: 0.3 }}
+        transition={{ duration: 0.8 }}
+      >
+        <motion.h2 
+          className="text-2xl md:text-3xl font-bold text-center text-base-content mb-10"
+          initial={{ opacity: 0, y: -20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6 }}
+        >
           Frequently Asked Questions
-        </h2>
-        <div className="space-y-4">
+        </motion.h2>
+        <motion.div 
+          className="space-y-4"
+          variants={containerVariants}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, amount: 0.3 }}
+        >
           {faqs.map((faq, idx) => (
-            <div key={idx} className="faq rounded-xl bg-base-100/70 shadow p-5">
-              <button
+            <motion.div
+              key={idx}
+              className="faq rounded-xl bg-base-100/70 shadow p-5"
+              variants={faqVariants}
+              custom={idx}
+              whileHover={{ scale: 1.02 }}
+              transition={{ delay: idx * 0.1 }}
+            >
+              <motion.button
                 className="faq-question w-full text-left flex justify-between items-center text-lg font-semibold text-primary focus:outline-none"
                 onClick={() => setOpenFaq(openFaq === idx ? null : idx)}
                 aria-expanded={openFaq === idx}
+                whileHover={{ scale: 1.01 }}
+                whileTap={{ scale: 0.99 }}
               >
                 {faq.q}
-                <span
-                  className={`ml-2 transition-transform ${
-                    openFaq === idx ? "rotate-180" : ""
-                  }`}
+                <motion.span
+                  className="ml-2 transition-transform"
+                  animate={{ rotate: openFaq === idx ? 180 : 0 }}
+                  transition={{ duration: 0.3 }}
                 >
                   ▼
-                </span>
-              </button>
-              <div
-                className={`faq-answer overflow-hidden transition-all duration-500 text-base-content ${
-                  openFaq === idx
-                    ? "max-h-40 mt-3 opacity-100"
-                    : "max-h-0 opacity-0"
-                }`}
-                style={{}}
+                </motion.span>
+              </motion.button>
+              <motion.div
+                className="faq-answer overflow-hidden text-base-content"
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ 
+                  height: openFaq === idx ? "auto" : 0,
+                  opacity: openFaq === idx ? 1 : 0
+                }}
+                transition={{ duration: 0.3, ease: "easeInOut" }}
               >
-                {openFaq === idx && <div>{faq.a}</div>}
-              </div>
-            </div>
+                {openFaq === idx && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.1 }}
+                    className="mt-3"
+                  >
+                    {faq.a}
+                  </motion.div>
+                )}
+              </motion.div>
+            </motion.div>
           ))}
-        </div>
-      </section>
+        </motion.div>
+      </motion.section>
 
       {/* Call to Action */}
-      <section className="text-center py-12 px-4">
-        <div className="inline-block bg-gradient-to-r from-primary to-secondary text-primary-content px-10 py-6 rounded-2xl shadow-xl">
-          <h3 className="text-2xl font-bold mb-2">Ready to get started?</h3>
-          <p className="mb-4">
+      <motion.section 
+        className="text-center py-12 px-4"
+        initial={{ opacity: 0, y: 50 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, amount: 0.3 }}
+        transition={{ duration: 0.8 }}
+      >
+        <motion.div 
+          className="inline-block bg-gradient-to-r from-primary to-secondary text-primary-content px-10 py-6 rounded-2xl shadow-xl"
+          initial={{ scale: 0.9, opacity: 0 }}
+          whileInView={{ scale: 1, opacity: 1 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6, delay: 0.2 }}
+          whileHover={{ scale: 1.05 }}
+        >
+          <motion.h3 
+            className="text-2xl font-bold mb-2"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5, delay: 0.3 }}
+          >
+            Ready to get started?
+          </motion.h3>
+          <motion.p 
+            className="mb-4"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5, delay: 0.4 }}
+          >
             Sign up now and get your first interview free. No credit card required.
-          </p>
+          </motion.p>
           {user?.freeInterview === 'Claimed' ? (
-              <button
-                disabled
+            <motion.button
+              disabled
               className="px-8 py-3 rounded-lg bg-gray-300 text-gray-500 font-semibold text-lg cursor-not-allowed"
-              >
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+            >
               Claimed
-              </button>
-            ) : (
-            <a
+            </motion.button>
+          ) : (
+            <motion.a
               href="#"
               className="px-8 py-3 rounded-lg bg-base-100 text-primary font-semibold text-lg shadow hover:bg-base-200 transition-colors duration-200"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
             >
               Start Free
-            </a>
+            </motion.a>
           )}
-        </div>
-      </section>
+        </motion.div>
+      </motion.section>
       <Footer />
     </div>
   );
