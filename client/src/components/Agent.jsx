@@ -105,7 +105,7 @@ const Agent = () => {
             console.log('Interview end detected, scheduling disconnect...');
             const timer = setTimeout(() => {
                 handleDisconnect();
-            }, 20000); // 20 seconds
+            }, lastMessage.content.length < 150 ? 12000 : 20000); 
             return () => clearTimeout(timer);
         }
     }, [lastMessage]);

@@ -328,10 +328,11 @@ If you think the interview is complete, set isInterviewEnd to true.`;
 
         const firstQuestion = getNextQuestion();
         if (firstQuestion) {
+            const candidateName = name || 'Candidate';
             const msg = {
                 type: 'interviewer',
                 role: 'interviewer',
-                content: `Hello ${name}! Thank you for taking the time to speak with me today. I'm excited to learn more about you and your experience. Let's begin with our first question: ${firstQuestion}`,
+                content: `Hello ${candidateName}! Thank you for taking the time to speak with me today. I'm excited to learn more about you and your experience. Let's begin with our first question: ${firstQuestion}`,
                 isInterviewEnd: false
             };
             conversationHistory.push(msg);

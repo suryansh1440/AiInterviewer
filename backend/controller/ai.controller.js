@@ -29,26 +29,66 @@ export const readPdf = async (req, res) => {
 export const getLeetCodeAnalysis = async (req, res) => {
   const { username } = req.body;
   try {
-    const url = `https://leetcode-stats-api.herokuapp.com/${username}`;
+    const url = `https://leetcode-api-pied.vercel.app/user/${username}`;
     const response = await axios.get(url);
-    const stats = response.data;
-    if (!stats || stats.status === 'error') {
+    const data = response.data;
+    
+    if (!data || !data.username) {
       return res.status(404).json({ text: 'No LeetCode stats found for this user.' });
     }
-    // Create a text summary
+
+    // Extract data from the new API format
+    const { profile, submitStats } = data;
+    
+    // Get submission stats
+    const allSubmissions = submitStats?.acSubmissionNum?.find(s => s.difficulty === 'All') || { count: 0, submissions: 0 };
+    const easySubmissions = submitStats?.acSubmissionNum?.find(s => s.difficulty === 'Easy') || { count: 0, submissions: 0 };
+    const mediumSubmissions = submitStats?.acSubmissionNum?.find(s => s.difficulty === 'Medium') || { count: 0, submissions: 0 };
+    const hardSubmissions = submitStats?.acSubmissionNum?.find(s => s.difficulty === 'Hard') || { count: 0, submissions: 0 };
+    
+    // Get total submission stats
+    const totalAllSubmissions = submitStats?.totalSubmissionNum?.find(s => s.difficulty === 'All') || { count: 0, submissions: 0 };
+    const totalEasySubmissions = submitStats?.totalSubmissionNum?.find(s => s.difficulty === 'Easy') || { count: 0, submissions: 0 };
+    const totalMediumSubmissions = submitStats?.totalSubmissionNum?.find(s => s.difficulty === 'Medium') || { count: 0, submissions: 0 };
+    const totalHardSubmissions = submitStats?.totalSubmissionNum?.find(s => s.difficulty === 'Hard') || { count: 0, submissions: 0 };
+
+    // Calculate acceptance rate
+    const totalSolved = allSubmissions.count;
+    const totalAttempted = totalAllSubmissions.count;
+    const acceptanceRate = totalAttempted > 0 ? ((totalSolved / totalAttempted) * 100).toFixed(1) : 0;
+
+    // Create a comprehensive text summary
     const text = `LeetCode Profile Analysis for ${username}:
 
-Total Solved: ${stats.totalSolved} / ${stats.totalQuestions}
-Easy: ${stats.easySolved} / ${stats.totalEasy}
-Medium: ${stats.mediumSolved} / ${stats.totalMedium}
-Hard: ${stats.hardSolved} / ${stats.totalHard}
-Ranking: ${stats.ranking}
-Contribution Points: ${stats.contributionPoints}
-Reputation: ${stats.reputation}
-Acceptance Rate: ${stats.acceptanceRate}%
+Profile Information:
+- Real Name: ${profile?.realName || 'Not provided'}
+- Country: ${profile?.countryName || 'Not provided'}
+- Company: ${profile?.company || 'Not provided'}
+- School: ${profile?.school || 'Not provided'}
+- About: ${profile?.aboutMe || 'Not provided'}
+- Ranking: ${profile?.ranking || 'Not available'}
+- Reputation: ${profile?.reputation || 0}
 
-Recent Submission Stats:
-${stats.recentSubmissionStats?.map(s => `- ${s.title} (${s.status})`).join('\n') || 'No recent submissions.'}`;
+Problem Solving Statistics:
+Total Solved: ${totalSolved} / ${totalAttempted} problems
+Acceptance Rate: ${acceptanceRate}%
+
+Difficulty Breakdown:
+- Easy: ${easySubmissions.count} solved (${easySubmissions.submissions} submissions)
+- Medium: ${mediumSubmissions.count} solved (${mediumSubmissions.submissions} submissions)
+- Hard: ${hardSubmissions.count} solved (${hardSubmissions.submissions} submissions)
+
+Total Submissions by Difficulty:
+- Easy: ${totalEasySubmissions.submissions} total submissions
+- Medium: ${totalMediumSubmissions.submissions} total submissions
+- Hard: ${totalHardSubmissions.submissions} total submissions
+
+Performance Analysis:
+- Success Rate: ${acceptanceRate}%
+- Total Submissions: ${totalAllSubmissions.submissions}
+- Problems Attempted: ${totalAttempted}
+- Problems Solved: ${totalSolved}`;
+
     res.json({ text });
   } catch (error) {
     console.log("Exception encountered while fetching LeetCode stats", error);

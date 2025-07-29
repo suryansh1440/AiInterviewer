@@ -48,7 +48,7 @@ export const useInterviewStore = create((set, get) => ({
             set({resumeData:res.data.text})
             return res.data.text;
         }catch(error){
-            toast.error(error.response.data.message);
+            // toast.error(error.response.data.message);
             return "No resume included";
         }finally{
             set({isGettingResume:false})
@@ -134,9 +134,10 @@ export const useInterviewStore = create((set, get) => ({
             console.log('Subscribing to interview events...');
             await get().subscribeToInterview();
             
-            // Step 3: Start the interview
+            // Step 3: Start the interview with the session data
             console.log('Starting interview...');
-            const success = await get().startInterview();
+            console.log(interviewSessionData);
+            const success = await get().startInterview(interviewSessionData);
             
             if (success) {
                 set({ isStartingInterview: false });
@@ -246,21 +247,21 @@ export const useInterviewStore = create((set, get) => ({
         return get().sendUserMessage(message);
     },
 
-    startInterview: async ()=>{
+    startInterview: async (interviewSessionData) => {
         const { socket, user } = useAuthStore.getState();
         if(!socket){
             toast.error("Socket not connected in startInterview");
             return false;
         }
         
-        console.log('Starting interview with data:', get().interviewData);
+        console.log('Starting interview with data:', interviewSessionData);
         
         set({isInterviewActive:true});
         set({messages:[]});
         set({currentInterviewSession:null});
         
         socket.emit("start-interview", {
-            interviewData: get().interviewData,
+            interviewData: interviewSessionData,
             userId: user._id,
         });
         
