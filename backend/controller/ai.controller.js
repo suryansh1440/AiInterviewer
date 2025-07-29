@@ -124,14 +124,31 @@ export const generateQuestion = async (req,res)=>{
     }
     const user = await User.findById(userId);
     if(user.interviewLeft <= 0 && user.subscription!=='pro'){
+      if(user.subscription==='starter'){
+        user.interviewLeft = 0;
+        user.subscription = 'none';
+        user.interviewLeftExpire = null;
+        await user.save();
+        return res.status(400).json({message:"You have no interviews left"})
+      }
       return res.status(400).json({message:"You have no interviews left"})
     }
     if(user.subscription==='pro' || user.subscription==='starter'){
       if(user.interviewLeftExpire < Date.now()){
         user.interviewLeft = 0;
         user.subscription = 'none';
+        user.interviewLeftExpire = null;
         await user.save();
         return res.status(400).json({message:"Your subscription has expired"})
+      }
+    }
+    if(user.subscription==='starter'){
+      if(user.interviewLeft <= 0){
+        user.interviewLeft = 0;
+        user.subscription = 'none';
+        user.interviewLeftExpire = null;
+        await user.save();
+        return res.status(400).json({message:"You have no interviews left"})
       }
     }
 

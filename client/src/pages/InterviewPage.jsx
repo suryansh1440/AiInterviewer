@@ -1,12 +1,16 @@
 import React, { useEffect } from 'react'
 import Agent from '../components/Agent'
-import { useAuthStore } from '../store/useAuthStore'
 import { useInterviewStore } from '../store/useInterviewStore'
-import { BookOpen } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
 
 const InterviewPage = () => {
-  const {user} = useAuthStore();
-  const { interviewData } = useInterviewStore();
+  const { interviewData,isInterviewActive } = useInterviewStore();
+  const navigate = useNavigate();
+  // useEffect(() => {
+  //   if(!isInterviewActive){
+  //     navigate('/');
+  //   }
+  // }, []);
   
 
   return (

@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from 'react'
 import Navbar from './components/Navbar'
-import { Outlet} from 'react-router-dom'
-import { useThemeStore } from './store/useThemeStore'
+import { Outlet, useLocation} from 'react-router-dom'
+import { useSettingStore } from './store/useSettingStore'
 import Modal from './components/Modal'
 import { useModalStore } from './store/useModalStore'
 import {Toaster} from "react-hot-toast"
@@ -11,9 +11,10 @@ import { Loader } from 'lucide-react'
 
 
 const App = () => {
-  const { theme } = useThemeStore();
+  const { theme } = useSettingStore();
   const { isOpenModal } = useModalStore();
   const {user,checkAuth,isCheckingAuth} = useAuthStore()
+  const location = useLocation()
 
 
   useEffect(()=>{
@@ -29,7 +30,7 @@ const App = () => {
 
   return (
     <div data-theme={theme} className="relative overflow-hidden">
-      <Navbar />
+      {!location.pathname.startsWith('/interview') && <Navbar />}
       <div className='min-h-[90vh]'>
         <Outlet />
       </div>

@@ -382,7 +382,7 @@ class SpeechManager {
         return cleaned;
     }
 
-    speak(text, options = {}) {
+    async speak(text, options = {}) {
         if (this.synthesis) {
             // Cancel any ongoing speech
             this.synthesis.cancel();
@@ -401,49 +401,56 @@ class SpeechManager {
             utterance.volume = options.volume || 0.9; // Slightly lower volume for natural sound
             utterance.lang = options.lang || 'en-US';
             
-            // Get available voices and select the best one
+            // Get available voices
             const voices = this.synthesis.getVoices();
             
-            // Priority order for voice selection
-            const voicePreferences = [
-                'Google UK English Female',
-                'Google UK English Male',
-                'Google US English Female',
-                'Google US English Male',
-                'Microsoft David - English (United States)',
-                'Microsoft Zira - English (United States)',
-                'Samantha',
-                'Alex',
-                'Daniel',
-                'Victoria',
-                'Natural',
-                'Enhanced'
-            ];
-            
+            // Get selected voice from store (import dynamically to avoid circular dependency)
             let selectedVoice = null;
-            
-            // Try to find a preferred voice
-            for (const preference of voicePreferences) {
-                const voice = voices.find(v => 
-                    v.name.includes(preference) || 
-                    v.name.toLowerCase().includes(preference.toLowerCase())
-                );
-                if (voice) {
-                    selectedVoice = voice;
-                    break;
+            try {
+                const { useSettingStore } = await import('../store/useSettingStore');
+                const { INTERVIEWER_VOICES } = await import('../constant');
+                const selectedVoiceId = useSettingStore.getState().voice;
+                const selectedVoiceData = INTERVIEWER_VOICES.find(v => v.id === selectedVoiceId);
+                
+                if (selectedVoiceData) {
+                    // Try to find the selected voice
+                    selectedVoice = voices.find(voice => 
+                        voice.name.includes(selectedVoiceData.voiceName) ||
+                        voice.name.includes(selectedVoiceData.fallbackVoice)
+                    );
                 }
+            } catch (error) {
+                console.error('Could not load voice store, using default selection:', error);
             }
             
-            // If no preferred voice found, try to find any Google or Microsoft voice
+            // If selected voice not found, try fallback voices
             if (!selectedVoice) {
-                selectedVoice = voices.find(voice => 
-                voice.name.includes('Google') || 
-                    voice.name.includes('Microsoft') ||
-                voice.name.includes('Natural') ||
-                    voice.name.includes('Enhanced') ||
-                    voice.name.includes('Samantha') ||
-                    voice.name.includes('Alex')
-                );
+                const fallbackVoices = [
+                    'Google UK English Female',
+                    'Google UK English Male',
+                    'Google US English Female',
+                    'Google US English Male',
+                    'Microsoft David - English (United States)',
+                    'Microsoft Zira - English (United States)',
+                    'Samantha',
+                    'Alex',
+                    'Daniel',
+                    'Victoria',
+                    'Natural',
+                    'Enhanced'
+                ];
+                
+                // Try to find a fallback voice
+                for (const fallbackVoice of fallbackVoices) {
+                    const voice = voices.find(v => 
+                        v.name.includes(fallbackVoice) || 
+                        v.name.toLowerCase().includes(fallbackVoice.toLowerCase())
+                    );
+                    if (voice) {
+                        selectedVoice = voice;
+                        break;
+                    }
+                }
             }
             
             // If still no good voice, use the first available

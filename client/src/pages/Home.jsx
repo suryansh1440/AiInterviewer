@@ -126,7 +126,7 @@ const Home = () => {
   return (
     <div className="bg-gradient-to-br from-base-100 to-base-200 min-h-screen font-sans">
       {/* Hero Section */}
-      <section className="relative overflow-hidden py-20 px-6 md:px-10">
+      <section className="relative overflow-hidden py-13 px-6 md:px-10">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-12">
           {/* Hero Text Content */}
           <motion.div

@@ -172,7 +172,7 @@ const Start = () => {
       setOpenModal(); 
       return;
     }
-    if(user.interviewLeft==0 && user.subscription!=='pro'){
+    if(user.interviewLeft==0 && user.subscription=='none'){
       toast.error("You don't have credits")
       navigate('/pricing')
       return;
