@@ -82,7 +82,7 @@ export const useInterviewStore = create((set, get) => ({
     },
 
     // Custom interview methods
-    startCustomInterview: async (questions, leetcode, resume, github, name) => {
+    startCustomInterview: async (questions, leetcode, resume, github,name) => {
         console.log('Starting custom interview...');
         set({isStartingInterview: true});
         const { user, socket } = useAuthStore.getState();

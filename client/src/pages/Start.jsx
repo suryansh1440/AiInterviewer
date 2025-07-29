@@ -117,7 +117,7 @@ const Start = () => {
     // Ensure questions is always an array
 
     const questions = Array.isArray(interview.questions) ? interview.questions : [];
-    const call = await startCustomInterview(questions, leet, resume, github, user?.name);
+    const call = await startCustomInterview(questions, leet, resume, github,user.name);
     if(call){
       navigate(`/interview/id=${interview._id}`);
     }

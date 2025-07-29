@@ -266,16 +266,60 @@ Do not include any explanations or extra text. Only return the JSON object. All 
       system
     });
 
-    const cleanText = text.replace(/```json\n?|\n?```/g, '').trim();
     // console.log('AI generated feedback text:', cleanText);
     
     let feedback;
     try {
+      // Clean the text to ensure it's valid JSON
+      let cleanText = text.replace(/```json/g, '').replace(/```/g, '').trim();
+      
+      // If the text doesn't start with {, try to find the JSON object
+      if (!cleanText.startsWith('{')) {
+        const jsonMatch = cleanText.match(/\{[\s\S]*\}/);
+        if (jsonMatch) {
+          cleanText = jsonMatch[0];
+        }
+      }
+      
       feedback = JSON.parse(cleanText);
     } catch (parseError) {
       console.error('Failed to parse AI feedback JSON:', parseError);
-      console.error('Raw text:', cleanText);
-      return res.status(500).json({message:"Failed to parse AI feedback"});
+      console.error('Raw text:', text);
+      
+      // Return a default feedback structure if parsing fails
+      feedback = {
+        totalScore: 0,
+        categoryScores: [
+          {
+            name: "Communication Skills",
+            score: 0,
+            comment: "Unable to assess due to technical issues."
+          },
+          {
+            name: "Technical Knowledge", 
+            score: 0,
+            comment: "Unable to assess due to technical issues."
+          },
+          {
+            name: "Problem Solving",
+            score: 0, 
+            comment: "Unable to assess due to technical issues."
+          },
+          {
+            name: "Cultural Fit",
+            score: 0,
+            comment: "Unable to assess due to technical issues."
+          },
+          {
+            name: "Confidence and Clarity",
+            score: 0,
+            comment: "Unable to assess due to technical issues."
+          }
+        ],
+        strengths: ["Unable to assess due to technical issues."],
+        areasForImprovement: ["Unable to assess due to technical issues."],
+        finalAssessment: "Unable to generate assessment due to technical issues."
+      };
     }
 
     // Validate feedback structure and ensure scores are reasonable
