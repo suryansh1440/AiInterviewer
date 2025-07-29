@@ -2,7 +2,7 @@ import axios from 'axios';
 
 export const analyze = async (repoUrl, githubToken) => {
     try {
-      const response = await axios.post("http://localhost:5001/ingest-repo", {
+      const response = await axios.post(`${process.env.PYTHON_BACKEND_URL}/ingest-repo`, {
         repo_url: repoUrl,
         github_token: githubToken
       });

@@ -44,10 +44,7 @@ export const useGithubProjectStore = create((set, get) => ({
 
             };
             
-            set((state) => {
-                const updatedProjects = [...state.githubProjects, newProject];
-                return { githubProjects: updatedProjects };
-            });
+            set({githubProjects:[...get().githubProjects,newProject]})
 
             toast.success('Repository analyzed and added successfully!');
             return response.data;

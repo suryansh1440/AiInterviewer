@@ -41,7 +41,6 @@ const Agent = () => {
 
         // Set up speech recognition event handlers
         speechManager.onSpeechResult((transcript) => {
-            console.log('Speech recognized:', transcript);
             sendUserMessage(transcript);
         });
 
@@ -51,12 +50,10 @@ const Agent = () => {
         });
 
         speechManager.onSpeechStart(() => {
-            console.log('Speech recognition started');
             setIsListening(true);
         });
 
         speechManager.onSpeechEnd(() => {
-            console.log('Speech recognition ended');
             setIsListening(false);
         });
 

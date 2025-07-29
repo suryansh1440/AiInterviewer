@@ -73,7 +73,6 @@ class SpeechManager {
                 if (interimTranscript.trim()) {
                     this._interimTranscript = interimTranscript.trim();
                     this._lastInterimUpdate = Date.now();
-                    console.log('Interim transcript updated:', this._interimTranscript);
                     // Reset 8-second timeout when user speaks (even interim)
                     this._resetSpeechTimeout();
                     // If user speaks during grace period, clear grace timer
@@ -101,7 +100,6 @@ class SpeechManager {
                     // Clean up the transcript for better processing
                     transcript = transcript.toLowerCase();
                     
-                    console.log('Final speech recognized:', transcript, 'Confidence:', confidence);
                     
                     // Reset interim transcript since we got final result
                     this._interimTranscript = '';
@@ -119,11 +117,6 @@ class SpeechManager {
                             this.stopListening(); // End listening after sending
                         }
                     }, 3000); // 2 second grace period
-                }
-                
-                // Log interim results for debugging
-                if (interimTranscript.trim()) {
-                    console.log('Interim transcript:', interimTranscript.trim());
                 }
             };
             
@@ -146,7 +139,6 @@ class SpeechManager {
                 this.recognition.start();
                 this._resetSpeechTimeout(); // Reset timeout when starting
             } catch (error) {
-                console.error('Error starting speech recognition:', error);
                 if (this._onSpeechError) this._onSpeechError(error);
             }
         }
@@ -169,13 +161,11 @@ class SpeechManager {
         // Set an 8-second timeout for user speech detection
         this._speechTimeout = setTimeout(() => {
             if (this.isListening && this._shouldBeListening) {
-                console.log('8-second speech timeout - checking for user input...');
                 
                 // Check if we have any interim transcript
                 const hasInterimTranscript = this._interimTranscript.trim().length > 0;
                 
                 if (hasInterimTranscript) {
-                    console.log('User spoke within 8 seconds, continuing to listen...');
                     // User spoke within 8 seconds, continue listening
                     this._resetSpeechTimeout(); // Reset the 8-second timer
                 } else {
@@ -188,7 +178,6 @@ class SpeechManager {
                     this._lastInterimUpdate = 0;
                     
                     // Restart recognition for continuous listening
-                    console.log('Restarting speech recognition after 8-second timeout...');
                     this.recognition.stop();
                 }
             }
@@ -464,23 +453,19 @@ class SpeechManager {
             
             if (selectedVoice) {
                 utterance.voice = selectedVoice;
-                console.log('Using voice:', selectedVoice.name);
             }
             
             utterance.onstart = () => {
-                console.log('TTS started:', text);
                 this.isSpeaking = true;
                 if (this._onTTSStart) this._onTTSStart();
             };
             
             utterance.onend = () => {
-                console.log('TTS ended');
                 this.isSpeaking = false;
                 if (this._onTTSEnd) this._onTTSEnd();
             };
             
             utterance.onerror = (event) => {
-                console.error('TTS error:', event.error);
                 this.isSpeaking = false;
                 if (this._onTTSError) this._onTTSError(event.error);
             };

@@ -107,7 +107,6 @@ const Start = () => {
       leetcode:leet,
       github
     }
-    console.log(interviewData);
     const interview = await generateQuestion(interviewData)
     if(!interview){
       return;
@@ -382,7 +381,7 @@ const Start = () => {
                 onChange={e => setNumQuestions(Number(e.target.value))}
                 className="px-3 py-1 border border-primary rounded-md text-base-content bg-base-100 text-base font-medium focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent/20 transition-all duration-150 w-20 shadow-sm"
               >
-                {[3,4,5].map(n => (
+                {[3,5,8,10].map(n => (
                   <option key={n} value={n}>{n}</option>
                 ))}
               </select>

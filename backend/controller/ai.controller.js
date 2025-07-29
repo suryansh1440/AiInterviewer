@@ -3,10 +3,6 @@ import {generateText} from "ai"
 import {google} from "@ai-sdk/google"
 import Interview from '../modals/interview.modal.js';
 import User from '../modals/user.modal.js';
-import { ServicePrincipalCredentials, PDFServices, MimeType, ExtractPDFParams, ExtractElementType, ExtractPDFJob, ExtractPDFResult } from "@adobe/pdfservices-node-sdk";
-import fs from "fs";
-import AdmZip from "adm-zip";
-import path from "path";
 import { analyze } from '../lib/gitingest.js';
 
 export const readPdf = async (req, res) => {
@@ -15,7 +11,7 @@ export const readPdf = async (req, res) => {
 
   try {
     // Call the gitingest_backend PDF extraction API
-    const response = await axios.post('http://localhost:5001/extract-pdf-text', {
+    const response = await axios.post(`${process.env.PYTHON_BACKEND_URL}/extract-pdf-text`, {
       pdf_url: url
     });
     const text = response.data.text;
@@ -241,17 +237,17 @@ export const createFeedback = async (req,res)=>{
     const prompt = `You are an expert technical interviewer and assessment coach. You will be given the transcript of a candidate's interview. Assess the candidate in the following categories: Communication Skills, Technical Knowledge, Problem Solving, Cultural Fit, and Confidence and Clarity. For each category, provide a score from 0 to 20 and a short comment. Also, provide a totalScore (0-100), a list of strengths, a list of areas for improvement, and a finalAssessment (1-2 sentences). Return only a valid JSON object in the following format:
 
 {
-  totalScore: number,
-  categoryScores: [
-    { name: "Communication Skills", score: number, comment: string },
-    { name: "Technical Knowledge", score: number, comment: string },
-    { name: "Problem Solving", score: number, comment: string },
-    { name: "Cultural Fit", score: number, comment: string },
-    { name: "Confidence and Clarity", score: number, comment: string }
+  "totalScore": number,
+  "categoryScores": [
+    { "name": "Communication Skills", "score": number, "comment": string },
+    { "name": "Technical Knowledge", "score": number, "comment": string },
+    { "name": "Problem Solving", "score": number, "comment": string },
+    { "name": "Cultural Fit", "score": number, "comment": string },
+    { "name": "Confidence and Clarity", "score": number, "comment": string }
   ],
-  strengths: string[],
-  areasForImprovement: string[],
-  finalAssessment: string
+  "strengths": string[],
+  "areasForImprovement": string[],
+  "finalAssessment": string
 }
 
 CRITICAL SCORING RULES:
@@ -272,17 +268,17 @@ ${formattedTranscript}`;
     const system = `You are an expert technical interviewer and assessment coach. Your job is to analyze the provided interview transcript and return a JSON object with the following structure:
 
 {
-  totalScore: number,
-  categoryScores: [
-    { name: "Communication Skills", score: number, comment: string },
-    { name: "Technical Knowledge", score: number, comment: string },
-    { name: "Problem Solving", score: number, comment: string },
-    { name: "Cultural Fit", score: number, comment: string },
-    { name: "Confidence and Clarity", score: number, comment: string }
+  "totalScore": number,
+  "categoryScores": [
+    { "name": "Communication Skills", "score": number, "comment": string },
+    { "name": "Technical Knowledge", "score": number, "comment": string },
+    { "name": "Problem Solving", "score": number, "comment": string },
+    { "name": "Cultural Fit", "score": number, "comment": string },
+    { "name": "Confidence and Clarity", "score": number, "comment": string }
   ],
-  strengths: string[],
-  areasForImprovement: string[],
-  finalAssessment: string
+  "strengths": string[],
+  "areasForImprovement": string[],
+  "finalAssessment": string
 }
 
 CRITICAL SCORING RULES:
@@ -306,20 +302,11 @@ Do not include any explanations or extra text. Only return the JSON object. All 
       system
     });
 
-    // console.log('AI generated feedback text:', cleanText);
     
     let feedback;
     try {
       // Clean the text to ensure it's valid JSON
-      let cleanText = text.replace(/```json/g, '').replace(/```/g, '').trim();
-      
-      // If the text doesn't start with {, try to find the JSON object
-      if (!cleanText.startsWith('{')) {
-        const jsonMatch = cleanText.match(/\{[\s\S]*\}/);
-        if (jsonMatch) {
-          cleanText = jsonMatch[0];
-        }
-      }
+      const cleanText = text.replace(/```json\n?|\n?```/g, '').trim();
       
       feedback = JSON.parse(cleanText);
     } catch (parseError) {

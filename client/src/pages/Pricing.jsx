@@ -61,10 +61,10 @@ const Pricing = () => {
     }
     let amount = 0;
     if(plan === 'starter'){ 
-      amount = 79;
+      amount = 30;
     }
     if(plan === 'pro'){
-      amount = 499;
+      amount = 300;
     }
     const {key} = await getKey();
     const {order} = await processPayment({
@@ -154,7 +154,7 @@ const Pricing = () => {
             <div className="absolute -top-5 left-1/2 -translate-x-1/2 bg-gradient-to-r from-green-400 to-green-600 text-white text-xs font-bold px-4 py-1 rounded-full shadow-lg uppercase tracking-wider z-20">Active</div>
           )}
           <div className="tier-title text-2xl font-bold mb-2 text-primary">Starter</div>
-          <div className="tier-price text-4xl font-extrabold mb-1 text-base-content">₹79</div>
+          <div className="tier-price text-4xl font-extrabold mb-1 text-base-content">₹30</div>
           <div className="tier-desc text-base-content/70 mb-4 text-center">2 interviews & advanced feedback</div>
           <ul className="mb-6 space-y-2 w-full">
             <li className="flex items-center gap-2 text-base-content"><span className="text-primary">✔</span> 2 AI-powered interviews</li>
@@ -180,7 +180,7 @@ const Pricing = () => {
             <div className="absolute -top-5 left-1/2 -translate-x-1/2 bg-gradient-to-r from-green-400 to-green-600 text-white text-xs font-bold px-4 py-1 rounded-full shadow-lg uppercase tracking-wider z-20">Active</div>
           )}
           <div className="tier-title text-2xl font-bold mb-2 text-primary">Pro</div>
-          <div className="tier-price text-4xl font-extrabold mb-1 text-base-content">₹499<span className="text-base font-medium text-base-content/70">/month</span></div>
+          <div className="tier-price text-4xl font-extrabold mb-1 text-base-content">₹300<span className="text-base font-medium text-base-content/70">/month</span></div>
           <div className="tier-desc text-base-content/70 mb-4 text-center">1 month unlimited interviews</div>
           <ul className="mb-6 space-y-2 w-full">
             <li className="flex items-center gap-2 text-base-content"><span className="text-primary">✔</span> Unlimited interviews (1 month)</li>

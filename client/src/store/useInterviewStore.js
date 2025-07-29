@@ -127,15 +127,12 @@ export const useInterviewStore = create((set, get) => ({
             };
 
             // Step 1: Unsubscribe from any existing interview
-            console.log('Unsubscribing from existing interview...');
             await get().unsubscribeFromInterview();
             
             // Step 2: Subscribe to interview events
-            console.log('Subscribing to interview events...');
             await get().subscribeToInterview();
             
             // Step 3: Start the interview with the session data
-            console.log('Starting interview...');
             console.log(interviewSessionData);
             const success = await get().startInterview(interviewSessionData);
             
@@ -162,15 +159,12 @@ export const useInterviewStore = create((set, get) => ({
             return false;
         }
         
-        console.log('Subscribing to interview events...');
-        
         // Reset messages and session
         set({messages:[]});
         set({currentInterviewSession:null});
         
         // Listen for interview responses
         socket.on("send-interview-response", (data) => {
-            console.log("Interview response received:", data);
             set((state) => ({
                 messages: [...state.messages, {
                     role: data.role,
@@ -183,7 +177,6 @@ export const useInterviewStore = create((set, get) => ({
 
         // Listen for interview errors
         socket.on("interview-error", (data) => {
-            console.error("Interview error:", data);
             toast.error(data.message || 'Interview error occurred');
             set({ 
                 isInterviewActive: false,
@@ -193,7 +186,6 @@ export const useInterviewStore = create((set, get) => ({
 
         // Listen for interview completion
         socket.on("interview-complete", (data) => {
-            console.log("Interview completed:", data);
             set({ isInterviewActive: false });
             // Interview completed - feedback will be created manually when user ends interview
             // You can add additional logic here if needed
@@ -208,8 +200,6 @@ export const useInterviewStore = create((set, get) => ({
             return false;
         }
         
-        console.log('Unsubscribing from interview events...');
-        
         socket.off("send-interview-response");
         socket.off("interview-error");
         socket.off("interview-complete");
@@ -223,8 +213,6 @@ export const useInterviewStore = create((set, get) => ({
             toast.error("Socket not connected in sendUserMessage");
             return false;
         }
-        
-        console.log('Sending user message:', message);
         
         // Add user message to state
         set((state) => ({
@@ -254,8 +242,6 @@ export const useInterviewStore = create((set, get) => ({
             return false;
         }
         
-        console.log('Starting interview with data:', interviewSessionData);
-        
         set({isInterviewActive:true});
         set({messages:[]});
         set({currentInterviewSession:null});
@@ -275,8 +261,6 @@ export const useInterviewStore = create((set, get) => ({
             return false;
         }
         
-        console.log('Ending interview...');
-        
         socket.emit("end-interview");
         set({isInterviewActive:false});
         set({messages:[]});
@@ -288,7 +272,6 @@ export const useInterviewStore = create((set, get) => ({
 
     // Complete reset of interview state
     resetInterviewState: () => {
-        console.log('Resetting interview state completely');
         const { socket } = useAuthStore.getState();
         if (socket) {
             get().unsubscribeFromInterview();
@@ -304,7 +287,6 @@ export const useInterviewStore = create((set, get) => ({
     },
 
     disconnectInterview: () => {
-        console.log('Disconnecting interview...');
         const { socket } = useAuthStore.getState();
         if (socket) {
             get().unsubscribeFromInterview();
@@ -338,7 +320,6 @@ export const useInterviewStore = create((set, get) => ({
             }
             return res.data.interview;
         } catch (error) {
-            console.log(error);
             toast.error(error?.response?.data?.message || "Failed to create feedback");
             return null;
         } finally {
