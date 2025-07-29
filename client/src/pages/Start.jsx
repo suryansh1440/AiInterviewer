@@ -573,9 +573,6 @@ const Start = () => {
               className="w-full bg-gradient-to-r from-primary to-secondary text-primary-content py-4 px-6 rounded-xl font-bold text-lg hover:from-primary-focus hover:to-secondary-focus transition-all duration-200 flex flex-col items-center justify-center gap-1 shadow-lg border-2 border-primary/30 disabled:opacity-60 disabled:cursor-not-allowed"
               onClick={handleRandomTopic}
               disabled={isGeneratingRandomTopic}
-              variants={buttonVariants}
-              whileHover="hover"
-              whileTap="tap"
             >
               <span className="flex items-center gap-2">
                 <Zap className="w-6 h-6 text-yellow-300 drop-shadow" />
@@ -592,9 +589,7 @@ const Start = () => {
             onClick={handleStartClick}
             className="w-full bg-gradient-to-r from-accent to-primary text-primary-content py-4 px-8 rounded-xl font-semibold text-lg hover:from-accent-focus hover:to-primary-focus transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-1"
             disabled={isGeneratingQuestion || isStartingInterview || isGettingLeetCodeAnalysis || isGettingResume}
-            variants={buttonVariants}
-            whileHover="hover"
-            whileTap="tap"
+            
           >
             {isGettingLeetCodeAnalysis
               ? 'Getting LeetCode Analysis...'
