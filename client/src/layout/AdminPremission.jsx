@@ -5,7 +5,7 @@ import { Link } from 'react-router-dom'
 
 const AdminPremission = ({ children }) => {
     const { user } = useAuthStore();
-    if (user?.role === 'ADMIN') return <>{children}</>;
+    if (user?.role === 'ADMIN' || user?.role ===  'SUPERADMIN') return <>{children}</>;
     return (
         <div className="flex flex-col items-center justify-center min-h-[60vh] gap-6 mt-30 text-center">
             <ShieldOff className="w-20 h-20 text-error mb-2 animate-bounce" />

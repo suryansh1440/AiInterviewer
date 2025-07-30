@@ -83,7 +83,7 @@ const faqVariants = {
 };
 
 const comparisonRows = [
-  ["AI-Powered Interviews", "1", "2", "Unlimited (1 month)"],
+  ["AI-Powered Interviews", "2", "5", "Unlimited (1 month)"],
   ["Feedback Quality", "Basic", "Advanced", "Advanced"],
   ["Voice Analysis", "-", "✔", "✔"],
   ["Progress Tracking", "-", "-", "✔"],
@@ -93,7 +93,7 @@ const comparisonRows = [
 const faqs = [
   {
     q: "Can I try AI Interviewer for free?",
-    a: "Yes! You get 1 free interview when you sign up. No credit card required.",
+    a: "Yes! You get 2 free interview when you sign up. No credit card required.",
   },
   {
     q: "What payment methods do you accept?",
@@ -134,7 +134,7 @@ const Pricing = () => {
     }
     let amount = 0;
     if(plan === 'starter'){ 
-      amount = 30;
+      amount = 40;
     }
     if(plan === 'pro'){
       amount = 300;
@@ -210,9 +210,9 @@ const Pricing = () => {
             Free
           </div>
           <div className="tier-price text-4xl font-extrabold mb-1 text-base-content">₹0</div>
-          <div className="tier-desc text-base-content/70 mb-4 text-center">Get started with 1 free interviews</div>
+          <div className="tier-desc text-base-content/70 mb-4 text-center">Get started with 2 free interviews</div>
           <ul className="mb-6 space-y-2 w-full">
-            <li className="flex items-center gap-2 text-base-content"><Check className="w-4 h-4 text-primary" /> 1 AI-powered interviews</li>
+            <li className="flex items-center gap-2 text-base-content"><Check className="w-4 h-4 text-primary" /> 2 AI-powered interviews</li>
             <li className="flex items-center gap-2 text-base-content"><Check className="w-4 h-4 text-primary" /> Basic feedback</li>
             <li className="flex items-center gap-2 text-base-content"><Check className="w-4 h-4 text-primary" /> Email support</li>
             <li className="flex items-center gap-2 text-base-content"><Check className="w-4 h-4 text-primary" /> validity 1 month</li>
@@ -267,10 +267,10 @@ const Pricing = () => {
             <Zap className="w-6 h-6" />
             Starter
           </div>
-          <div className="tier-price text-4xl font-extrabold mb-1 text-base-content">₹30</div>
-          <div className="tier-desc text-base-content/70 mb-4 text-center">2 interviews & advanced feedback</div>
+          <div className="tier-price text-4xl font-extrabold mb-1 text-base-content">₹40</div>
+          <div className="tier-desc text-base-content/70 mb-4 text-center">5 interviews & advanced feedback</div>
           <ul className="mb-6 space-y-2 w-full">
-            <li className="flex items-center gap-2 text-base-content"><Check className="w-4 h-4 text-primary" /> 2 AI-powered interviews</li>
+            <li className="flex items-center gap-2 text-base-content"><Check className="w-4 h-4 text-primary" /> 5 AI-powered interviews</li>
             <li className="flex items-center gap-2 text-base-content"><Check className="w-4 h-4 text-primary" /> Advanced AI feedback</li>
             <li className="flex items-center gap-2 text-base-content"><Check className="w-4 h-4 text-primary" /> Voice analysis</li>
             <li className="flex items-center gap-2 text-base-content"><Check className="w-4 h-4 text-primary" /> Priority support</li>

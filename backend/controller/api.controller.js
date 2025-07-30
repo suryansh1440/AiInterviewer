@@ -52,3 +52,18 @@ export const resetApi = async (req, res) => {
         res.status(500).json({ message: "Internal server error" });
     }
 }
+
+export const deleteApi = async (req, res) => {
+    const { apiId } = req.body;
+    try {
+        const api = await Api.findByIdAndDelete(apiId);
+        if (api) {
+            res.status(200).json({ message: "Api deleted successfully" });
+        } else {
+            res.status(404).json({ message: "Api not found" });
+        }
+    } catch (error) {
+        console.log("error in deleteApi", error);
+        res.status(500).json({ message: "Internal server error" });
+    }
+}

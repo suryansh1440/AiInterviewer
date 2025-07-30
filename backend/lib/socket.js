@@ -315,16 +315,41 @@ const google = createGoogleGenerativeAI({
     apiKey: apiKey
 });
 
-            const { text } = await generateText({
-                model: google('gemini-2.0-flash-001'),
-                prompt: context
-            });
+            try {
+                const { text } = await generateText({
+                    model: google('gemini-2.0-flash-001'),
+                    prompt: context
+                });
 
-            const cleanedText = text.replace(/```json/g, '').replace(/```/g, '');
+                const cleanedText = text.replace(/```json/g, '').replace(/```/g, '');
 
-            const response = JSON.parse(cleanedText);
+                const response = JSON.parse(cleanedText);
 
-            return response;
+                return response;
+            } catch (aiError) {
+                // Check if the error is due to model overload
+                if (aiError.message && aiError.message.includes('The model is overloaded')) {
+                    console.log('AI Model overloaded, pausing API key:', apiKey);
+                    
+                    // Pause the API key that was used
+                    const Api = (await import('../modals/api.modal.js')).default;
+                    const api = await Api.findOne({ apiKey });
+                    if (api) {
+                        api.apiStatus = 'overloaded';
+                        await api.save();
+                        console.log('API key paused due to model overload');
+                    }
+                    
+                    return {
+                        role: 'interviewer',
+                        content: "I apologize, but the AI service is temporarily overloaded. Please try again in a moment.",
+                        isInterviewEnd: false
+                    };
+                }
+                
+                // Re-throw other AI errors
+                throw aiError;
+            }
         } catch (error) {
             console.error('Error generating AI response:', error);
             return {

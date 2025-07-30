@@ -3,6 +3,7 @@ import {generateText} from "ai"
 import {createGoogleGenerativeAI} from "@ai-sdk/google"
 import Interview from '../modals/interview.modal.js';
 import User from '../modals/user.modal.js';
+import Api from '../modals/api.modal.js';
 import { analyze } from '../lib/gitingest.js';
 import { getApi } from '../lib/getApi.js';
 
@@ -110,16 +111,39 @@ export const getRandomTopic = async (req, res) => {
       apiKey: apiKey
     });
 
-    // Use the same model initialization as generateQuestio
-    const { text } = await generateText({
-       model:google('gemini-2.0-flash-001'),
-       prompt 
-      });
+    try {
+      // Use the same model initialization as generateQuestio
+      const { text } = await generateText({
+         model:google('gemini-2.0-flash-001'),
+         prompt 
+        });
 
-    // Clean the response text
-    const cleanText = text.replace(/```json\n?|\n?```/g, '').trim();
-    const topics = JSON.parse(cleanText);
-    res.status(200).json({ topics });
+      // Clean the response text
+      const cleanText = text.replace(/```json\n?|\n?```/g, '').trim();
+      const topics = JSON.parse(cleanText);
+      res.status(200).json({ topics });
+    } catch (aiError) {
+      // Check if the error is due to model overload
+      if (aiError.message && aiError.message.includes('The model is overloaded')) {
+        console.log('AI Model overloaded, pausing API key:', apiKey);
+        
+        // Pause the API key that was used
+        const api = await Api.findOne({ apiKey });
+        if (api) {
+          api.apiStatus = 'overloaded';
+          await api.save();
+          console.log('API key paused due to model overload');
+        }
+        
+        return res.status(503).json({ 
+          message: 'AI service is temporarily overloaded. Please try again later.',
+          error: 'MODEL_OVERLOADED'
+        });
+      }
+      
+      // Re-throw other AI errors
+      throw aiError;
+    }
   } catch (error) {
     console.log("error in getRandomTopic",error);
     res.status(500).json({ message: "Internal Server Error" });
@@ -175,30 +199,53 @@ export const generateQuestion = async (req,res)=>{
       apiKey: apiKey
     });
     
-    const {text} = await generateText({
-      model : google('gemini-2.0-flash-001'),
-      prompt
-    })
+    try {
+      const {text} = await generateText({
+        model : google('gemini-2.0-flash-001'),
+        prompt
+      })
 
-    const cleanText = text.replace(/```json\n?|\n?```/g, '').trim();
-    const questions = JSON.parse(cleanText);
+      const cleanText = text.replace(/```json\n?|\n?```/g, '').trim();
+      const questions = JSON.parse(cleanText);
 
-    const interview = await Interview.create({
-      userId,
-      topic,
-      subTopic,
-      level,
-      questions,
-    })
+      const interview = await Interview.create({
+        userId,
+        topic,
+        subTopic,
+        level,
+        questions,
+      })
 
-    // Increment user's totalInterviews
-    if (user) {
-        user.interviewLeft = user.interviewLeft - 1;
-      user.stats.totalInterviews = (user.stats.totalInterviews || 0) + 1;
-      await user.save();
+      // Increment user's totalInterviews
+      if (user) {
+          user.interviewLeft = user.interviewLeft - 1;
+        user.stats.totalInterviews = (user.stats.totalInterviews || 0) + 1;
+        await user.save();
+      }
+
+      res.status(200).json({interview});
+    } catch (aiError) {
+      // Check if the error is due to model overload
+      if (aiError.message && aiError.message.includes('The model is overloaded')) {
+        console.log('AI Model overloaded, pausing API key:', apiKey);
+        
+        // Pause the API key that was used
+        const api = await Api.findOne({ apiKey });
+        if (api) {
+          api.apiStatus = 'overloaded';
+          await api.save();
+          console.log('API key paused due to model overload');
+        }
+        
+        return res.status(503).json({ 
+          message: 'AI service is temporarily overloaded. Please try again later.',
+          error: 'MODEL_OVERLOADED'
+        });
+      }
+      
+      // Re-throw other AI errors
+      throw aiError;
     }
-
-    res.status(200).json({interview});
   }catch(error){
     console.log("error in getQuestion controller",error);
     return res.status(500).json({message:"Internal server Error"})
@@ -343,57 +390,80 @@ Do not include any explanations or extra text. Only return the JSON object. All 
       apiKey: apiKey
     });
     
-    const { text } = await generateText({
-      model: google('gemini-2.0-flash-001'),
-      prompt,
-      system
-    });
-
-    
-    let feedback;
     try {
-      // Clean the text to ensure it's valid JSON
-      const cleanText = text.replace(/```json\n?|\n?```/g, '').trim();
+      const { text } = await generateText({
+        model: google('gemini-2.0-flash-001'),
+        prompt,
+        system
+      });
+
       
-      feedback = JSON.parse(cleanText);
-    } catch (parseError) {
-      console.error('Failed to parse AI feedback JSON:', parseError);
-      console.error('Raw text:', text);
+      let feedback;
+      try {
+        // Clean the text to ensure it's valid JSON
+        const cleanText = text.replace(/```json\n?|\n?```/g, '').trim();
+        
+        feedback = JSON.parse(cleanText);
+      } catch (parseError) {
+        console.error('Failed to parse AI feedback JSON:', parseError);
+        console.error('Raw text:', text);
+        
+        // Return a default feedback structure if parsing fails
+        feedback = {
+          totalScore: 0,
+          categoryScores: [
+            {
+              name: "Communication Skills",
+              score: 0,
+              comment: "Unable to assess due to technical issues."
+            },
+            {
+              name: "Technical Knowledge", 
+              score: 0,
+              comment: "Unable to assess due to technical issues."
+            },
+            {
+              name: "Problem Solving",
+              score: 0, 
+              comment: "Unable to assess due to technical issues."
+            },
+            {
+              name: "Cultural Fit",
+              score: 0,
+              comment: "Unable to assess due to technical issues."
+            },
+            {
+              name: "Confidence and Clarity",
+              score: 0,
+              comment: "Unable to assess due to technical issues."
+            }
+          ],
+          strengths: ["Unable to assess due to technical issues."],
+          areasForImprovement: ["Unable to assess due to technical issues."],
+          finalAssessment: "Unable to generate assessment due to technical issues."
+        };
+      }
+    } catch (aiError) {
+      // Check if the error is due to model overload
+      if (aiError.message && aiError.message.includes('The model is overloaded')) {
+        console.log('AI Model overloaded, pausing API key:', apiKey);
+        
+        // Pause the API key that was used
+        const api = await Api.findOne({ apiKey });
+        if (api) {
+          api.apiStatus = 'overloaded';
+          await api.save();
+          console.log('API key paused due to model overload');
+        }
+        
+        return res.status(503).json({ 
+          message: 'AI service is temporarily overloaded. Please try again later.',
+          error: 'MODEL_OVERLOADED'
+        });
+      }
       
-      // Return a default feedback structure if parsing fails
-      feedback = {
-        totalScore: 0,
-        categoryScores: [
-          {
-            name: "Communication Skills",
-            score: 0,
-            comment: "Unable to assess due to technical issues."
-          },
-          {
-            name: "Technical Knowledge", 
-            score: 0,
-            comment: "Unable to assess due to technical issues."
-          },
-          {
-            name: "Problem Solving",
-            score: 0, 
-            comment: "Unable to assess due to technical issues."
-          },
-          {
-            name: "Cultural Fit",
-            score: 0,
-            comment: "Unable to assess due to technical issues."
-          },
-          {
-            name: "Confidence and Clarity",
-            score: 0,
-            comment: "Unable to assess due to technical issues."
-          }
-        ],
-        strengths: ["Unable to assess due to technical issues."],
-        areasForImprovement: ["Unable to assess due to technical issues."],
-        finalAssessment: "Unable to generate assessment due to technical issues."
-      };
+      // Re-throw other AI errors
+      throw aiError;
     }
 
     // Validate feedback structure and ensure scores are reasonable
@@ -469,7 +539,7 @@ export const analyzeGitHubRepo = async (req, res) => {
     }
 
     let { summary, tree, files } = analysisResult;
-    files = files.slice(0, 700000);
+    files = files.slice(0, 100000);
 
     // Extract repo name from URL for the prompt
     const repoUrlParts = repoUrl.split('/');
@@ -489,7 +559,7 @@ ${JSON.stringify(tree, null, 2)}
 Files Content:
 ${JSON.stringify(files, null, 2)}
 
-Provide a concise analysis (maximum 2000 words) that covers:
+Provide a concise analysis (maximum 1000 words) that covers:
 1. Project purpose and main features
 2. Technology stack and architecture
 3. Code organization and structure
@@ -508,15 +578,39 @@ Return only the analysis text without any introductory phrases like "Here's my a
     const google = createGoogleGenerativeAI({
       apiKey: apiKey
     });
-    const { text: aiAnalysis } = await generateText({
-      model: google('gemini-2.0-flash-001'),
-      prompt
-    });
+    // console.log(prompt.length)
+    try {
+      const { text: aiAnalysis } = await generateText({
+        model: google('gemini-2.0-flash-001'),
+        prompt
+      });
 
-    res.status(200).json({
-      analysis: aiAnalysis,
-      tree
-    });
+      res.status(200).json({
+        analysis: aiAnalysis,
+        tree
+      });
+    } catch (aiError) {
+      // Check if the error is due to model overload
+      if (aiError.message && aiError.message.includes('The model is overloaded')) {
+        console.log('AI Model overloaded, pausing API key:', apiKey);
+        
+        // Pause the API key that was used
+        const api = await Api.findOne({ apiKey });
+        if (api) {
+          api.apiStatus = 'overloaded';
+          await api.save();
+          console.log('API key paused due to model overload');
+        }
+        
+        return res.status(503).json({ 
+          message: 'AI service is temporarily overloaded. Please try again later.',
+          error: 'MODEL_OVERLOADED'
+        });
+      }
+      
+      // Re-throw other AI errors
+      throw aiError;
+    }
 
   } catch (error) {
     console.error('Error analyzing GitHub repository with Gitingest:', error);

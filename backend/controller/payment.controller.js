@@ -47,7 +47,7 @@ export const claimFree = async (req,res)=>{
     if(user.freeInterview === 'claimed'){
         return res.status(400).json({message:"Free interview already claimed"});
     }
-    user.interviewLeft +=1;
+    user.interviewLeft +=2;
     user.freeInterview = 'claimed';
     user.interviewLeftExpire = Date.now() + 1000*60*60*24*30;
 
