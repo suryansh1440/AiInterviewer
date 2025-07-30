@@ -2,7 +2,8 @@ import { Server } from "socket.io"
 import http from "http"
 import express from "express"
 import { generateText } from "ai"
-import { google } from "@ai-sdk/google"
+import { createGoogleGenerativeAI } from "@ai-sdk/google"
+import { getApi } from "./getApi.js"
 
 const app = express()
 const server = http.createServer(app);
@@ -299,6 +300,20 @@ Also send the message in this format:
 }
 
 If you think the interview is complete, set isInterviewEnd to true.`;
+
+const apiKey = await getApi();
+if(!apiKey){
+    console.log("No api key found")
+    return {
+        role: 'interviewer',
+        content: "I apologize, but I'm having trouble processing that. Could you please repeat your response?",
+        isInterviewEnd: false
+    };
+}
+
+const google = createGoogleGenerativeAI({
+    apiKey: apiKey
+});
 
             const { text } = await generateText({
                 model: google('gemini-2.0-flash-001'),

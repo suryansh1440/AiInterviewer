@@ -6,11 +6,11 @@ import { useNavigate } from 'react-router-dom'
 const InterviewPage = () => {
   const { interviewData,isInterviewActive } = useInterviewStore();
   const navigate = useNavigate();
-  // useEffect(() => {
-  //   if(!isInterviewActive){
-  //     navigate('/');
-  //   }
-  // }, []);
+  useEffect(() => {
+    if(!isInterviewActive){
+      navigate('/');
+    }
+  }, []);
   
 
   return (

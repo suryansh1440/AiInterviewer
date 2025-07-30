@@ -1,9 +1,10 @@
 import axios from 'axios';
 import {generateText} from "ai"
-import {google} from "@ai-sdk/google"
+import {createGoogleGenerativeAI} from "@ai-sdk/google"
 import Interview from '../modals/interview.modal.js';
 import User from '../modals/user.modal.js';
 import { analyze } from '../lib/gitingest.js';
+import { getApi } from '../lib/getApi.js';
 
 export const readPdf = async (req, res) => {
   const { url } = req.body;
@@ -99,9 +100,19 @@ export const getRandomTopic = async (req, res) => {
 
     const prompt = `Given the following resume text, generate 5 random, relevant, and diverse interview topics. For each topic, also generate a relevant subtopic. Return only a valid JSON array of 5 objects, each with the following structure: { "topic": "<topic>", "subtopic": "<subtopic>" }. Do not include any explanations, introductions, or extra text—only the JSON array.\n\nExample output:\n[\n  { "topic": "Machine Learning", "subtopic": "Supervised Learning" },\n  { "topic": "Web Development", "subtopic": "React.js" },\n  { "topic": "Cloud Computing", "subtopic": "AWS Services" },\n  { "topic": "Data Structures", "subtopic": "Trees" },\n  { "topic": "Cybersecurity", "subtopic": "Network Security" }\n]\n\nResume:\n${resumeText}`;
 
+    const apiKey = await getApi();
+    if(!apiKey){
+      console.log("No api key found")
+      return res.status(400).json({message:"Internal server error"})
+    }
+    
+    const google = createGoogleGenerativeAI({
+      apiKey: apiKey
+    });
+
     // Use the same model initialization as generateQuestio
     const { text } = await generateText({
-       model:google('gemini-2.0-flash-001'), 
+       model:google('gemini-2.0-flash-001'),
        prompt 
       });
 
@@ -110,7 +121,7 @@ export const getRandomTopic = async (req, res) => {
     const topics = JSON.parse(cleanText);
     res.status(200).json({ topics });
   } catch (error) {
-    console.log(error);
+    console.log("error in getRandomTopic",error);
     res.status(500).json({ message: "Internal Server Error" });
   }
 };
@@ -155,6 +166,15 @@ export const generateQuestion = async (req,res)=>{
     // --- Enhanced Prompt with GitHub Integration ---
     const prompt = `Given the following context, generate ${amount} personalized interview questions.\n\nContext:\n- Topic: ${topic}\n- Subtopic: ${subTopic}\n- Difficulty: ${level}\n- Resume: ${resume || 'N/A'}\n- LeetCode Stats: ${leetcode || 'N/A'}\n- Github Projects: ${github || 'N/A'}\n\nRequirements:\n- At least one question should be a behavioral or soft skills question.\n- Include questions specifically about the candidate's GitHub projects if available.\n- Ask technical questions that match the candidate's experience level and technologies used in their projects.\n- Questions should be personalized based on the resume content, LeetCode performance, and GitHub project analysis.\n- Each question should be clear, concise, and suitable for an AI voice agent to read aloud.\n- Do not use any special characters in the questions, only letters, numbers, and spaces.\n- Questions should progress from basic to advanced based on the difficulty level.\n- For GitHub projects, ask about specific technologies, architecture decisions, and challenges faced.\n- Return only a valid JSON array of strings with no explanations or extra text.\n\nExample output:\n[\n  "What is a data structure",\n  "Explain the concept of a linked list",\n  "How do you implement a stack in code",\n  "Describe a time you overcame a challenge at work",\n  "What technologies did you use in your GitHub project",\n  "How did you structure your React components in your portfolio"\n]\nNow generate the questions.`;
 
+    const apiKey = await getApi();
+    if(!apiKey){
+      console.log("No api key found")
+      return res.status(400).json({message:"Internal server error"})
+    }
+    const google = createGoogleGenerativeAI({
+      apiKey: apiKey
+    });
+    
     const {text} = await generateText({
       model : google('gemini-2.0-flash-001'),
       prompt
@@ -313,6 +333,16 @@ CRITICAL SCORING RULES:
 Do not include any explanations or extra text. Only return the JSON object. All scores should be integers between 0 and 20. Comments should be concise and actionable.
 `;
 
+    const apiKey = await getApi();
+    if(!apiKey){
+      console.log("No api key found")
+      return res.status(400).json({message:"Internal server error"})
+    }
+
+    const google = createGoogleGenerativeAI({
+      apiKey: apiKey
+    });
+    
     const { text } = await generateText({
       model: google('gemini-2.0-flash-001'),
       prompt,
@@ -439,7 +469,7 @@ export const analyzeGitHubRepo = async (req, res) => {
     }
 
     let { summary, tree, files } = analysisResult;
-    files = files.slice(0, 800000);
+    files = files.slice(0, 700000);
 
     // Extract repo name from URL for the prompt
     const repoUrlParts = repoUrl.split('/');
@@ -466,9 +496,18 @@ Provide a concise analysis (maximum 2000 words) that covers:
 4. Potential technical challenges or interesting aspects
 
 Return only the analysis text without any introductory phrases like "Here's my analysis" or "Based on the repository".`;
-    
-   
 
+    const apiKey = await getApi();
+    
+    
+    if(!apiKey){
+      console.log("No api key found")
+      return res.status(400).json({message:"Internal server error"})
+    }
+    
+    const google = createGoogleGenerativeAI({
+      apiKey: apiKey
+    });
     const { text: aiAnalysis } = await generateText({
       model: google('gemini-2.0-flash-001'),
       prompt
