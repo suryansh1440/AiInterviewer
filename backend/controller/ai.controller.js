@@ -390,60 +390,60 @@ Do not include any explanations or extra text. Only return the JSON object. All 
       apiKey: apiKey
     });
     
-    try {
-      const { text } = await generateText({
-        model: google('gemini-2.0-flash-001'),
-        prompt,
-        system
-      });
+         let feedback;
+     try {
+       const { text } = await generateText({
+         model: google('gemini-2.0-flash-001'),
+         prompt,
+         system
+       });
 
-      
-      let feedback;
-      try {
-        // Clean the text to ensure it's valid JSON
-        const cleanText = text.replace(/```json\n?|\n?```/g, '').trim();
-        
-        feedback = JSON.parse(cleanText);
-      } catch (parseError) {
-        console.error('Failed to parse AI feedback JSON:', parseError);
-        console.error('Raw text:', text);
-        
-        // Return a default feedback structure if parsing fails
-        feedback = {
-          totalScore: 0,
-          categoryScores: [
-            {
-              name: "Communication Skills",
-              score: 0,
-              comment: "Unable to assess due to technical issues."
-            },
-            {
-              name: "Technical Knowledge", 
-              score: 0,
-              comment: "Unable to assess due to technical issues."
-            },
-            {
-              name: "Problem Solving",
-              score: 0, 
-              comment: "Unable to assess due to technical issues."
-            },
-            {
-              name: "Cultural Fit",
-              score: 0,
-              comment: "Unable to assess due to technical issues."
-            },
-            {
-              name: "Confidence and Clarity",
-              score: 0,
-              comment: "Unable to assess due to technical issues."
-            }
-          ],
-          strengths: ["Unable to assess due to technical issues."],
-          areasForImprovement: ["Unable to assess due to technical issues."],
-          finalAssessment: "Unable to generate assessment due to technical issues."
-        };
-      }
-    } catch (aiError) {
+       
+       try {
+         // Clean the text to ensure it's valid JSON
+         const cleanText = text.replace(/```json\n?|\n?```/g, '').trim();
+         
+         feedback = JSON.parse(cleanText);
+       } catch (parseError) {
+         console.error('Failed to parse AI feedback JSON:', parseError);
+         console.error('Raw text:', text);
+         
+         // Return a default feedback structure if parsing fails
+         feedback = {
+           totalScore: 0,
+           categoryScores: [
+             {
+               name: "Communication Skills",
+               score: 0,
+               comment: "Unable to assess due to technical issues."
+             },
+             {
+               name: "Technical Knowledge", 
+               score: 0,
+               comment: "Unable to assess due to technical issues."
+             },
+             {
+               name: "Problem Solving",
+               score: 0, 
+               comment: "Unable to assess due to technical issues."
+             },
+             {
+               name: "Cultural Fit",
+               score: 0,
+               comment: "Unable to assess due to technical issues."
+             },
+             {
+               name: "Confidence and Clarity",
+               score: 0,
+               comment: "Unable to assess due to technical issues."
+             }
+           ],
+           strengths: ["Unable to assess due to technical issues."],
+           areasForImprovement: ["Unable to assess due to technical issues."],
+           finalAssessment: "Unable to generate assessment due to technical issues."
+         };
+       }
+     } catch (aiError) {
       // Check if the error is due to model overload
       if (aiError.message && aiError.message.includes('The model is overloaded')) {
         console.log('AI Model overloaded, pausing API key:', apiKey);
@@ -462,8 +462,40 @@ Do not include any explanations or extra text. Only return the JSON object. All 
         });
       }
       
-      // Re-throw other AI errors
-      throw aiError;
+      // Set default feedback for other AI errors
+      feedback = {
+        totalScore: 0,
+        categoryScores: [
+          {
+            name: "Communication Skills",
+            score: 0,
+            comment: "Unable to assess due to AI service error."
+          },
+          {
+            name: "Technical Knowledge", 
+            score: 0,
+            comment: "Unable to assess due to AI service error."
+          },
+          {
+            name: "Problem Solving",
+            score: 0, 
+            comment: "Unable to assess due to AI service error."
+          },
+          {
+            name: "Cultural Fit",
+            score: 0,
+            comment: "Unable to assess due to AI service error."
+          },
+          {
+            name: "Confidence and Clarity",
+            score: 0,
+            comment: "Unable to assess due to AI service error."
+          }
+        ],
+        strengths: ["Unable to assess due to AI service error."],
+        areasForImprovement: ["Unable to assess due to AI service error."],
+        finalAssessment: "Unable to generate assessment due to AI service error."
+      };
     }
 
     // Validate feedback structure and ensure scores are reasonable

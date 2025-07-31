@@ -18,7 +18,6 @@ const userSchema = new mongoose.Schema(
       type: String,
       minlength: 6,
       select: false,
-      required: true,
     },
     authProvider: {
       type: String,
