@@ -80,6 +80,8 @@ export const login = async (req, res) => {
     user.lastLogin = new Date();
     await user.save();
     const token = generateToken(user._id, res);
+    console.log("Login successful for user:", user.email);
+    console.log("JWT token generated:", token ? "Yes" : "No");
     res.status(200).json({
       token,
       _id: user._id,
@@ -114,6 +116,7 @@ export const logout = async (req, res) => {
     httpOnly: true,
     sameSite: "lax",
     secure: process.env.NODE_ENV === "production",
+    path: "/"
   });
   return res.status(200).json({ message: "Logged out successfully" });
 };
@@ -259,6 +262,7 @@ export const deleteAccount = async (req, res) => {
       httpOnly: true,
       sameSite: "lax",
       secure: process.env.NODE_ENV === "production",
+      path: "/"
     });
     return res.status(200).json({ message: "Account deleted successfully" });
   } catch (error) {
