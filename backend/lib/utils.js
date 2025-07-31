@@ -6,17 +6,15 @@ export const generateToken = (userId,res) =>{
         expiresIn:"7d"
     })
     
-    // Cookie settings - simplified for better compatibility
+    // Cookie settings for production
     const cookieOptions = {
         maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
         httpOnly: true,
-        sameSite: "lax",
-        secure: false, // Set to false for now to test
+        sameSite: "none", // Required for cross-origin
+        secure: true, // Required when sameSite is "none"
         path: "/"
     }
     
-    console.log("Setting cookie with options:", cookieOptions);
     res.cookie("jwt", token, cookieOptions);
-    console.log("Cookie set successfully");
     return token;
 }

@@ -22,7 +22,7 @@ const PORT = process.env.PORT;
 app.use(cookieParser());
 
 app.use(cors({
-    origin: true, // Allow all origins for testing
+    origin: [process.env.FRONTEND_URL, "http://localhost:8081"], // Allow all origins for testing
     credentials: true
 }))
 app.use(express.json({ limit: '10mb' }));
@@ -48,26 +48,6 @@ app.get("/",(req,res)=>{
 
 app.get("/health",(req,res)=>{
     res.json({ status: "healthy", service: "aiinterviewer-backend" });
-})
-
-app.get("/test-cookie",(req,res)=>{
-    res.cookie("test", "test-value", {
-        httpOnly: true,
-        sameSite: "lax",
-        secure: false,
-        path: "/"
-    });
-    res.json({ message: "Test cookie set", cookies: req.cookies });
-})
-
-app.get("/test-cookie-simple",(req,res)=>{
-    res.cookie("simple-test", "simple-value", {
-        httpOnly: false,
-        sameSite: "lax",
-        secure: false,
-        path: "/"
-    });
-    res.json({ message: "Simple test cookie set", cookies: req.cookies });
 })
 
 server.listen(PORT, () => {
