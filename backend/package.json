@@ -8,8 +8,8 @@
   "main": "server.js",
   "scripts": {
     "dev": "nodemon server.js",
-    "start": "nodemon server.js",
-    "start:prod": "process.env.NODE_ENV=production nodemon server.js"
+    "start": "node server.js",
+    "start:prod": "NODE_ENV=production node server.js"
   },
   "dependencies": {
     "@ai-sdk/google": "^1.2.22",

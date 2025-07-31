@@ -43,7 +43,11 @@ app.use("/api/api", apiRouter);
 
 
 app.get("/",(req,res)=>{
-    res.send("Hello World");
+    res.send("AiInterviewer Backend is running!");
+})
+
+app.get("/health",(req,res)=>{
+    res.json({ status: "healthy", service: "aiinterviewer-backend" });
 })
 
 server.listen(PORT, () => {
