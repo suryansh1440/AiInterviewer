@@ -61,5 +61,11 @@ def extract_pdf_text():
         traceback.print_exc()
         return jsonify({'error': str(e)}), 500
 
+# Health check endpoint
+@app.route('/health', methods=['GET'])
+def health_check():
+    return jsonify({'status': 'healthy', 'service': 'gitingest-backend'})
+
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5001)
+    port = int(os.environ.get('PORT', 5001))
+    app.run(host='0.0.0.0', port=port)
