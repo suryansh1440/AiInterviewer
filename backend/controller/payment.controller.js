@@ -100,6 +100,6 @@ export const paymentVerification = async (req,res)=>{
         console.log("error in paymentVerification",err);
       return res.status(500).json({ message: "Failed to update user subscription", error: err.message });
     }
-    res.redirect(process.env.FRONTEND_URL);
+    res.redirect(process.env.FRONTEND_URL + "/pricing");
     // res.status(200).json({message:"Payment verification successful"});
 }

@@ -116,7 +116,7 @@ class SpeechManager {
                             this._pendingFinalTranscript = null;
                             this.stopListening(); // End listening after sending
                         }
-                    }, 3000); // 2 second grace period
+                    }, 2000); // 2 second grace period
                 }
             };
             
@@ -181,7 +181,7 @@ class SpeechManager {
                     this.recognition.stop();
                 }
             }
-        }, 8000); // 8 second timeout
+        }, 60000); // 1min timeout
     }
 
     // Clean text for better TTS pronunciation
