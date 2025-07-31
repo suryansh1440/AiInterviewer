@@ -27,6 +27,12 @@ export const useAuthStore = create((set,get) => ({
 
     }catch(error){
         console.log("Error in checkAuth",error)
+        // Clear any invalid tokens by making a logout request
+        try {
+          await axiosInstance.post("/auth/logout");
+        } catch (logoutError) {
+          console.log("Logout error:", logoutError);
+        }
         set({user:null})
     }finally{
         set({isCheckingAuth:false})

@@ -109,10 +109,10 @@ export const login = async (req, res) => {
 };
 
 export const logout = async (req, res) => {
-  // Clear the auth token cookie (assuming it's called 'token')
+  // Clear the auth token cookie
   res.clearCookie("jwt", {
     httpOnly: true,
-    sameSite: "strict",
+    sameSite: "lax",
     secure: process.env.NODE_ENV === "production",
   });
   return res.status(200).json({ message: "Logged out successfully" });
@@ -257,7 +257,7 @@ export const deleteAccount = async (req, res) => {
     await user.deleteOne();
     res.clearCookie("jwt", {
       httpOnly: true,
-      sameSite: "strict",
+      sameSite: "lax",
       secure: process.env.NODE_ENV === "production",
     });
     return res.status(200).json({ message: "Account deleted successfully" });
