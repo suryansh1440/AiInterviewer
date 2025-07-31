@@ -52,7 +52,9 @@ export const claimFree = async (req,res)=>{
     user.interviewLeftExpire = Date.now() + 1000*60*60*24*30;
 
     await user.save();
-    res.status(200).json({message:"Free interview claimed successfully"});
+    res.status(200).json({message:"Free interview claimed successfully",
+      user
+    });
     }catch(err){
         console.log("error in claimFree",err);
         return res.status(500).json({message:"Internal server Error"});
@@ -98,6 +100,6 @@ export const paymentVerification = async (req,res)=>{
         console.log("error in paymentVerification",err);
       return res.status(500).json({ message: "Failed to update user subscription", error: err.message });
     }
-    res.redirect(process.env.FRONTEND_URL + "/pricing");
+    res.redirect(process.env.FRONTEND_URL);
     // res.status(200).json({message:"Payment verification successful"});
 }

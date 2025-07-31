@@ -1,6 +1,7 @@
 import toast from "react-hot-toast";
 import { create } from "zustand";
 import { axiosInstance } from "../lib/axios";
+import { useAuthStore } from './useAuthStore';
 
 export const usePaymentStore = create((set) => ({
     isCheckoutLoading: false,
@@ -9,8 +10,12 @@ export const usePaymentStore = create((set) => ({
     claimFree: async ()=>{
         set({isCheckoutLoading:true});
         try{
-            await axiosInstance.post("/payment/claimFree");
+            const res = await axiosInstance.post("/payment/claimFree");
             toast.success("Free interview claimed successfully");
+            if (res.data.user) {
+                useAuthStore.getState().user=res.data.user;
+            }
+
             set({isFreeClaimed:true});
         }catch(error){
             toast.error(error.response.data.message);
