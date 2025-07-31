@@ -16,8 +16,8 @@ import { ThemedView } from '../components/ThemedView';
 import { router } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-// const BACKEND_URL = 'http://192.168.251.173:5000/api'; // Your computer's IP address
-const BACKEND_URL = 'https://aiinterviewerbackend.onrender.com/api'; // Your computer's IP address
+
+const BACKEND_URL = 'https://aiinterviewerbackend.onrender.com/api';
 
 export default function LoginScreen() {
   const [email, setEmail] = useState('');

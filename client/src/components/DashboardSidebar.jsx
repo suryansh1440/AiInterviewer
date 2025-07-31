@@ -29,7 +29,7 @@ const DashboardSidebar = () => {
           </Link>
 
           {/* Admin Panel page - only for ADMIN */}
-          {user?.role === 'ADMIN' && (
+          {(user?.role === 'ADMIN' || user?.role === 'SUPERADMIN') && (
             <Link
               to="/dashboard/adminPanel"
               className={`btn justify-start text-base-content text-lg font-medium rounded-lg transition-colors duration-200 border-0 ${
