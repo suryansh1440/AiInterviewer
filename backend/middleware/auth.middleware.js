@@ -33,7 +33,7 @@ export const protectRoute = async (req,res,next) =>{
             res.clearCookie("jwt", {
                 httpOnly: true,
                 sameSite: "lax",
-                secure: process.env.NODE_ENV === "production",
+                secure: false,
                 path: "/"
             });
             return res.status(401).json({message:"Unauthorized - Token expired or invalid"});
