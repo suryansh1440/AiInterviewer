@@ -4,7 +4,6 @@ import {createGoogleGenerativeAI} from "@ai-sdk/google"
 import Interview from '../modals/interview.modal.js';
 import User from '../modals/user.modal.js';
 import Api from '../modals/api.modal.js';
-import { analyze } from '../lib/gitingest.js';
 import { getApi } from '../lib/getApi.js';
 
 export const readPdf = async (req, res) => {
@@ -564,74 +563,176 @@ export const analyzeGitHubRepo = async (req, res) => {
   }
 
   try {
-    const analysisResult = await analyze(repoUrl, githubToken );
+    // Call the new gitingest backend to get all repository data
+    const gitingestResponse = await axios.post(`${process.env.PYTHON_BACKEND_URL}/ingest-repo`, {
+      repo_url: repoUrl,
+      github_token: githubToken
+    });
 
-    if (!analysisResult) {
-      return res.status(500).json({ message: 'Failed to analyze repository with Gitingest' });
+    if (!gitingestResponse.data) {
+      return res.status(500).json({ message: 'Failed to analyze repository with gitingest backend' });
     }
 
-    let { summary, tree, files } = analysisResult;
-    files = files.slice(0, 100000);
-
+    const { summary, tree, content } = gitingestResponse.data;
+    
     // Extract repo name from URL for the prompt
     const repoUrlParts = repoUrl.split('/');
     const repoName = repoUrlParts[repoUrlParts.length - 1];
 
-    // Generate AI analysis of the repository using the summary from Gitingest
-    let prompt = `You are an expert software engineer and technical interviewer. Analyze this GitHub repository information and create a concise summary that highlights the key aspects of the project. Focus on the technologies used, architecture, and main features.
-
-Repository Information:
-Name: ${repoName}
-Summary from Gitingest:
-${summary}
-
-File Tree:
-${JSON.stringify(tree, null, 2)}
-
-Files Content:
-${JSON.stringify(files, null, 2)}
-
-Provide a concise analysis (maximum 1000 words) that covers:
-1. Project purpose and main features
-2. Technology stack and architecture
-3. Code organization and structure
-4. Potential technical challenges or interesting aspects
-
-Return only the analysis text without any introductory phrases like "Here's my analysis" or "Based on the repository".`;
-
-    const apiKey = await getApi();
+    // Get all files with their content
+    const allFiles = content.files_with_content || [];
     
-    
-    if(!apiKey){
-      console.log("No api key found")
-      return res.status(400).json({message:"Internal server error"})
+    if (allFiles.length === 0) {
+      return res.status(404).json({ message: 'No files found in the repository' });
+    }
+
+    // Process files in chunks of 200k words
+    const CHUNK_SIZE = 200000; // words
+    const fileChunks = [];
+    let currentChunk = [];
+    let currentWordCount = 0;
+
+    for (const file of allFiles) {
+      if (file.content && file.type === 'file') {
+        const fileWordCount = file.content.split(/\s+/).length;
+        
+        if (currentWordCount + fileWordCount > CHUNK_SIZE && currentChunk.length > 0) {
+          // Save current chunk and start new one
+          fileChunks.push(currentChunk);
+          currentChunk = [file];
+          currentWordCount = fileWordCount;
+        } else {
+          // Add to current chunk
+          currentChunk.push(file);
+          currentWordCount += fileWordCount;
+        }
+      }
     }
     
+    // Add the last chunk if it has content
+    if (currentChunk.length > 0) {
+      fileChunks.push(currentChunk);
+    }
+
+    console.log(`Processing ${allFiles.length} files in ${fileChunks.length} chunks`);
+
+    // Analyze each chunk and combine results
+    const apiKey = await getApi();
+    if (!apiKey) {
+      console.log("No api key found");
+      return res.status(400).json({ message: "Internal server error" });
+    }
+
     const google = createGoogleGenerativeAI({
       apiKey: apiKey
     });
-    // console.log(prompt.length)
+
+    const chunkAnalyses = [];
+    
+    for (let i = 0; i < fileChunks.length; i++) {
+      const chunk = fileChunks[i];
+      const chunkFiles = chunk.map(file => ({
+        name: file.name,
+        path: file.path,
+        content: file.content
+      }));
+
+      const chunkPrompt = `You are an expert software engineer analyzing a GitHub repository. Analyze this chunk of files and provide insights about the code structure, patterns, and technologies used.
+
+Repository: ${repoName}
+Chunk ${i + 1} of ${fileChunks.length}
+
+Files in this chunk:
+${JSON.stringify(chunkFiles, null, 2)}
+
+Provide a concise analysis (300-500 words) covering:
+1. Code patterns and architecture
+2. Technologies and frameworks used
+3. Code quality and structure
+4. Key functionality and features
+
+Focus on technical insights and patterns. Return only the analysis text.`;
+
+      try {
+        const { text: chunkAnalysis } = await generateText({
+          model: google('gemini-2.0-flash-001'),
+          prompt: chunkPrompt
+        });
+        
+        chunkAnalyses.push({
+          chunkNumber: i + 1,
+          filesAnalyzed: chunk.length,
+          analysis: chunkAnalysis
+        });
+
+        console.log(`Completed analysis for chunk ${i + 1}/${fileChunks.length}`);
+        
+      } catch (aiError) {
+        // Check if the error is due to model overload
+        if (aiError.message && aiError.message.includes('The model is overloaded')) {
+          console.log('AI Model overloaded, pausing API key:', apiKey);
+          
+          // Pause the API key that was used
+          const api = await Api.findOne({ apiKey });
+          if (api) {
+            api.apiStatus = 'overloaded';
+            await api.save();
+            console.log('API key paused due to model overload');
+          }
+          
+          return res.status(503).json({ 
+            message: 'AI service is temporarily overloaded. Please try again later.',
+            error: 'MODEL_OVERLOADED'
+          });
+        }
+        
+        // For other errors, continue with next chunk
+        console.log(`Error analyzing chunk ${i + 1}:`, aiError.message);
+        chunkAnalyses.push({
+          chunkNumber: i + 1,
+          filesAnalyzed: chunk.length,
+          analysis: `Error analyzing this chunk: ${aiError.message}`
+        });
+      }
+    }
+
+    // Generate final comprehensive analysis
+    const finalPrompt = `You are an expert software engineer. Create a comprehensive analysis of this GitHub repository based on the chunked analyses provided.
+
+Repository: ${repoName}
+Repository Summary: ${JSON.stringify(summary, null, 2)}
+
+Chunked Analyses:
+${chunkAnalyses.map(chunk => `Chunk ${chunk.chunkNumber} (${chunk.filesAnalyzed} files): ${chunk.analysis}`).join('\n\n')}
+
+Create a comprehensive final analysis (800-1200 words) that:
+1. Synthesizes insights from all chunks
+2. Identifies the overall architecture and technology stack
+3. Highlights key features and functionality
+4. Assesses code quality and patterns
+5. Provides technical recommendations
+
+Return only the comprehensive analysis text.`;
+
     try {
-      const { text: aiAnalysis } = await generateText({
+      const { text: finalAnalysis } = await generateText({
         model: google('gemini-2.0-flash-001'),
-        prompt
+        prompt: finalPrompt
       });
 
       res.status(200).json({
-        analysis: aiAnalysis,
-        tree
+        analysis: finalAnalysis
       });
-    } catch (aiError) {
-      // Check if the error is due to model overload
-      if (aiError.message && aiError.message.includes('The model is overloaded')) {
-        console.log('AI Model overloaded, pausing API key:', apiKey);
+
+    } catch (finalAiError) {
+      // Handle final analysis error
+      if (finalAiError.message && finalAiError.message.includes('The model is overloaded')) {
+        console.log('AI Model overloaded during final analysis, pausing API key:', apiKey);
         
-        // Pause the API key that was used
         const api = await Api.findOne({ apiKey });
         if (api) {
           api.apiStatus = 'overloaded';
           await api.save();
-          console.log('API key paused due to model overload');
         }
         
         return res.status(503).json({ 
@@ -640,12 +741,11 @@ Return only the analysis text without any introductory phrases like "Here's my a
         });
       }
       
-      // Re-throw other AI errors
-      throw aiError;
+      throw finalAiError;
     }
 
   } catch (error) {
-    console.error('Error analyzing GitHub repository with Gitingest:', error);
+    console.error('Error analyzing GitHub repository:', error);
     res.status(500).json({ message: 'Failed to analyze GitHub repository' });
   }
 };
