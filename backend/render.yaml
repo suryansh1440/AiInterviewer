@@ -1,0 +1,37 @@
+services:
+  - type: web
+    name: aiinterviewer-backend
+    env: node
+    plan: free
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: MONGODB_URI
+        sync: false
+      - key: JWT_SECRET
+        sync: false
+      - key: CLOUDDINARY_CLOUD_NAME
+        sync: false
+      - key: CLOUDDINARY_API_KEY
+        sync: false
+      - key: CLOUDDINARY_API_SECRET
+        sync: false
+      - key: GOOGLE_CLIENT_ID
+        sync: false
+      - key: GITHUB_CLIENT_SECRET
+        sync: false
+      - key: GITHUB_CLIENT_ID
+        sync: false
+      - key: GITHUB_CALLBACK_URL
+        sync: false
+      - key: RAZORPAY_API_KEY
+        sync: false
+      - key: RAZORPAY_API_SECRET
+        sync: false
+      - key: FRONTEND_URL
+        sync: false
+      - key: PYTHON_BACKEND_URL
+        sync: false 
