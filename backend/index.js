@@ -14,11 +14,12 @@ import contactRouter from "./router/contact.router.js";
 import apiRouter from "./router/api.router.js";
 
 
+
 dotenv.config()
 
 
 
-const PORT = process.env.PORT;
+const PORT = process.env.PORT || 3000;
 app.use(cookieParser());
 
 app.use(cors({
