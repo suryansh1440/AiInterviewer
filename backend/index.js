@@ -12,6 +12,7 @@ import postRouter from './router/post.router.js';
 import messageRouter from './router/message.router.js';
 import contactRouter from "./router/contact.router.js";
 import apiRouter from "./router/api.router.js";
+import { checkDBConnection } from './middleware/auth.middleware.js';
 
 
 
@@ -23,11 +24,14 @@ const PORT = process.env.PORT || 3000;
 app.use(cookieParser());
 
 app.use(cors({
-    origin: [process.env.FRONTEND_URL, "http://localhost:8081","http://localhost:5173"], // Allow all origins for testing
+    origin: [process.env.FRONTEND_URL, "http://localhost:8081"], // Allow all origins for testing
     credentials: true
 }))
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+
+// Add database connection check for all API routes
+app.use('/api', checkDBConnection);
 
 
 
@@ -51,8 +55,26 @@ app.get("/health",(req,res)=>{
     res.json({ status: "healthy", service: "aiinterviewer-backend" });
 })
 
-server.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
-    connectDB();
+// Connect to database first, then start server
+const startServer = async () => {
+    try {
+        // Connect to MongoDB first
+        await connectDB();
+        
+        // Start server after database connection
+        server.listen(PORT, () => {
+            console.log(`Server is running on port ${PORT}`);
+        });
+    } catch (error) {
+        console.error('Failed to start server:', error);
+        process.exit(1);
+    }
+};
 
-});
+// For Vercel serverless functions, don't start the server
+if (process.env.NODE_ENV !== 'production' || !process.env.VERCEL) {
+    startServer();
+}
+
+// Export for Vercel
+export default app;
