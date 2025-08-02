@@ -40,8 +40,7 @@ export const useGithubProjectStore = create((set, get) => ({
                 id: repoNumber,
                 url: repoUrl,
                 analysis: response.data.analysis,
-                tree: response.data.tree,
-
+                tree: "no tree provided",
             };
             
             set({githubProjects:[...get().githubProjects,newProject]})
@@ -50,7 +49,17 @@ export const useGithubProjectStore = create((set, get) => ({
             return response.data;
         } catch (error) {
             console.error('Error analyzing repository:', error);
-            toast.error('Failed to analyze repository. Please add token if repo is private');
+            
+            // Handle specific error cases
+            if (error.response?.status === 403) {
+                toast.error('Access forbidden. Add GitHub token for private repos or check rate limits.');
+            } else if (error.response?.status === 404) {
+                toast.error('Repository not found. Please check the URL.');
+            } else if (error.response?.status === 503) {
+                toast.error('AI service temporarily overloaded. Please try again later.');
+            } else {
+                toast.error('Failed to analyze repository. Please add token if repo is private');
+            }
             return null;
         } finally {
             set({ isAnalyzingGithubProject: false });
