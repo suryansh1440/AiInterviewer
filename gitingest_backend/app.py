@@ -66,6 +66,11 @@ def extract_pdf_text():
 def health_check():
     return jsonify({'status': 'healthy', 'service': 'gitingest-backend'})
 
+@app.route('/', methods=['GET'])
+def home():
+    return jsonify({'message': 'GitIngest Backend is running!'})
+
+# For local development
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5001))
     app.run(host='0.0.0.0', port=port)

@@ -1,0 +1,16 @@
+{
+    "version": 2,
+    "name": "gitingest-backend",
+    "builds": [
+        {
+            "src": "app.py",
+            "use": "@vercel/python"
+        }
+    ],
+    "routes": [
+        {
+            "src": "/(.*)",
+            "dest": "app.py"
+        }
+    ]
+} 
