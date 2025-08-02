@@ -1,5 +1,2 @@
 Flask==2.3.3
-gitingest==0.3.0
-pdfminer.six==20221105
 requests==2.31.0
-gunicorn==21.2.0
