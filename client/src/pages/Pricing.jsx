@@ -134,10 +134,10 @@ const Pricing = () => {
     }
     let amount = 0;
     if(plan === 'starter'){ 
-      amount = 40;
+      amount = 20;
     }
     if(plan === 'pro'){
-      amount = 300;
+      amount = 149;
     }
     const {key} = await getKey();
     const {order} = await processPayment({
@@ -267,7 +267,11 @@ const Pricing = () => {
             <Zap className="w-6 h-6" />
             Starter
           </div>
-          <div className="tier-price text-4xl font-extrabold mb-1 text-base-content">₹40</div>
+          <div className="mb-1 flex flex-col items-center">
+            <span className="text-xs font-semibold text-red-500 mb-1 bg-red-100 px-2 py-0.5 rounded-full">Limited Time Offer</span>
+            <span className="line-through text-base-content/50 text-lg">₹50</span>
+            <span className="tier-price text-4xl font-extrabold text-base-content">₹20</span>
+          </div>
           <div className="tier-desc text-base-content/70 mb-4 text-center">5 interviews & advanced feedback</div>
           <ul className="mb-6 space-y-2 w-full">
             <li className="flex items-center gap-2 text-base-content"><Check className="w-4 h-4 text-primary" /> 5 AI-powered interviews</li>
@@ -310,7 +314,11 @@ const Pricing = () => {
             <Crown className="w-6 h-6" />
             Pro
           </div>
-          <div className="tier-price text-4xl font-extrabold mb-1 text-base-content">₹300<span className="text-base font-medium text-base-content/70">/month</span></div>
+          <div className="mb-1 flex flex-col items-center">
+            <span className="text-xs font-semibold text-red-500 mb-1 bg-red-100 px-2 py-0.5 rounded-full">Limited Time Offer</span>
+            <span className="line-through text-base-content/50 text-lg">₹300</span>
+            <span className="tier-price text-4xl font-extrabold text-base-content">₹149<span className="text-base font-medium text-base-content/70">/month</span></span>
+          </div>
           <div className="tier-desc text-base-content/70 mb-4 text-center">1 month unlimited interviews</div>
           <ul className="mb-6 space-y-2 w-full">
             <li className="flex items-center gap-2 text-base-content"><Check className="w-4 h-4 text-primary" /> Unlimited interviews (1 month)</li>
