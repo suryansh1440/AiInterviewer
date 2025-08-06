@@ -230,6 +230,39 @@ const Home = () => {
         </div>
       </section>
 
+      {/* Personalized Analysis Section */}
+      <section className="py-16 px-6 md:px-10">
+        <div className="max-w-5xl mx-auto flex flex-col md:flex-row items-center gap-12 bg-base-100/80 rounded-3xl shadow-2xl border border-primary/20 p-8 md:p-14 relative overflow-hidden">
+          {/* Gradient badge */}
+          <span className="absolute top-6 left-6 bg-gradient-to-r from-primary to-secondary text-white text-xs font-bold px-4 py-1 rounded-full shadow uppercase tracking-wider z-10 animate-pulse">Personalized AI</span>
+          {/* Text Content */}
+          <div className="flex-1 flex flex-col items-center md:items-start text-center md:text-left z-10">
+            <h2 className="text-3xl mt-5 md:text-4xl font-extrabold mb-4 text-primary-focus drop-shadow">Truly Personalized Interviews</h2>
+            <p className="text-lg md:text-xl text-base-content/80 mb-8 max-w-xl">
+              Stand out with interviews tailored to <span className="font-bold text-primary">your real experience</span>. Upload your <span className="font-bold">resume</span>, connect your <span className="font-bold">LeetCode</span> profile, and add your <span className="font-bold">GitHub</span> projects. Our AI analyzes your background to ask relevant questions and give feedback that matters to you.
+            </p>
+            <ul className="space-y-4 text-base-content/90 text-left w-full max-w-xs">
+              <li className="flex items-center gap-3 text-lg font-medium"><Award className="w-6 h-6 text-primary animate-bounce" /> Resume-based questions & feedback</li>
+              <li className="flex items-center gap-3 text-lg font-medium"><LineChart className="w-6 h-6 text-warning animate-pulse" /> LeetCode stats analysis</li>
+              <li className="flex items-center gap-3 text-lg font-medium"><Globe className="w-6 h-6 text-secondary animate-spin-slow" /> GitHub project deep-dives</li>
+            </ul>
+          </div>
+          {/* Illustration/Icon */}
+          <div className="flex-1 flex justify-center items-center z-0">
+            <motion.img 
+              src="/aiAvatar.png" 
+              alt="Personalized Interview" 
+              className="w-72 h-72 object-contain drop-shadow-2xl rounded-2xl bg-base-100 p-4 border-2 border-primary/20"
+              initial={{ opacity: 0, scale: 0.9, y: 30 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              transition={{ duration: 1, type: 'spring' }}
+            />
+            {/* Decorative blurred gradient blob */}
+            <div className="absolute -bottom-10 -right-10 w-56 h-56 bg-gradient-to-br from-primary/30 to-secondary/30 rounded-full filter blur-2xl opacity-40 z-0"></div>
+          </div>
+        </div>
+      </section>
+
       {/* Features Section */}
       <section className="py-20 px-6 md:px-10 bg-base-200/50" id="features">
         <div className="max-w-7xl mx-auto">

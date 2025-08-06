@@ -184,9 +184,9 @@ const Agent = () => {
                             <span className="absolute inline-flex h-25 w-25 rounded-full bg-primary/30 animate-ping z-0"></span>
                         )}
                         <img
-                            src="/avatar.png"
+                            src="/aiPic.png"
                             alt="Agent avatar"
-                            className="w-28 h-28 rounded-full object-cover shadow-md relative z-10"
+                            className="w-43 h-43 rounded-full object-cover shadow-md relative z-10"
                         />
                     </div>
                     <h2 className="font-bold text-2xl text-white mb-2 text-center">AI Interviewer</h2>
