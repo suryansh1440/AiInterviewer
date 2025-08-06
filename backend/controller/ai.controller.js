@@ -344,6 +344,8 @@ CRITICAL SCORING RULES:
 8. A meaningful response is one that actually answers the question asked, not just acknowledging the question.
 9. If the transcript shows "[NO RESPONSE]" or empty responses, do not score those interactions.
 10. Only give positive scores when the candidate demonstrates actual knowledge or skills in their responses.
+11. Do not penalize for grammar, spelling, or transcription errors. Focus only on the content, clarity, and intent of the candidate's responses.
+12. If a word or phrase is repeated multiple times due to speech recognition errors, ignore the repetition and do not penalize the candidate.
 
 Transcript:
 ${formattedTranscript}`;

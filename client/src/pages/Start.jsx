@@ -151,7 +151,7 @@ const Start = () => {
   const [subTopic, setSubTopic] = useState('');
   const [includeResume, setIncludeResume] = useState(!!(user && user.resume && user.resume.endsWith('.pdf')));
   const [showResumeModal, setShowResumeModal] = useState(false);
-  const [numQuestions, setNumQuestions] = useState(3);
+  const [numQuestions, setNumQuestions] = useState(5);
   const [difficulty, setDifficulty] = useState('easy');
   const [showLeetModal, setShowLeetModal] = useState(false);
   const [leetToggle, setLeetToggle] = useState(!!user?.leetcodeUsername);
@@ -175,6 +175,11 @@ const Start = () => {
     if(user.interviewLeft==0 && user.subscription=='none'){
       toast.error("You don't have credits")
       navigate('/pricing')
+      return;
+    }
+
+    if(topic=='' || subTopic==''){
+      toast.error("Please select a topic and subtopic")
       return;
     }
 

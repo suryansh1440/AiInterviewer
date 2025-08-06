@@ -1,8 +1,8 @@
 class SpeechManager {
-    constructor() {
+  constructor() {
         this.recognition = null;
         this.synthesis = window.speechSynthesis;
-        this.isListening = false;
+    this.isListening = false;
         this.isSpeaking = false;
         this._shouldBeListening = false;
         this._speechTimeout = null;
@@ -45,27 +45,27 @@ class SpeechManager {
                 // Auto-restart if we're supposed to be listening
                 if (this._shouldBeListening) {
                     console.log('Auto-restarting speech recognition...');
-                    setTimeout(() => {
+      setTimeout(() => {
                         this.startListening();
-                    }, 100);
-                }
-                
+      }, 100);
+    }
+    
                 if (this._onSpeechEnd) this._onSpeechEnd();
             };
-            
+      
             this.recognition.onresult = (event) => {
                 let finalTranscript = '';
-                let interimTranscript = '';
-                
-                // Process all results
+        let interimTranscript = '';
+        
+        // Process all results
                 for (let i = 0; i < event.results.length; i++) {
                     const result = event.results[i];
                     const transcript = result[0].transcript;
                     
                     if (result.isFinal) {
                         finalTranscript += transcript;
-                    } else {
-                        interimTranscript += transcript;
+          } else {
+            interimTranscript += transcript;
                     }
                 }
                 
@@ -182,6 +182,25 @@ class SpeechManager {
                 }
             }
         }, 60000); // 1min timeout
+    }
+
+    _cleanTranscript(transcript) {
+        // Normalize transcript
+        let cleaned = transcript.toLowerCase().trim();
+        
+        // Remove extra whitespace
+        cleaned = cleaned.replace(/\s+/g, ' ');
+        
+        // Remove common speech artifacts
+        cleaned = cleaned.replace(/\b(um|uh|ah|er|hmm|mm)\b/g, '');
+        cleaned = cleaned.replace(/\s+/g, ' ').trim();
+        
+        // Remove repeated consecutive words (for mobile STT)
+        cleaned = cleaned.replace(/(\b\w+\b)(?:\s+\1\b)+/g, '$1');
+        // Remove repeated consecutive 2-word phrases (for more robustness)
+        cleaned = cleaned.replace(/(\b\w+\b\s+\w+\b)(?:\s+\1\b)+/g, '$1');
+        
+        return cleaned;
     }
 
     // Clean text for better TTS pronunciation
@@ -419,7 +438,7 @@ class SpeechManager {
                         voice.name.includes(selectedVoiceData.fallbackVoice)
                     );
                 }
-            } catch (error) {
+    } catch (error) {
                 console.error('Could not load voice store, using default selection:', error);
             }
             
@@ -462,18 +481,18 @@ class SpeechManager {
                 utterance.voice = selectedVoice;
             }
             
-            utterance.onstart = () => {
-                this.isSpeaking = true;
+    utterance.onstart = () => {
+      this.isSpeaking = true;
                 if (this._onTTSStart) this._onTTSStart();
-            };
-            
-            utterance.onend = () => {
-                this.isSpeaking = false;
+    };
+    
+    utterance.onend = () => {
+      this.isSpeaking = false;
                 if (this._onTTSEnd) this._onTTSEnd();
-            };
-            
-            utterance.onerror = (event) => {
-                this.isSpeaking = false;
+    };
+    
+    utterance.onerror = (event) => {
+      this.isSpeaking = false;
                 if (this._onTTSError) this._onTTSError(event.error);
             };
             
@@ -500,30 +519,30 @@ class SpeechManager {
 
     getSpeakingState() {
         return this.isSpeaking;
-    }
-
-    // Event handlers
-    onSpeechResult(callback) {
+  }
+  
+  // Event handlers
+  onSpeechResult(callback) {
         this._onSpeechResult = callback;
-    }
-
-    onSpeechError(callback) {
+  }
+  
+  onSpeechError(callback) {
         this._onSpeechError = callback;
-    }
-
-    onSpeechStart(callback) {
+  }
+  
+  onSpeechStart(callback) {
         this._onSpeechStart = callback;
-    }
-
-    onSpeechEnd(callback) {
+  }
+  
+  onSpeechEnd(callback) {
         this._onSpeechEnd = callback;
-    }
-
-    onTTSStart(callback) {
+  }
+  
+  onTTSStart(callback) {
         this._onTTSStart = callback;
-    }
-
-    onTTSEnd(callback) {
+  }
+  
+  onTTSEnd(callback) {
         this._onTTSEnd = callback;
     }
 
