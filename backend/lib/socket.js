@@ -322,7 +322,7 @@ const google = createGoogleGenerativeAI({
 
             try {
                 const { text } = await generateText({
-                    model: google('gemini-2.0-flash-001'),
+                    model: google('gemini-3-flash-preview'),
                     prompt: context
                 });
 

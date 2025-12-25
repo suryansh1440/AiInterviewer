@@ -113,7 +113,7 @@ export const getRandomTopic = async (req, res) => {
     try {
       // Use the same model initialization as generateQuestio
       const { text } = await generateText({
-         model:google('gemini-2.0-flash-001'),
+         model:google('gemini-3-flash-preview'),
          prompt 
         });
 
@@ -200,7 +200,7 @@ export const generateQuestion = async (req,res)=>{
     
     try {
       const {text} = await generateText({
-        model : google('gemini-2.0-flash-001'),
+        model : google('gemini-3-flash-preview'),
         prompt
       })
 
@@ -394,7 +394,7 @@ Do not include any explanations or extra text. Only return the JSON object. All 
          let feedback;
      try {
        const { text } = await generateText({
-         model: google('gemini-2.0-flash-001'),
+         model: google('gemini-3-flash-preview'),
          prompt,
          system
        });
@@ -657,7 +657,7 @@ Focus on technical insights and patterns. Return only the analysis text.`;
 
       try {
         const { text: chunkAnalysis } = await generateText({
-          model: google('gemini-2.0-flash-001'),
+          model: google('gemini-3-flash-preview'),
           prompt: chunkPrompt
         });
         
@@ -718,7 +718,7 @@ Return only the comprehensive analysis text.`;
 
     try {
       const { text: finalAnalysis } = await generateText({
-        model: google('gemini-2.0-flash-001'),
+        model: google('gemini-3-flash-preview'),
         prompt: finalPrompt
       });
 
