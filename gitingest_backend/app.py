@@ -4,6 +4,8 @@ import requests
 import json
 import base64
 from urllib.parse import urlparse
+from io import BytesIO
+from pypdf import PdfReader
 
 app = Flask(__name__)
 
@@ -392,21 +394,88 @@ def extract_pdf_text():
             return jsonify({'error': 'pdf_url is required'}), 400
 
         # Download PDF content
-        response = requests.get(pdf_url)
+        print(f"Downloading PDF from: {pdf_url}")
+        response = requests.get(pdf_url, timeout=30)
         response.raise_for_status()
         
-        # For now, return metadata since pdfminer.six isn't available
-        return jsonify({
-            'text': f'PDF content extraction for {pdf_url} - Content length: {len(response.content)} bytes',
-            'metadata': {
-                'url': pdf_url,
-                'content_length': len(response.content),
-                'content_type': response.headers.get('content-type', 'unknown'),
-                'note': 'Full text extraction requires pdfminer.six package'
-            }
-        })
+        # Check if content is actually a PDF
+        content_type = response.headers.get('content-type', '').lower()
+        if 'pdf' not in content_type and not pdf_url.lower().endswith('.pdf'):
+            print(f"Warning: Content type is {content_type}, but attempting to extract anyway")
         
+        # Extract text from PDF
+        try:
+            pdf_file = BytesIO(response.content)
+            pdf_reader = PdfReader(pdf_file)
+            
+            # Extract text from all pages
+            extracted_text = ""
+            total_pages = len(pdf_reader.pages)
+            print(f"PDF has {total_pages} pages")
+            
+            for page_num, page in enumerate(pdf_reader.pages, 1):
+                try:
+                    page_text = page.extract_text()
+                    if page_text:
+                        extracted_text += page_text + "\n"
+                    print(f"Extracted text from page {page_num}/{total_pages} (length: {len(page_text)})")
+                except Exception as page_error:
+                    print(f"Error extracting text from page {page_num}: {page_error}")
+                    continue
+            
+            # Clean up the extracted text
+            extracted_text = extracted_text.strip()
+            
+            if not extracted_text:
+                return jsonify({
+                    'text': '',
+                    'metadata': {
+                        'url': pdf_url,
+                        'content_length': len(response.content),
+                        'content_type': content_type,
+                        'total_pages': total_pages,
+                        'note': 'PDF extracted but no text content found. The PDF may be image-based or encrypted.'
+                    },
+                    'warning': 'No text could be extracted from the PDF'
+                })
+            
+            print(f"Successfully extracted {len(extracted_text)} characters from PDF")
+            
+            return jsonify({
+                'text': extracted_text,
+                'metadata': {
+                    'url': pdf_url,
+                    'content_length': len(response.content),
+                    'content_type': content_type,
+                    'total_pages': total_pages,
+                    'extracted_text_length': len(extracted_text)
+                }
+            })
+            
+        except Exception as pdf_error:
+            print(f"Error extracting PDF text: {pdf_error}")
+            import traceback
+            traceback.print_exc()
+            
+            # Return error with metadata
+            return jsonify({
+                'text': '',
+                'metadata': {
+                    'url': pdf_url,
+                    'content_length': len(response.content),
+                    'content_type': content_type,
+                    'error': str(pdf_error)
+                },
+                'error': f'Failed to extract text from PDF: {str(pdf_error)}'
+            }), 500
+        
+    except requests.exceptions.RequestException as e:
+        print(f"Error downloading PDF: {e}")
+        return jsonify({'error': f'Failed to download PDF: {str(e)}'}), 500
     except Exception as e:
+        print(f"Unexpected error: {e}")
+        import traceback
+        traceback.print_exc()
         return jsonify({'error': f'Serverless function error: {str(e)}'}), 500
 
 # For local development

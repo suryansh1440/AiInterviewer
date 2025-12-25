@@ -1,9 +1,7 @@
 import axios from 'axios';
-import {generateText} from "ai"
-import {createGoogleGenerativeAI} from "@ai-sdk/google"
+import OpenAI from 'openai';
 import Interview from '../modals/interview.modal.js';
 import User from '../modals/user.modal.js';
-import Api from '../modals/api.modal.js';
 import { getApi } from '../lib/getApi.js';
 
 export const readPdf = async (req, res) => {
@@ -16,6 +14,7 @@ export const readPdf = async (req, res) => {
       pdf_url: url
     });
     const text = response.data.text;
+    console.log(text);
     res.json({ text });
   } catch (err) {
     console.log("Exception encountered while extracting PDF text", err);
@@ -100,47 +99,33 @@ export const getRandomTopic = async (req, res) => {
 
     const prompt = `Given the following resume text, generate 5 random, relevant, and diverse interview topics. For each topic, also generate a relevant subtopic. Return only a valid JSON array of 5 objects, each with the following structure: { "topic": "<topic>", "subtopic": "<subtopic>" }. Do not include any explanations, introductions, or extra text—only the JSON array.\n\nExample output:\n[\n  { "topic": "Machine Learning", "subtopic": "Supervised Learning" },\n  { "topic": "Web Development", "subtopic": "React.js" },\n  { "topic": "Cloud Computing", "subtopic": "AWS Services" },\n  { "topic": "Data Structures", "subtopic": "Trees" },\n  { "topic": "Cybersecurity", "subtopic": "Network Security" }\n]\n\nResume:\n${resumeText}`;
 
-    const apiKey = await getApi();
+    const apiKey = getApi();
     if(!apiKey){
       console.log("No api key found")
       return res.status(400).json({message:"Internal server error"})
     }
     
-    const google = createGoogleGenerativeAI({
+    const client = new OpenAI({
       apiKey: apiKey
     });
 
     try {
-      // Use the same model initialization as generateQuestio
-      const { text } = await generateText({
-         model:google('gemini-2.0-flash-001'),
-         prompt 
-        });
+      const response = await client.chat.completions.create({
+        model: "gpt-4.1-nano",
+        messages: [
+          { role: "user", content: prompt }
+        ]
+      });
 
+      const text = response.choices[0]?.message?.content || '';
+      
       // Clean the response text
       const cleanText = text.replace(/```json\n?|\n?```/g, '').trim();
       const topics = JSON.parse(cleanText);
+      console.log(topics);
       res.status(200).json({ topics });
     } catch (aiError) {
-      // Check if the error is due to model overload
-      if (aiError.message && aiError.message.includes('The model is overloaded')) {
-        console.log('AI Model overloaded, pausing API key:', apiKey);
-        
-        // Pause the API key that was used
-        const api = await Api.findOne({ apiKey });
-        if (api) {
-          api.apiStatus = 'overloaded';
-          await api.save();
-          console.log('API key paused due to model overload');
-        }
-        
-        return res.status(503).json({ 
-          message: 'AI service is temporarily overloaded. Please try again later.',
-          error: 'MODEL_OVERLOADED'
-        });
-      }
-      
-      // Re-throw other AI errors
+      console.log('Error in getRandomTopic:', aiError.message);
       throw aiError;
     }
   } catch (error) {
@@ -189,21 +174,25 @@ export const generateQuestion = async (req,res)=>{
     // --- Enhanced Prompt with GitHub Integration ---
     const prompt = `Given the following context, generate ${amount} personalized interview questions.\n\nContext:\n- Topic: ${topic}\n- Subtopic: ${subTopic}\n- Difficulty: ${level}\n- Resume: ${resume || 'N/A'}\n- LeetCode Stats: ${leetcode || 'N/A'}\n- Github Projects: ${github || 'N/A'}\n\nRequirements:\n- At least one question should be a behavioral or soft skills question.\n- Include questions specifically about the candidate's GitHub projects if available.\n- Ask technical questions that match the candidate's experience level and technologies used in their projects.\n- Questions should be personalized based on the resume content, LeetCode performance, and GitHub project analysis.\n- Each question should be clear, concise, and suitable for an AI voice agent to read aloud.\n- Do not use any special characters in the questions, only letters, numbers, and spaces.\n- Questions should progress from basic to advanced based on the difficulty level.\n- For GitHub projects, ask about specific technologies, architecture decisions, and challenges faced.\n- Return only a valid JSON array of strings with no explanations or extra text.\n\nExample output:\n[\n  "What is a data structure",\n  "Explain the concept of a linked list",\n  "How do you implement a stack in code",\n  "Describe a time you overcame a challenge at work",\n  "What technologies did you use in your GitHub project",\n  "How did you structure your React components in your portfolio"\n]\nNow generate the questions.`;
 
-    const apiKey = await getApi();
+    const apiKey = getApi();
     if(!apiKey){
       console.log("No api key found")
       return res.status(400).json({message:"Internal server error"})
     }
-    const google = createGoogleGenerativeAI({
+    
+    const client = new OpenAI({
       apiKey: apiKey
     });
     
     try {
-      const {text} = await generateText({
-        model : google('gemini-2.0-flash-001'),
-        prompt
-      })
+      const response = await client.chat.completions.create({
+        model: "gpt-4.1-nano",
+        messages: [
+          { role: "user", content: prompt }
+        ]
+      });
 
+      const text = response.choices[0]?.message?.content || '';
       const cleanText = text.replace(/```json\n?|\n?```/g, '').trim();
       const questions = JSON.parse(cleanText);
 
@@ -224,25 +213,7 @@ export const generateQuestion = async (req,res)=>{
 
       res.status(200).json({interview});
     } catch (aiError) {
-      // Check if the error is due to model overload
-      if (aiError.message && aiError.message.includes('The model is overloaded')) {
-        console.log('AI Model overloaded, pausing API key:', apiKey);
-        
-        // Pause the API key that was used
-        const api = await Api.findOne({ apiKey });
-        if (api) {
-          api.apiStatus = 'overloaded';
-          await api.save();
-          console.log('API key paused due to model overload');
-        }
-        
-        return res.status(503).json({ 
-          message: 'AI service is temporarily overloaded. Please try again later.',
-          error: 'MODEL_OVERLOADED'
-        });
-      }
-      
-      // Re-throw other AI errors
+      console.log('Error in generateQuestion:', aiError.message);
       throw aiError;
     }
   }catch(error){
@@ -381,23 +352,27 @@ CRITICAL SCORING RULES:
 Do not include any explanations or extra text. Only return the JSON object. All scores should be integers between 0 and 20. Comments should be concise and actionable.
 `;
 
-    const apiKey = await getApi();
+    const apiKey = getApi();
     if(!apiKey){
       console.log("No api key found")
       return res.status(400).json({message:"Internal server error"})
     }
 
-    const google = createGoogleGenerativeAI({
+    const client = new OpenAI({
       apiKey: apiKey
     });
     
          let feedback;
      try {
-       const { text } = await generateText({
-         model: google('gemini-2.0-flash-001'),
-         prompt,
-         system
+       const response = await client.chat.completions.create({
+         model: "gpt-4.1-nano",
+         messages: [
+           { role: "system", content: system },
+           { role: "user", content: prompt }
+         ]
        });
+
+       const text = response.choices[0]?.message?.content || '';
 
        
        try {
@@ -445,25 +420,9 @@ Do not include any explanations or extra text. Only return the JSON object. All 
          };
        }
      } catch (aiError) {
-      // Check if the error is due to model overload
-      if (aiError.message && aiError.message.includes('The model is overloaded')) {
-        console.log('AI Model overloaded, pausing API key:', apiKey);
-        
-        // Pause the API key that was used
-        const api = await Api.findOne({ apiKey });
-        if (api) {
-          api.apiStatus = 'overloaded';
-          await api.save();
-          console.log('API key paused due to model overload');
-        }
-        
-        return res.status(503).json({ 
-          message: 'AI service is temporarily overloaded. Please try again later.',
-          error: 'MODEL_OVERLOADED'
-        });
-      }
+      console.log('Error in createFeedback:', aiError.message);
       
-      // Set default feedback for other AI errors
+      // Set default feedback for AI errors
       feedback = {
         totalScore: 0,
         categoryScores: [
@@ -619,13 +578,13 @@ export const analyzeGitHubRepo = async (req, res) => {
     console.log(`Processing ${allFiles.length} files in ${fileChunks.length} chunks`);
 
     // Analyze each chunk and combine results
-    const apiKey = await getApi();
+    const apiKey = getApi();
     if (!apiKey) {
       console.log("No api key found");
       return res.status(400).json({ message: "Internal server error" });
     }
 
-    const google = createGoogleGenerativeAI({
+    const client = new OpenAI({
       apiKey: apiKey
     });
 
@@ -656,10 +615,14 @@ Provide a concise analysis (300-500 words) covering:
 Focus on technical insights and patterns. Return only the analysis text.`;
 
       try {
-        const { text: chunkAnalysis } = await generateText({
-          model: google('gemini-2.0-flash-001'),
-          prompt: chunkPrompt
+        const response = await client.chat.completions.create({
+          model: "gpt-4.1-nano",
+          messages: [
+            { role: "user", content: chunkPrompt }
+          ]
         });
+
+        const chunkAnalysis = response.choices[0]?.message?.content || '';
         
         chunkAnalyses.push({
           chunkNumber: i + 1,
@@ -670,25 +633,7 @@ Focus on technical insights and patterns. Return only the analysis text.`;
         console.log(`Completed analysis for chunk ${i + 1}/${fileChunks.length}`);
         
       } catch (aiError) {
-        // Check if the error is due to model overload
-        if (aiError.message && aiError.message.includes('The model is overloaded')) {
-          console.log('AI Model overloaded, pausing API key:', apiKey);
-          
-          // Pause the API key that was used
-          const api = await Api.findOne({ apiKey });
-          if (api) {
-            api.apiStatus = 'overloaded';
-            await api.save();
-            console.log('API key paused due to model overload');
-          }
-          
-          return res.status(503).json({ 
-            message: 'AI service is temporarily overloaded. Please try again later.',
-            error: 'MODEL_OVERLOADED'
-          });
-        }
-        
-        // For other errors, continue with next chunk
+        // For errors, continue with next chunk
         console.log(`Error analyzing chunk ${i + 1}:`, aiError.message);
         chunkAnalyses.push({
           chunkNumber: i + 1,
@@ -717,32 +662,21 @@ Create a comprehensive final analysis (800-1200 words) that:
 Return only the comprehensive analysis text.`;
 
     try {
-      const { text: finalAnalysis } = await generateText({
-        model: google('gemini-2.0-flash-001'),
-        prompt: finalPrompt
+      const response = await client.chat.completions.create({
+        model: "gpt-4.1-nano",
+        messages: [
+          { role: "user", content: finalPrompt }
+        ]
       });
+
+      const finalAnalysis = response.choices[0]?.message?.content || '';
 
       res.status(200).json({
         analysis: finalAnalysis
       });
 
     } catch (finalAiError) {
-      // Handle final analysis error
-      if (finalAiError.message && finalAiError.message.includes('The model is overloaded')) {
-        console.log('AI Model overloaded during final analysis, pausing API key:', apiKey);
-        
-        const api = await Api.findOne({ apiKey });
-        if (api) {
-          api.apiStatus = 'overloaded';
-          await api.save();
-        }
-        
-        return res.status(503).json({ 
-          message: 'AI service is temporarily overloaded. Please try again later.',
-          error: 'MODEL_OVERLOADED'
-        });
-      }
-      
+      console.log('Error in final analysis:', finalAiError.message);
       throw finalAiError;
     }
 

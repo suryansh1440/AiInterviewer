@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react'
+import React, { useEffect} from 'react'
 import Navbar from './components/Navbar'
 import { Outlet, useLocation} from 'react-router-dom'
 import { useSettingStore } from './store/useSettingStore'
