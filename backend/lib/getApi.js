@@ -1,20 +1,9 @@
-import Api from '../modals/api.modal.js';
-
-export const getApi = async () => {
-    try {
-        const apis = await Api.find({ apiStatus: 'active' });
-        const randomApi = apis[Math.floor(Math.random() * apis.length)];
-        if (randomApi) {
-            randomApi.apiUsage = (randomApi.apiUsage || 0) + 1;
-            if(randomApi.apiUsage >= 200){
-                randomApi.apiStatus = 'overloaded';
-            }
-            await randomApi.save();
-            return randomApi.apiKey;
-        }
-        return null;
-    } catch (error) {
-        console.log("error in getApi", error);
+export const getApi = () => {
+    // Get API key from environment variable
+    const apiKey = process.env.OPENAI_API_KEY;
+    if (!apiKey) {
+        console.log("No OpenAI API key found in environment variables");
         return null;
     }
+    return apiKey;
 }

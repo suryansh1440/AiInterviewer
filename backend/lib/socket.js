@@ -1,8 +1,7 @@
 import { Server } from "socket.io"
 import http from "http"
 import express from "express"
-import { generateText } from "ai"
-import { createGoogleGenerativeAI } from "@ai-sdk/google"
+import OpenAI from "openai"
 import { getApi } from "./getApi.js"
 
 const app = express()
@@ -306,7 +305,7 @@ Also send the message in this format:
 
 If you think the interview is complete, set isInterviewEnd to true.`;
 
-const apiKey = await getApi();
+const apiKey = getApi();
 if(!apiKey){
     console.log("No api key found")
     return {
@@ -316,44 +315,32 @@ if(!apiKey){
     };
 }
 
-const google = createGoogleGenerativeAI({
+const client = new OpenAI({
     apiKey: apiKey
 });
 
             try {
-                const { text } = await generateText({
-                    model: google('gemini-3-flash-preview'),
-                    prompt: context
+                const response = await client.chat.completions.create({
+                    model: "gpt-4.1-nano",
+                    messages: [
+                        { role: "user", content: context }
+                    ]
                 });
 
+                const text = response.choices[0]?.message?.content || '';
                 const cleanedText = text.replace(/```json/g, '').replace(/```/g, '');
 
-                const response = JSON.parse(cleanedText);
+                const parsedResponse = JSON.parse(cleanedText);
 
-                return response;
+                return parsedResponse;
             } catch (aiError) {
-                // Check if the error is due to model overload
-                if (aiError.message && aiError.message.includes('The model is overloaded')) {
-                    console.log('AI Model overloaded, pausing API key:', apiKey);
-                    
-                    // Pause the API key that was used
-                    const Api = (await import('../modals/api.modal.js')).default;
-                    const api = await Api.findOne({ apiKey });
-                    if (api) {
-                        api.apiStatus = 'overloaded';
-                        await api.save();
-                        console.log('API key paused due to model overload');
-                    }
-                    
-                    return {
-                        role: 'interviewer',
-                        content: "I apologize, but the AI service is temporarily overloaded. Please try again in a moment.",
-                        isInterviewEnd: false
-                    };
-                }
+                console.log('Error generating AI response:', aiError.message);
                 
-                // Re-throw other AI errors
-                throw aiError;
+                return {
+                    role: 'interviewer',
+                    content: "I apologize, but I'm having trouble processing that. Could you please repeat your response?",
+                    isInterviewEnd: false
+                };
             }
         } catch (error) {
             console.error('Error generating AI response:', error);
