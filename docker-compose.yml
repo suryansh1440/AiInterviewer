@@ -1,0 +1,54 @@
+services:
+
+  frontend:
+    build: ./client
+    container_name: react_frontend
+    restart: always
+    ports:
+      - "80:80"
+    depends_on:
+      - node_backend
+      - python_backend
+    networks:
+      - my_network
+
+  node_backend:
+    build: ./backend
+    container_name: node_backend
+    restart: always
+    env_file:
+      - ./backend/.env
+    ports:
+      - "5000:5000"
+    depends_on:
+      - mongo
+    networks:
+      - my_network
+
+  python_backend:
+    build: ./gitingest_backend
+    container_name: python_backend
+    restart: always
+    ports:
+      - "8000:8000"
+    networks:
+      - my_network
+
+  mongo:
+    image: mongo:7
+    container_name: mongo_db
+    restart: always
+    volumes:
+      - mongo_data:/data/db
+    ports:
+      - 27017:27017
+    networks:
+      - my_network
+
+volumes:
+  mongo_data:
+    driver: local
+
+networks:
+  my_network:
+    driver: bridge
