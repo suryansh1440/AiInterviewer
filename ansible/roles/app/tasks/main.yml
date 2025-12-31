@@ -10,7 +10,7 @@
   git:
     repo: https://github.com/suryansh1440/AiInterviewer.git
     dest: /opt/app
-    version: main
+    version: compose
     force: yes
 
 - name: Stop old containers
