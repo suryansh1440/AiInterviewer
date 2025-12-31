@@ -156,14 +156,26 @@ pipeline {
                 script {
                     echo 'Checking Ansible installation...'
                     sh '''
-                        if ! command -v ansible-playbook &> /dev/null; then
+                        # Ensure /usr/bin is in PATH for this script
+                        export PATH="/usr/bin:/usr/local/bin:$PATH"
+                        
+                        # Check if ansible-playbook exists (try multiple methods)
+                        if [ -f /usr/bin/ansible-playbook ]; then
+                            ANSIBLE_CMD="/usr/bin/ansible-playbook"
+                        elif command -v ansible-playbook &> /dev/null; then
+                            ANSIBLE_CMD="ansible-playbook"
+                        elif which ansible-playbook &> /dev/null; then
+                            ANSIBLE_CMD=$(which ansible-playbook)
+                        else
                             echo "❌ Ansible is not installed"
                             echo "Please install Ansible on Jenkins server:"
                             echo "  sudo apt update"
                             echo "  sudo apt install -y ansible"
                             exit 1
                         fi
-                        ansible-playbook --version
+                        
+                        # Verify and show version
+                        $ANSIBLE_CMD --version
                         echo "✓ Ansible is ready"
                     '''
                 }
