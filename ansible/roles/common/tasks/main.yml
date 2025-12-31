@@ -1,0 +1,13 @@
+- name: Update system
+  apt:
+    update_cache: yes
+    upgrade: yes
+
+- name: Install basic packages
+  apt:
+    name:
+      - curl
+      - git
+      - unzip
+      - ca-certificates
+    state: present

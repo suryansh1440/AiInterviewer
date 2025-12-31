@@ -1,0 +1,7 @@
+- name: Initial server setup
+  hosts: app
+  become: true
+
+  roles:
+    - common
+    - docker

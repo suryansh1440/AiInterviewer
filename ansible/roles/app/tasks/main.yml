@@ -1,0 +1,30 @@
+- name: Ensure app directory exists
+  file:
+    path: /opt/app
+    state: directory
+    owner: ubuntu
+    group: ubuntu
+    mode: '0755'
+
+- name: Pull latest code
+  git:
+    repo: https://github.com/suryansh1440/AiInterviewer.git
+    dest: /opt/app
+    version: main
+    force: yes
+
+- name: Stop old containers
+  shell: |
+    cd /opt/app
+    docker compose down
+  ignore_errors: yes
+  become_user: ubuntu
+
+- name: Build and start containers
+  shell: |
+    cd /opt/app
+    docker compose up -d --build
+  become_user: ubuntu
+  environment:
+    DOCKER_BUILDKIT: 1
+    COMPOSE_DOCKER_CLI_BUILD: 1
