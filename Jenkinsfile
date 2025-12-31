@@ -18,7 +18,6 @@ pipeline {
     options {
         timeout(time: 30, unit: 'MINUTES')
         timestamps()
-        ansiColor('xterm')
     }
     
     stages {
@@ -137,6 +136,19 @@ pipeline {
                     '''
                 }
             }
+            post {
+                always {
+                    script {
+                        echo 'Cleaning up Docker images after validation...'
+                        sh '''
+                            # Remove all built images to free up space
+                            docker compose down --rmi all --volumes --remove-orphans || true
+                            docker system prune -af --volumes || true
+                            echo "✓ Docker cleanup completed"
+                        '''
+                    }
+                }
+            }
         }
         
         stage('Check Ansible') {
@@ -145,11 +157,11 @@ pipeline {
                     echo 'Checking Ansible installation...'
                     sh '''
                         if ! command -v ansible-playbook &> /dev/null; then
-                            echo "Installing Ansible..."
-                            pip3 install ansible || {
-                                echo "❌ Failed to install Ansible"
-                                exit 1
-                            }
+                            echo "❌ Ansible is not installed"
+                            echo "Please install Ansible on Jenkins server:"
+                            echo "  sudo apt update"
+                            echo "  sudo apt install -y ansible"
+                            exit 1
                         fi
                         ansible-playbook --version
                         echo "✓ Ansible is ready"
@@ -246,53 +258,26 @@ pipeline {
         }
         
         success {
-            emailext (
-                subject: "✅ Deployment Successful: ${env.JOB_NAME} - Build #${env.BUILD_NUMBER}",
-                body: """
-                    <h2>✅ Deployment Successful</h2>
-                    <p><strong>Job:</strong> ${env.JOB_NAME}</p>
-                    <p><strong>Build Number:</strong> ${env.BUILD_NUMBER}</p>
-                    <p><strong>Status:</strong> Success</p>
-                    <p><strong>Build URL:</strong> <a href="${env.BUILD_URL}">${env.BUILD_URL}</a></p>
-                    <p>The application has been successfully deployed to the server.</p>
-                """,
-                mimeType: 'text/html',
+            mail(
                 to: 'suryansh1440@gmail.com',
-                attachLog: false
+                subject: "✅ SUCCESS: ${env.JOB_NAME} - Build #${env.BUILD_NUMBER}",
+                body: "Job '${env.JOB_NAME}' (${env.BUILD_URL}) completed successfully. The application has been deployed to the server."
             )
         }
         
         failure {
-            emailext (
-                subject: "❌ Deployment Failed: ${env.JOB_NAME} - Build #${env.BUILD_NUMBER}",
-                body: """
-                    <h2>❌ Deployment Failed</h2>
-                    <p><strong>Job:</strong> ${env.JOB_NAME}</p>
-                    <p><strong>Build Number:</strong> ${env.BUILD_NUMBER}</p>
-                    <p><strong>Status:</strong> Failed</p>
-                    <p><strong>Build URL:</strong> <a href="${env.BUILD_URL}">${env.BUILD_URL}</a></p>
-                    <p>Please check the build logs for more details.</p>
-                """,
-                mimeType: 'text/html',
+            mail(
                 to: 'suryansh1440@gmail.com',
-                attachLog: true
+                subject: "❌ FAILED: ${env.JOB_NAME} - Build #${env.BUILD_NUMBER}",
+                body: "Job '${env.JOB_NAME}' (${env.BUILD_URL}) failed. Please check the build logs for details."
             )
         }
         
         unstable {
-            emailext (
-                subject: "⚠️ Pipeline Unstable: ${env.JOB_NAME} - Build #${env.BUILD_NUMBER}",
-                body: """
-                    <h2>⚠️ Pipeline Unstable</h2>
-                    <p><strong>Job:</strong> ${env.JOB_NAME}</p>
-                    <p><strong>Build Number:</strong> ${env.BUILD_NUMBER}</p>
-                    <p><strong>Status:</strong> Unstable</p>
-                    <p><strong>Build URL:</strong> <a href="${env.BUILD_URL}">${env.BUILD_URL}</a></p>
-                    <p>The pipeline completed but with some warnings or test failures.</p>
-                """,
-                mimeType: 'text/html',
+            mail(
                 to: 'suryansh1440@gmail.com',
-                attachLog: false
+                subject: "⚠️ UNSTABLE: ${env.JOB_NAME} - Build #${env.BUILD_NUMBER}",
+                body: "Job '${env.JOB_NAME}' (${env.BUILD_URL}) is unstable. The pipeline completed but with warnings or test failures."
             )
         }
     }
