@@ -122,6 +122,34 @@ pipeline {
                 }
             }
         }
+        stage('audit check') {
+            parallel {
+                stage('Frontend audit'){
+                    steps {
+                        script {
+                            echo 'Running frontend Audit check'
+                            dir('client') {
+                                 sh '''
+                                    npm audit --audit-level=high || echo "⚠ Frontend vulnerabilities found (non-blocking)"
+                                '''
+                            }
+                        }
+                    }
+                }
+                stage('Backend audit'){
+                    steps {
+                        script {
+                            echo 'Running Backend Audit check'
+                            dir('backend') {
+                                 sh '''
+                                    npm audit --audit-level=high || echo "⚠ Backend vulnerabilities found (non-blocking)"
+                                '''
+                            }
+                        }
+                    }
+                }
+            }
+        }
         
         stage('Build Docker Images') {
             steps {
