@@ -11,8 +11,7 @@ import { app, server } from './lib/socket.js';
 import postRouter from './router/post.router.js';
 import messageRouter from './router/message.router.js';
 import contactRouter from "./router/contact.router.js";
-import apiRouter from "./router/api.router.js";
-import { checkDBConnection } from './middleware/auth.middleware.js';
+
 
 
 
@@ -37,8 +36,6 @@ app.use(cors({
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
-// Add database connection check for all API routes
-app.use('/api', checkDBConnection);
 
 
 
@@ -49,7 +46,6 @@ app.use("/api/payment",paymentRouter)
 app.use("/api/post",postRouter)
 app.use("/api/message",messageRouter)
 app.use("/api/contact", contactRouter);
-app.use("/api/api", apiRouter);
 
 
 

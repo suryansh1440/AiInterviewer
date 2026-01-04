@@ -2,7 +2,8 @@ import { Server } from "socket.io"
 import http from "http"
 import express from "express"
 import OpenAI from "openai"
-import { getApi } from "./getApi.js"
+import dotenv from "dotenv"
+dotenv.config()
 
 const app = express()
 const server = http.createServer(app);
@@ -305,18 +306,8 @@ Also send the message in this format:
 
 If you think the interview is complete, set isInterviewEnd to true.`;
 
-const apiKey = getApi();
-if(!apiKey){
-    console.log("No api key found")
-    return {
-        role: 'interviewer',
-        content: "I apologize, but I'm having trouble processing that. Could you please repeat your response?",
-        isInterviewEnd: false
-    };
-}
-
 const client = new OpenAI({
-    apiKey: apiKey
+    apiKey: process.env.OPENAI_API_KEY
 });
 
             try {
